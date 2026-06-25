@@ -328,6 +328,7 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
 .agFClearBtn{padding:6px 14px;background:transparent;color:var(--s5);border:1.5px solid var(--s2);border-radius:var(--Rs);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s}
 .agFClearBtn:hover{border-color:var(--s4);color:var(--s7)}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -367,6 +368,29 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
 </header>
 
 <!-- ════ MAIN ════ -->
+<style>
+#loginOverlay{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);display:flex;align-items:center;justify-content:center;z-index:9999;}
+#loginBox{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px 36px;width:340px;box-shadow:0 25px 50px rgba(0,0,0,.5);}
+#loginBox h2{color:#38bdf8;margin:0 0 8px;font-size:1.4rem;text-align:center;}
+#loginBox p{color:#94a3b8;text-align:center;margin:0 0 28px;font-size:.85rem;}
+.lField{width:100%;padding:11px 14px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-size:.95rem;box-sizing:border-box;margin-bottom:14px;outline:none;}
+.lField:focus{border-color:#38bdf8;}
+#loginBtn{width:100%;padding:12px;background:linear-gradient(135deg,#0ea5e9,#2563eb);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;margin-top:4px;}
+#loginBtn:hover{opacity:.9;}
+#loginErr{color:#f87171;font-size:.82rem;text-align:center;margin-top:12px;min-height:18px;}
+#loginLogo{text-align:center;margin-bottom:20px;font-size:2rem;}
+</style>
+<div id="loginOverlay">
+  <div id="loginBox">
+    <div id="loginLogo">🏥</div>
+    <h2>Clínica Gontijo</h2>
+    <p>Acesse o painel de gestão</p>
+    <input class="lField" type="email" id="loginEmail" placeholder="E-mail" autocomplete="email"/>
+    <input class="lField" type="password" id="loginPassword" placeholder="Senha" autocomplete="current-password"/>
+    <button id="loginBtn" onclick="doLogin()">Entrar</button>
+    <div id="loginErr"></div>
+  </div>
+</div>
 <main>
 
 <div class="secL">🏗️ Cadastro de Serviços &amp; Lançamento Mensal</div>
@@ -737,19 +761,43 @@ if(!LS) document.getElementById('sBanner').style.display='block';
 let _ram = {};
 
 /* ══════════════════════════════════════
-   SUPABASE — sincronização em nuvem
+   SUPABASE — autenticação + sincronização
 ══════════════════════════════════════ */
 const SUPA_URL = 'https://yigqjrfmrgegwqbxotgc.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZ3FqcmZtcmdlZ3dxYnhvdGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MTQwNDcsImV4cCI6MjA5Nzk5MDA0N30.DcOl-UYfh_wrTxh3qNwpDjE6YL5OquCeWLDbXYXqEEc';
 const SUPA_PREFIX = ['tabelaPrecos_','cfv4_lanc_','cfv4_data_','agendaFixa_','agendaCfg_','cf_activeUnit'];
+const _sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+async function doLogin() {
+  const email = (document.getElementById('loginEmail').value||'').trim();
+  const pass  = document.getElementById('loginPassword').value;
+  document.getElementById('loginErr').textContent = '';
+  document.getElementById('loginBtn').textContent = 'Entrando...';
+  const {error} = await _sb.auth.signInWithPassword({email, password: pass});
+  document.getElementById('loginBtn').textContent = 'Entrar';
+  if (error) {
+    document.getElementById('loginErr').textContent = 'E-mail ou senha incorretos.';
+  } else {
+    document.getElementById('loginOverlay').style.display = 'none';
+    await supaLoad();
+    renderGlobal(); renderLanc(); renderAgenda(); renderAll(); onMonthChange();
+  }
+}
+
+async function doLogout() {
+  await _sb.auth.signOut();
+  document.getElementById('loginOverlay').style.display = 'flex';
+}
 
 async function supaSet(key, value) {
   try {
+    const {data:{session}} = await _sb.auth.getSession();
+    if (!session) return;
     await fetch(SUPA_URL+'/rest/v1/clinica_dados', {
       method: 'POST',
       headers: {
         'apikey': SUPA_KEY,
-        'Authorization': 'Bearer '+SUPA_KEY,
+        'Authorization': 'Bearer '+session.access_token,
         'Content-Type': 'application/json',
         'Prefer': 'resolution=merge-duplicates'
       },
@@ -760,8 +808,10 @@ async function supaSet(key, value) {
 
 async function supaLoad() {
   try {
+    const {data:{session}} = await _sb.auth.getSession();
+    if (!session) return;
     const res = await fetch(SUPA_URL+'/rest/v1/clinica_dados?select=chave,valor', {
-      headers: {'apikey': SUPA_KEY, 'Authorization': 'Bearer '+SUPA_KEY}
+      headers: {'apikey': SUPA_KEY, 'Authorization': 'Bearer '+session.access_token}
     });
     const rows = await res.json();
     if (Array.isArray(rows)) {
@@ -823,6 +873,13 @@ function flash(){const el=sid('saveInd');el.classList.add('on');clearTimeout(el.
 let _agFilter='all';
 let _prevMonth=null;
 (async function init(){
+  /* Verifica sessão — só renderiza se autenticado */
+  const {data:{session}} = await _sb.auth.getSession();
+  if (!session) {
+    /* Não logado: apenas mostra o overlay de login, entra por doLogin() */
+    return;
+  }
+  document.getElementById('loginOverlay').style.display = 'none';
   /* Carrega dados do Supabase antes de renderizar */
   await supaLoad();
   /* Popula abas de unidades */
