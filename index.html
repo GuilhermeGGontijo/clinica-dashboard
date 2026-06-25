@@ -736,14 +736,58 @@ if(!LS) document.getElementById('sBanner').style.display='block';
 
 let _ram = {};
 
+/* ══════════════════════════════════════
+   SUPABASE — sincronização em nuvem
+══════════════════════════════════════ */
+const SUPA_URL = 'https://yigqjrfmrgegwqbxotgc.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZ3FqcmZtcmdlZ3dxYnhvdGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MTQwNDcsImV4cCI6MjA5Nzk5MDA0N30.DcOl-UYfh_wrTxh3qNwpDjE6YL5OquCeWLDbXYXqEEc';
+const SUPA_PREFIX = ['tabelaPrecos_','cfv4_lanc_','cfv4_data_','agendaFixa_','agendaCfg_','cf_activeUnit'];
+
+async function supaSet(key, value) {
+  try {
+    await fetch(SUPA_URL+'/rest/v1/clinica_dados', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer '+SUPA_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({chave: key, valor: value, atualizado_em: new Date().toISOString()})
+    });
+  } catch(e) { console.warn('Supabase sync erro:', e); }
+}
+
+async function supaLoad() {
+  try {
+    const res = await fetch(SUPA_URL+'/rest/v1/clinica_dados?select=chave,valor', {
+      headers: {'apikey': SUPA_KEY, 'Authorization': 'Bearer '+SUPA_KEY}
+    });
+    const rows = await res.json();
+    if (Array.isArray(rows)) {
+      rows.forEach(function(row) {
+        if (row.chave && row.valor !== undefined) {
+          try { localStorage.setItem(row.chave, JSON.stringify(row.valor)); } catch(e) {}
+        }
+      });
+    }
+    console.log('Supabase: '+rows.length+' registros carregados.');
+  } catch(e) { console.warn('Supabase load erro:', e); }
+}
+
 function lsGet(key,def){
   if(!LS) return (_ram[key]!==undefined?_ram[key]:def);
   try{const v=localStorage.getItem(key);return v!==null?JSON.parse(v):def;}catch{return def;}
 }
 function lsSet(key,val){
   if(!LS){_ram[key]=val;flash();return true;}
-  try{localStorage.setItem(key,JSON.stringify(val));flash();return true;}
-  catch(e){toast('Erro ao salvar: '+e.message,'err');return false;}
+  try{
+    localStorage.setItem(key,JSON.stringify(val));
+    if(SUPA_PREFIX.some(function(p){return key===p||key.startsWith(p);})){
+      supaSet(key,val);
+    }
+    flash();return true;
+  }catch(e){toast('Erro ao salvar: '+e.message,'err');return false;}
 }
 
 let CU = lsGet('cf_activeUnit','u1');
@@ -778,7 +822,9 @@ function flash(){const el=sid('saveInd');el.classList.add('on');clearTimeout(el.
 ══════════════════════════════════════ */
 let _agFilter='all';
 let _prevMonth=null;
-(function init(){
+(async function init(){
+  /* Carrega dados do Supabase antes de renderizar */
+  await supaLoad();
   /* Popula abas de unidades */
   renderUnitTabs();
   updateUnitDisplay();
