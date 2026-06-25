@@ -384,7 +384,7 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
 <div id="loginOverlay">
   <div id="loginBox">
     <div id="loginLogo">🏥</div>
-    <h2>Clínica Gontijo</h2>
+    <h2>Clínica da Família</h2>
     <p>Acesse o painel de gestão</p>
     <input class="lField" type="email" id="loginEmail" placeholder="E-mail" autocomplete="email"/>
     <input class="lField" type="password" id="loginPassword" placeholder="Senha" autocomplete="current-password"/>
@@ -885,8 +885,13 @@ let _prevMonth=null;
   document.getElementById('loginOverlay').style.display = 'none';
   /* Carrega dados do Supabase antes de renderizar */
   await supaLoad();
-  /* Logo */
-  if(LOGO_URL){const le=document.getElementById('bLogoEl');if(le)le.innerHTML='<img src="'+LOGO_URL+'" alt="Logo"/>';}
+  /* Logo — header e tela de login */
+  if(LOGO_URL){
+    const le=document.getElementById('bLogoEl');
+    if(le)le.innerHTML='<img src="'+LOGO_URL+'" alt="Logo"/>';
+    const ll=document.getElementById('loginLogo');
+    if(ll){ll.style.fontSize='0';ll.innerHTML='<img src="'+LOGO_URL+'" alt="Logo" style="height:64px;width:auto;border-radius:8px;margin:0 auto;display:block;"/>';}
+  }
   /* Popula abas de unidades */
   renderUnitTabs();
   updateUnitDisplay();
@@ -911,6 +916,25 @@ let _prevMonth=null;
   renderAgenda();
   renderAll();
   onMonthChange();
+
+  /* ── AUTO-SAVE a cada 30 segundos ── */
+  setInterval(function(){
+    _sb.auth.getSession().then(function(r){
+      if(!r.data||!r.data.session) return;
+      var saved=0;
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(!k) continue;
+        if(SUPA_PREFIX.some(function(p){return k===p||k.startsWith(p);})){
+          try{ supaSet(k,JSON.parse(localStorage.getItem(k))); saved++; }catch(e){}
+        }
+      }
+      if(saved>0){
+        var ind=document.getElementById('saveInd');
+        if(ind){ind.textContent='💾 Auto-salvo';ind.classList.add('on');clearTimeout(ind._at);ind._at=setTimeout(function(){ind.classList.remove('on');ind.textContent='✅ Salvo';},3000);}
+      }
+    });
+  }, 30000);
 
   /* Auto-calcular KPI cards quando inputs mudam */
   document.querySelectorAll('.cInps input:not([readonly])').forEach(function(inp){
