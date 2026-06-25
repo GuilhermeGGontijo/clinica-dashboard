@@ -771,6 +771,29 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const SUPA_PREFIX = ['tabelaPrecos_','cfv4_lanc_','cfv4_data_','agendaFixa_','agendaCfg_','cf_activeUnit'];
 const _sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
+async function doPasswordReset() {
+  const p1 = (document.getElementById('newPass1').value||'');
+  const p2 = (document.getElementById('newPass2').value||'');
+  const errEl = document.getElementById('loginErr');
+  errEl.style.color = '';
+  if(p1.length < 6){ errEl.textContent = 'Mínimo 6 caracteres.'; return; }
+  if(p1 !== p2){ errEl.textContent = 'As senhas não coincidem.'; return; }
+  document.getElementById('loginBtn').textContent = 'Salvando...';
+  errEl.textContent = '';
+  const {error} = await _sb.auth.updateUser({password: p1});
+  if(error){
+    errEl.textContent = 'Erro: ' + error.message;
+    document.getElementById('loginBtn').textContent = 'Salvar senha';
+  } else {
+    errEl.style.color = '#22c55e';
+    errEl.textContent = '✅ Senha alterada com sucesso! Entrando...';
+    setTimeout(async ()=>{
+      history.replaceState(null,'',window.location.pathname);
+      window.location.reload();
+    }, 2000);
+  }
+}
+
 async function doLogin() {
   const email = (document.getElementById('loginEmail').value||'').trim();
   const pass  = document.getElementById('loginPassword').value;
@@ -876,10 +899,29 @@ function flash(){const el=sid('saveInd');el.classList.add('on');clearTimeout(el.
 let _agFilter='all';
 let _prevMonth=null;
 (async function init(){
+  /* ── MODO RECUPERAÇÃO DE SENHA ── */
+  const _hParams = new URLSearchParams(window.location.hash.replace(/^#/,''));
+  if(_hParams.get('type')==='recovery'){
+    /* Supabase já processou o token via createClient — mostra form de nova senha */
+    const ll = document.getElementById('loginOverlay');
+    if(ll) ll.innerHTML = '<div id="loginBox">'
+      + '<div id="loginLogo">'+(LOGO_URL?'<img src="'+LOGO_URL+'" alt="Logo" style="height:64px;width:auto;border-radius:8px;margin:0 auto;display:block;"/>':'🏥')+'</div>'
+      + '<h2>Clínica da Família</h2>'
+      + '<p>Defina sua nova senha</p>'
+      + '<input class="lField" type="password" id="newPass1" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="new-password"/>'
+      + '<input class="lField" type="password" id="newPass2" placeholder="Confirme a nova senha" autocomplete="new-password"/>'
+      + '<button id="loginBtn" onclick="doPasswordReset()">Salvar senha</button>'
+      + '<div id="loginErr"></div>'
+      + '</div>';
+    return;
+  }
+
   /* Verifica sessão — só renderiza se autenticado */
   const {data:{session}} = await _sb.auth.getSession();
   if (!session) {
     /* Não logado: apenas mostra o overlay de login, entra por doLogin() */
+    /* Logo na tela de login */
+    if(LOGO_URL){const ll=document.getElementById('loginLogo');if(ll){ll.style.fontSize='0';ll.innerHTML='<img src="'+LOGO_URL+'" alt="Logo" style="height:64px;width:auto;border-radius:8px;margin:0 auto;display:block;"/>';}}
     return;
   }
   document.getElementById('loginOverlay').style.display = 'none';
