@@ -376,6 +376,10 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
 #loginBox p{color:#94a3b8;text-align:center;margin:0 0 28px;font-size:.85rem;}
 .lField{width:100%;padding:11px 14px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-size:.95rem;box-sizing:border-box;margin-bottom:14px;outline:none;}
 .lField:focus{border-color:#38bdf8;}
+.lFieldWrap{position:relative;margin-bottom:14px;}
+.lFieldWrap .lField{margin-bottom:0;padding-right:42px;}
+.lFieldWrap .eyeBtn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748b;font-size:1.1rem;padding:4px;line-height:1;}
+.lFieldWrap .eyeBtn:hover{color:#38bdf8;}
 #loginBtn{width:100%;padding:12px;background:linear-gradient(135deg,#0ea5e9,#2563eb);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;margin-top:4px;}
 #loginBtn:hover{opacity:.9;}
 #loginErr{color:#f87171;font-size:.82rem;text-align:center;margin-top:12px;min-height:18px;}
@@ -387,7 +391,10 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
     <h2>Clínica da Família</h2>
     <p>Acesse o painel de gestão</p>
     <input class="lField" type="email" id="loginEmail" placeholder="E-mail" autocomplete="email"/>
-    <input class="lField" type="password" id="loginPassword" placeholder="Senha" autocomplete="current-password"/>
+    <div class="lFieldWrap">
+      <input class="lField" type="password" id="loginPassword" placeholder="Senha" autocomplete="current-password"/>
+      <button class="eyeBtn" type="button" onclick="togglePass('loginPassword',this)" title="Mostrar/ocultar senha">👁</button>
+    </div>
     <button id="loginBtn" onclick="doLogin()">Entrar</button>
     <div id="loginErr"></div>
   </div>
@@ -771,6 +778,13 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const SUPA_PREFIX = ['tabelaPrecos_','cfv4_lanc_','cfv4_data_','agendaFixa_','agendaCfg_','cf_activeUnit'];
 const _sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
+function togglePass(fieldId, btn) {
+  const f = document.getElementById(fieldId);
+  if (!f) return;
+  if (f.type === 'password') { f.type = 'text'; btn.textContent = '🙈'; }
+  else { f.type = 'password'; btn.textContent = '👁'; }
+}
+
 async function doPasswordReset() {
   const p1 = (document.getElementById('newPass1').value||'');
   const p2 = (document.getElementById('newPass2').value||'');
@@ -916,8 +930,8 @@ let _prevMonth=null;
       + '<div id="loginLogo">'+(LOGO_URL?'<img src="'+LOGO_URL+'" alt="Logo" style="height:64px;width:auto;border-radius:8px;margin:0 auto;display:block;"/>':'🏥')+'</div>'
       + '<h2>Clínica da Família</h2>'
       + '<p>Defina sua nova senha</p>'
-      + '<input class="lField" type="password" id="newPass1" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="new-password"/>'
-      + '<input class="lField" type="password" id="newPass2" placeholder="Confirme a nova senha" autocomplete="new-password"/>'
+      + '<div class="lFieldWrap"><input class="lField" type="password" id="newPass1" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="new-password"/><button class="eyeBtn" type="button" onclick="togglePass(\'newPass1\',this)" title="Mostrar/ocultar">👁</button></div>'
+      + '<div class="lFieldWrap"><input class="lField" type="password" id="newPass2" placeholder="Confirme a nova senha" autocomplete="new-password"/><button class="eyeBtn" type="button" onclick="togglePass(\'newPass2\',this)" title="Mostrar/ocultar">👁</button></div>'
       + '<button id="loginBtn" onclick="doPasswordReset()">Salvar senha</button>'
       + '<div id="loginErr"></div>'
       + '</div>';
