@@ -415,6 +415,88 @@ body.mode-pacientes #modulePacientes{display:block!important}
 .patFG label{font-size:.72rem;font-weight:700;color:var(--s7)}
 .patFG.sp2{grid-column:span 2}.patFG.sp3{grid-column:span 3}
 @media(max-width:600px){.patFormGrid{grid-template-columns:1fr 1fr}.patFG.sp2,.patFG.sp3{grid-column:span 2}}
+
+/* ══ SIDEBAR ══ */
+#sidebar{position:fixed;left:0;top:36px;bottom:0;width:230px;
+  background:linear-gradient(180deg,var(--s9) 0%,#1a2640 100%);
+  z-index:390;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  border-right:1px solid rgba(255,255,255,.07);box-shadow:3px 0 18px rgba(0,0,0,.3)}
+#sidebar.visible{display:flex}
+.sbHdr{padding:14px 16px 12px;background:rgba(0,0,0,.18);border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
+.sbHdrLogo{font-size:1.7rem;margin-bottom:4px}
+.sbHdrName{font-size:.78rem;font-weight:800;color:#fff;line-height:1.3}
+.sbHdrSub{font-size:.63rem;color:rgba(255,255,255,.35);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbNav{padding:6px 0;flex:1;overflow-y:auto}
+.sbItem{display:flex;align-items:center;gap:9px;padding:10px 14px;font-size:.8rem;font-weight:600;
+  color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s;border-left:3px solid transparent;user-select:none}
+.sbItem:hover{color:#fff;background:rgba(255,255,255,.06)}
+.sbItem.active{color:#4ade80;background:rgba(74,222,128,.1);border-left-color:#4ade80;font-weight:700}
+.sbItemIco{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.sbItemLbl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbItemChev{font-size:.65rem;margin-left:auto;transition:transform .2s;flex-shrink:0}
+.sbSub{max-height:0;overflow:hidden;transition:max-height .25s ease}
+.sbSub.open{max-height:300px}
+.sbSubItem{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 44px;font-size:.76rem;font-weight:600;
+  color:rgba(255,255,255,.38);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.sbSubItem:hover{color:rgba(255,255,255,.72);background:rgba(255,255,255,.04)}
+.sbSubItem.active{color:#4ade80;background:rgba(74,222,128,.07);border-left-color:#4ade80;font-weight:700}
+.sbDivider{height:1px;background:rgba(255,255,255,.06);margin:6px 12px}
+.sbFooter{padding:8px 0;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0}
+
+/* ══ LAYOUT COM SIDEBAR ══ */
+body.sidebar-open header{margin-left:230px}
+body.sidebar-open #moduleNav{display:none!important}
+body.sidebar-open main{margin-left:230px;padding-top:12px}
+@media(max-width:820px){
+  body.sidebar-open header,body.sidebar-open main{margin-left:0}
+  #sidebar{transform:translateX(-100%);transition:transform .25s}
+  #sidebar.visible{transform:translateX(0)}
+  #sbToggle{display:flex!important}
+}
+
+/* ══ VISIBILIDADE DOS MÓDULOS ══ */
+/* Com sidebar ativo oculta tudo; cada classe sb- revela o seu módulo */
+body.sb-active main>*{display:none!important}
+body.sb-home #secHome{display:block!important}
+body.sb-pacientes #modulePacientes{display:block!important}
+body.sb-agenda .agFormWrap,body.sb-agenda #slOcupacao,body.sb-agenda .gcWrap{display:block!important}
+body.sb-prontuario #secProntuario{display:block!important}
+body.sb-relatorios #slHistorico,body.sb-relatorios .histWrap{display:block!important}
+body.sb-fin-dashboard #printHeader,
+body.sb-fin-dashboard #slCadastro,body.sb-fin-dashboard .topGrid,
+body.sb-fin-dashboard #slKpis,body.sb-fin-dashboard .kpiGrid,
+body.sb-fin-dashboard #slComparativo,body.sb-fin-dashboard .compWrap{display:block!important}
+
+/* ══ TELA INICIAL ══ */
+#secHome{padding-top:4px}
+.homeWelcome{background:linear-gradient(135deg,var(--g9) 0%,var(--g7) 55%,var(--g6) 100%);
+  border-radius:var(--R);padding:26px 28px;color:#fff;margin-bottom:18px;box-shadow:var(--shm)}
+.homeWelcomeTitle{font-size:1.3rem;font-weight:800;margin-bottom:5px}
+.homeWelcomeSub{font-size:.84rem;opacity:.75}
+.homeCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:18px}
+.homeCard{background:var(--w);border:1px solid var(--s2);border-radius:var(--R);padding:18px 16px;
+  box-shadow:var(--sh);display:flex;align-items:center;gap:14px;cursor:pointer;
+  transition:box-shadow .2s,transform .15s;text-decoration:none}
+.homeCard:hover{box-shadow:var(--shm);transform:translateY(-2px)}
+.homeCardIco{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;font-size:1.4rem;flex-shrink:0}
+.homeCardIco.g{background:var(--g1)}.homeCardIco.b{background:#dbeafe}
+.homeCardIco.p{background:#f3e8ff}.homeCardIco.o{background:#fef3c7}.homeCardIco.r{background:var(--r1)}
+.homeCardLabel{font-size:.68rem;font-weight:700;color:var(--s4);text-transform:uppercase;letter-spacing:.05em}
+.homeCardTitle{font-size:.88rem;font-weight:800;color:var(--s9);margin-top:2px}
+.homeCardLocked{opacity:.5;cursor:default}
+.homeCardLocked:hover{transform:none;box-shadow:var(--sh)}
+.homeTip{background:var(--s1);border:1px solid var(--s2);border-radius:var(--Rs);
+  padding:12px 16px;font-size:.8rem;color:var(--s5);line-height:1.5}
+
+/* ══ PRONTUÁRIO PLACEHOLDER ══ */
+#secProntuario{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:440px}
+.proWrap{max-width:400px;text-align:center}
+.proIco{font-size:4rem;margin-bottom:14px}
+.proTitle{font-size:1.08rem;font-weight:800;color:var(--s7);margin-bottom:8px}
+.proDesc{font-size:.83rem;color:var(--s5);line-height:1.65;margin-bottom:14px}
+.proBadge{display:inline-block;padding:6px 18px;background:var(--s1);border:1px solid var(--s2);
+  border-radius:99px;font-size:.72rem;font-weight:700;color:var(--s5)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -490,12 +572,108 @@ body.mode-pacientes #modulePacientes{display:block!important}
     <div id="loginErr"></div>
   </div>
 </div>
+<!-- ════ SIDEBAR NAVIGATION ════ -->
+<button id="sbToggle" style="display:none;position:fixed;top:44px;left:10px;z-index:420;
+  background:var(--g9);border:none;color:#fff;font-size:1.1rem;padding:7px 10px;
+  border-radius:var(--Rs);cursor:pointer" onclick="document.getElementById('sidebar').classList.toggle('visible')">☰</button>
+
+<nav id="sidebar">
+  <div class="sbHdr">
+    <div class="sbHdrLogo" id="sbLogoEl">🏥</div>
+    <div class="sbHdrName">Clínica da Família</div>
+    <div class="sbHdrSub" id="sbUnitLabel">Gestão Clínica</div>
+  </div>
+  <div class="sbNav">
+
+    <div class="sbItem" data-mod="home" onclick="switchSidebar('home')">
+      <span class="sbItemIco">🏠</span><span class="sbItemLbl">Tela Inicial</span>
+    </div>
+
+    <div class="sbItem" data-mod="pacientes" onclick="switchSidebar('pacientes')">
+      <span class="sbItemIco">👥</span><span class="sbItemLbl">Cadastro de Pacientes</span>
+    </div>
+
+    <div class="sbItem" data-mod="agenda" onclick="switchSidebar('agenda')">
+      <span class="sbItemIco">📅</span><span class="sbItemLbl">Agenda</span>
+    </div>
+
+    <div class="sbItem" data-mod="prontuario" onclick="switchSidebar('prontuario')">
+      <span class="sbItemIco">📋</span><span class="sbItemLbl">Prontuário Eletrônico</span>
+    </div>
+
+    <div class="sbItem" data-mod="relatorios" onclick="switchSidebar('relatorios')">
+      <span class="sbItemIco">📊</span><span class="sbItemLbl">Relatórios</span>
+    </div>
+
+    <div class="sbDivider"></div>
+
+    <div class="sbItem" data-mod="financeiro" onclick="toggleSbGroup(this,'sbGrpFin')">
+      <span class="sbItemIco">💰</span>
+      <span class="sbItemLbl">Financeiro</span>
+      <span class="sbItemChev">▾</span>
+    </div>
+    <div class="sbSub open" id="sbGrpFin">
+      <div class="sbSubItem" data-mod="fin-dashboard" onclick="switchSidebar('fin-dashboard')">
+        Dashboard
+      </div>
+    </div>
+
+  </div>
+  <div class="sbFooter">
+    <div class="sbItem" onclick="doLogout()">
+      <span class="sbItemIco">🚪</span><span class="sbItemLbl">Sair do Sistema</span>
+    </div>
+  </div>
+</nav>
+
 <main>
+<div id="secHome">
+  <div class="homeWelcome">
+    <div class="homeWelcomeTitle">👋 Bem-vindo ao Sistema</div>
+    <div class="homeWelcomeSub" id="homeUnitLabel">Selecione uma unidade no topo</div>
+  </div>
+  <div class="homeCards">
+    <div class="homeCard" onclick="switchSidebar('pacientes')">
+      <div class="homeCardIco g">👥</div>
+      <div><div class="homeCardLabel">Módulo</div><div class="homeCardTitle">Cadastro de Pacientes</div></div>
+    </div>
+    <div class="homeCard" onclick="switchSidebar('agenda')">
+      <div class="homeCardIco b">📅</div>
+      <div><div class="homeCardLabel">Módulo</div><div class="homeCardTitle">Agenda</div></div>
+    </div>
+    <div class="homeCard homeCardLocked" title="Em desenvolvimento">
+      <div class="homeCardIco p">📋</div>
+      <div><div class="homeCardLabel">Em breve</div><div class="homeCardTitle">Prontuário Eletrônico</div></div>
+    </div>
+    <div class="homeCard" onclick="switchSidebar('relatorios')">
+      <div class="homeCardIco o">📊</div>
+      <div><div class="homeCardLabel">Módulo</div><div class="homeCardTitle">Relatórios</div></div>
+    </div>
+    <div class="homeCard" onclick="switchSidebar('fin-dashboard')">
+      <div class="homeCardIco g">💰</div>
+      <div><div class="homeCardLabel">Financeiro</div><div class="homeCardTitle">Dashboard</div></div>
+    </div>
+  </div>
+  <div class="homeTip">💡 <strong>Dica:</strong> Use o menu lateral esquerdo para navegar entre todos os módulos do sistema.</div>
+</div>
+
+<div id="secProntuario">
+  <div class="proWrap">
+    <div class="proIco">📋</div>
+    <div class="proTitle">Prontuário Eletrônico</div>
+    <div class="proDesc">
+      Este módulo permitirá o registro completo de atendimentos clínicos: anamnese,
+      diagnóstico CID-10, solicitação de exames, receituário digital e emissão de atestados.
+    </div>
+    <div class="proBadge">🔧 Em desenvolvimento</div>
+  </div>
+</div>
+
 <div id="printHeader">
   <h1 id="phTitle">Relatório — Clínica da Família</h1>
   <p id="phSub">Gerado em: <strong id="phDate"></strong></p>
 </div>
-<div class="secL">🏗️ Cadastro de Serviços &amp; Lançamento Mensal</div>
+<div class="secL" id="slCadastro">🏗️ Cadastro de Serviços &amp; Lançamento Mensal</div>
 <div class="topGrid">
 
   <!-- COLUNA ESQUERDA: CADASTRO GLOBAL -->
@@ -612,7 +790,7 @@ body.mode-pacientes #modulePacientes{display:block!important}
 </div>
 
 <!-- ════ AGENDA DE OCUPAÇÃO ════ -->
-<div class="secL">📅 Mapa de Ocupação Semanal das Salas
+<div class="secL" id="slOcupacao">📅 Mapa de Ocupação Semanal das Salas
   <span style="font-size:.65rem;font-weight:600;text-transform:none;color:var(--s5);margin-left:4px">(clique em qualquer horário para agendar)</span>
 </div>
 <div class="gcWrap">
@@ -643,7 +821,7 @@ body.mode-pacientes #modulePacientes{display:block!important}
 </div>
 
 <!-- ════ KPIs ════ -->
-<div class="secL">📊 KPIs Mensais — Resultados e Evolução</div>
+<div class="secL" id="slKpis">📊 KPIs Mensais — Resultados e Evolução</div>
 <div class="kpiGrid">
 
   <!-- CARD 1: ABSENTEÍSMO -->
@@ -760,7 +938,7 @@ body.mode-pacientes #modulePacientes{display:block!important}
 </div><!-- /kpiGrid -->
 
 <!-- ════ HISTÓRICO ════ -->
-<div class="secL">🗂️ Histórico Mensal Completo</div>
+<div class="secL" id="slHistorico">🗂️ Histórico Mensal Completo</div>
 <div class="histWrap">
   <table class="hTab">
     <thead><tr>
@@ -775,7 +953,7 @@ body.mode-pacientes #modulePacientes{display:block!important}
 </div>
 
 <!-- ════ COMPARATIVO ENTRE UNIDADES ════ -->
-<div class="secL">🔄 Comparativo entre Unidades — <span id="compMesLabel" style="text-transform:none;font-weight:500;font-size:.82rem;color:var(--s5)">selecione um mês</span></div>
+<div class="secL" id="slComparativo">🔄 Comparativo entre Unidades — <span id="compMesLabel" style="text-transform:none;font-weight:500;font-size:.82rem;color:var(--s5)">selecione um mês</span></div>
 <div class="compWrap">
   <div class="compLoading" id="compLoading">Salve dados de ao menos um mês para ver o comparativo entre todas as unidades.</div>
   <div id="compGrid" style="display:none"></div>
@@ -1057,7 +1235,8 @@ async function doLogin() {
   } else {
     document.getElementById('loginOverlay').style.display = 'none';
     await supaLoad();
-    await loadUserProfile(); applyRoleVisibility(); switchModule('gestao');
+    await loadUserProfile(); applyRoleVisibility();
+    showSidebar(); switchSidebar('home');
     renderGlobal(); renderLanc(); renderAgenda(); renderAll(); onMonthChange();
   }
 }
@@ -1149,6 +1328,59 @@ let _prevMonth=null;
 ══════════════════════════════════════ */
 var USER_ROLE = null;
 var USER_PROFILE = null;
+
+/* ══════════════════════════════════════
+   SIDEBAR NAVIGATION
+══════════════════════════════════════ */
+function switchSidebar(mod){
+  // Atualiza classes do body
+  var keep = document.body.className.split(' ')
+    .filter(function(c){ return c && !c.startsWith('sb-') && c!=='mode-gestao' && c!=='mode-pacientes'; });
+  keep.push('sb-active','sb-'+mod);
+  // Compatibilidade com sistema antigo
+  if(mod==='pacientes'){ keep.push('mode-pacientes'); } else { keep.push('mode-gestao'); }
+  document.body.className = keep.join(' ');
+
+  // Ativa item no sidebar
+  document.querySelectorAll('.sbItem[data-mod],.sbSubItem[data-mod]').forEach(function(el){
+    el.classList.toggle('active', el.dataset.mod === mod || el.dataset.mod === mod.split('-')[0]);
+  });
+
+  // Label da unidade no sidebar e home
+  var u = UNITS.find(function(u2){return u2.id===CU;}) || UNITS[0];
+  var sl=sid('sbUnitLabel'); if(sl) sl.textContent=u.name;
+  var hl=sid('homeUnitLabel'); if(hl) hl.textContent=u.name;
+
+  // Lógica específica por módulo
+  if(mod==='pacientes'){
+    _currentModule='pacientes';
+    renderPacientes();
+  } else {
+    _currentModule='gestao';
+    renderModuleTabs();
+  }
+
+  window.scrollTo(0,0);
+}
+
+function toggleSbGroup(el,grpId){
+  var sub=sid(grpId);
+  if(!sub) return;
+  sub.classList.toggle('open');
+  var chev=el.querySelector('.sbItemChev');
+  if(chev) chev.style.transform=sub.classList.contains('open')?'':'rotate(-90deg)';
+}
+
+function showSidebar(){
+  var sb=sid('sidebar');
+  if(sb){ sb.classList.add('visible'); }
+  document.body.classList.add('sidebar-open');
+  // Copia logo para sidebar se disponível
+  if(LOGO_URL){
+    var sl=sid('sbLogoEl');
+    if(sl) sl.innerHTML='<img src="'+LOGO_URL+'" alt="Logo" style="height:36px;width:auto;border-radius:6px;display:block;"/>';
+  }
+}
 
 async function loadUserProfile(){
   try {
@@ -1412,7 +1644,8 @@ function _calcIdade(d){if(!d)return'?';var h=new Date(),n=new Date(d),a=h.getFul
   document.getElementById('loginOverlay').style.display = 'none';
   /* Carrega dados do Supabase antes de renderizar */
   await supaLoad();
-  await loadUserProfile(); applyRoleVisibility(); switchModule('gestao');
+  await loadUserProfile(); applyRoleVisibility();
+  showSidebar(); switchSidebar('home');
   /* Logo — header e tela de login */
   if(LOGO_URL){
     const le=document.getElementById('bLogoEl');
@@ -1514,6 +1747,8 @@ function updateUnitDisplay(){
   const u=UNITS.find(u=>u.id===CU)||UNITS[0];
   sid('hUnitName').textContent=u.name;
   const _pl=sid('patUnitLabel'); if(_pl) _pl.textContent=u.name;
+  const _sl=sid('sbUnitLabel'); if(_sl) _sl.textContent=u.name;
+  const _hl=sid('homeUnitLabel'); if(_hl) _hl.textContent=u.name;
 }
 
 /* ══════════════════════════════════════
