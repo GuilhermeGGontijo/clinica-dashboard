@@ -365,6 +365,56 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
 .agFBtn button:hover{background:var(--g9)}
 .agFClearBtn{padding:6px 14px;background:transparent;color:var(--s5);border:1.5px solid var(--s2);border-radius:var(--Rs);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s}
 .agFClearBtn:hover{border-color:var(--s4);color:var(--s7)}
+
+/* ══ NAVEGAÇÃO DE MÓDULOS ══ */
+#moduleNav{background:var(--w);border-bottom:2px solid var(--s2);position:sticky;top:102px;z-index:350}
+.mnIn{max-width:1440px;margin:0 auto;padding:0 22px;display:flex;gap:0;overflow-x:auto}
+.mnTab{padding:10px 22px;font-size:.84rem;font-weight:700;cursor:pointer;border:none;
+  background:none;color:var(--s5);border-bottom:3px solid transparent;
+  transition:all .15s;white-space:nowrap;flex-shrink:0}
+.mnTab:hover{color:var(--g7);background:var(--g0)}
+.mnTab.active{color:var(--g9);border-bottom-color:var(--g6)}
+
+/* ══ CHAVEAMENTO DE MÓDULOS ══ */
+body.mode-gestao #modulePacientes{display:none!important}
+body.mode-pacientes .topGrid,body.mode-pacientes .agFormWrap,
+body.mode-pacientes .gcWrap,body.mode-pacientes .kpiGrid,
+body.mode-pacientes .histWrap,body.mode-pacientes .compWrap{display:none!important}
+body.mode-pacientes #modulePacientes{display:block!important}
+#modulePacientes{display:none;padding-top:4px}
+
+/* ══ MÓDULO PACIENTES ══ */
+.patHeader{display:flex;align-items:flex-start;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;margin-bottom:14px}
+.patSearchWrap{margin-bottom:14px}
+.patSearchInp{width:100%;max-width:520px;padding:10px 16px;border:1.5px solid var(--s2);
+  border-radius:var(--Rs);font-size:.9rem;color:var(--s9);background:var(--w);
+  outline:none;transition:border-color .2s,box-shadow .2s}
+.patSearchInp:focus{border-color:var(--g6);box-shadow:0 0 0 3px rgba(22,163,74,.13)}
+.patWrap{display:flex;flex-direction:column;gap:8px;min-height:100px}
+.patEmpty{padding:44px;text-align:center;color:var(--s4);font-size:.84rem;line-height:2;
+  background:var(--w);border:1px solid var(--s2);border-radius:var(--R);box-shadow:var(--sh)}
+.patCard{background:var(--w);border:1px solid var(--s2);border-radius:var(--R);
+  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;box-shadow:var(--sh);transition:box-shadow .2s,transform .15s;flex-wrap:wrap}
+.patCard:hover{box-shadow:var(--shm);transform:translateY(-1px)}
+.patCardMain{display:flex;align-items:center;gap:14px;flex:1;min-width:0}
+.patCardAvatar{width:44px;height:44px;border-radius:50%;background:var(--g1);
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.patCardInfo{flex:1;min-width:0}
+.patCardName{font-size:.93rem;font-weight:800;color:var(--g9);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.patCardMeta{font-size:.73rem;color:var(--s5);margin-top:2px}
+.patCardActions{display:flex;gap:6px;flex-shrink:0}
+
+/* ══ FORM PACIENTES (modal) ══ */
+.patFormSec{font-size:.69rem;font-weight:800;color:var(--g7);text-transform:uppercase;
+  letter-spacing:.08em;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--g1)}
+.patFormGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px 14px}
+.patFG{display:flex;flex-direction:column;gap:4px}
+.patFG label{font-size:.72rem;font-weight:700;color:var(--s7)}
+.patFG.sp2{grid-column:span 2}.patFG.sp3{grid-column:span 3}
+@media(max-width:600px){.patFormGrid{grid-template-columns:1fr 1fr}.patFG.sp2,.patFG.sp3{grid-column:span 2}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -405,6 +455,9 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
     </div>
   </div>
 </header>
+
+<!-- ════ MÓDULO NAV ════ -->
+<div id="moduleNav"><div class="mnIn"></div></div>
 
 <!-- ════ MAIN ════ -->
 <style>
@@ -728,6 +781,25 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
   <div id="compGrid" style="display:none"></div>
 </div>
 
+<!-- ════ MÓDULO: PACIENTES ════ -->
+<div id="modulePacientes">
+  <div class="patHeader">
+    <div>
+      <div class="secL" style="margin:0 0 4px">👥 Cadastro de Pacientes</div>
+      <p style="font-size:.76rem;color:var(--s5);margin:0">Unidade ativa: <strong id="patUnitLabel"></strong></p>
+    </div>
+    <button class="btn bG" onclick="abrirFormPaciente()">➕ Novo Paciente</button>
+  </div>
+  <div class="patSearchWrap">
+    <input type="text" id="patSearchInp" class="patSearchInp"
+      placeholder="🔍  Buscar por nome ou CPF..."
+      oninput="_patSearch=this.value.trim();_patPage=0;renderPacientes()" />
+  </div>
+  <div id="patWrap" class="patWrap">
+    <div class="patEmpty">Selecione o módulo Pacientes para carregar os registros.</div>
+  </div>
+</div>
+
 </main>
 
 <div id="toast"></div>
@@ -784,6 +856,111 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
     <div class="mActs" style="margin-top:14px">
       <button class="btn" style="background:var(--s1);color:var(--s7)" onclick="closeAgModal()">Cancelar</button>
       <button class="btn bG" onclick="saveAgCell()">💾 Salvar Horário</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Cadastro / Edição de Paciente -->
+<div class="ovl" id="patModal">
+  <div class="mBox" style="max-width:640px;width:96%;padding:22px 20px">
+    <h3 id="patModalTitle" style="color:var(--g9)">➕ Novo Paciente</h3>
+
+    <div class="patFormSec">📋 DADOS OBRIGATÓRIOS</div>
+    <div class="patFormGrid">
+      <div class="patFG sp3">
+        <label>Nome Completo *</label>
+        <input type="text" id="patNome" class="afInp" placeholder="Nome completo do paciente" autocomplete="off"/>
+      </div>
+      <div class="patFG">
+        <label>Data de Nascimento *</label>
+        <input type="date" id="patNascimento" class="afInp"/>
+      </div>
+      <div class="patFG">
+        <label>CPF *</label>
+        <input type="text" id="patCPF" class="afInp" placeholder="000.000.000-00" maxlength="14"
+          oninput="this.value=_fmtCPF(this.value)"/>
+      </div>
+      <div class="patFG">
+        <label>Celular *</label>
+        <input type="tel" id="patCelular" class="afInp" placeholder="(00) 00000-0000" maxlength="15"
+          oninput="this.value=_fmtFoneI(this.value)"/>
+      </div>
+      <div class="patFG">
+        <label>Sexo Biológico *</label>
+        <select id="patSexo" class="afInp">
+          <option value="">Selecione...</option>
+          <option value="M">Masculino</option>
+          <option value="F">Feminino</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="patFormSec">📝 DADOS COMPLEMENTARES <span style="font-weight:500;color:var(--s4);text-transform:none;font-size:.68rem">(opcionais)</span></div>
+    <div class="patFormGrid">
+      <div class="patFG">
+        <label>Gênero</label>
+        <input type="text" id="patGenero" class="afInp" placeholder="Ex: Não-binário"/>
+      </div>
+      <div class="patFG sp2">
+        <label>Nome da Mãe</label>
+        <input type="text" id="patNomeMae" class="afInp" placeholder="Nome completo da mãe"/>
+      </div>
+      <div class="patFG sp2">
+        <label>E-mail</label>
+        <input type="email" id="patEmail" class="afInp" placeholder="email@exemplo.com"/>
+      </div>
+      <div class="patFG">
+        <label>Unidade de Cadastro</label>
+        <select id="patFormUnidade" class="afInp"></select>
+      </div>
+    </div>
+
+    <div class="patFormSec">📍 ENDEREÇO <span style="font-weight:500;color:var(--s4);text-transform:none;font-size:.68rem">(opcional — CEP preenche automaticamente)</span></div>
+    <div class="patFormGrid">
+      <div class="patFG">
+        <label>CEP</label>
+        <input type="text" id="patCEP" class="afInp" placeholder="00000-000" maxlength="9"
+          oninput="this.value=_fmtCEP(this.value)" onblur="buscarCEP(this.value)"/>
+      </div>
+      <div class="patFG sp2">
+        <label>Logradouro</label>
+        <input type="text" id="patLogradouro" class="afInp" placeholder="Rua, Avenida..."/>
+      </div>
+      <div class="patFG" style="max-width:90px">
+        <label>Número</label>
+        <input type="text" id="patNumero" class="afInp" placeholder="Nº"/>
+      </div>
+      <div class="patFG">
+        <label>Complemento</label>
+        <input type="text" id="patComplemento" class="afInp" placeholder="Apto, Sala..."/>
+      </div>
+      <div class="patFG">
+        <label>Bairro</label>
+        <input type="text" id="patBairro" class="afInp" placeholder="Bairro"/>
+      </div>
+      <div class="patFG">
+        <label>Cidade</label>
+        <input type="text" id="patCidade" class="afInp" placeholder="Cidade"/>
+      </div>
+      <div class="patFG" style="max-width:90px">
+        <label>UF</label>
+        <select id="patUF" class="afInp">
+          <option value="">UF</option>
+          <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+          <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+          <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+          <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+          <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+          <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+          <option>SP</option><option>SE</option><option>TO</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="patFormErr" style="color:var(--r6);font-size:.82rem;margin-top:10px;min-height:18px"></div>
+    <div class="mActs" style="margin-top:16px">
+      <button class="btn" style="background:var(--s1);color:var(--s7)" onclick="fecharFormPaciente()">Cancelar</button>
+      <button class="btn bG" id="patSaveBtn" onclick="savePaciente()">💾 Salvar Paciente</button>
     </div>
   </div>
 </div>
@@ -880,6 +1057,7 @@ async function doLogin() {
   } else {
     document.getElementById('loginOverlay').style.display = 'none';
     await supaLoad();
+    await loadUserProfile(); applyRoleVisibility(); switchModule('gestao');
     renderGlobal(); renderLanc(); renderAgenda(); renderAll(); onMonthChange();
   }
 }
@@ -965,6 +1143,246 @@ function flash(){const el=sid('saveInd');el.classList.add('on');clearTimeout(el.
 ══════════════════════════════════════ */
 let _agFilter='all';
 let _prevMonth=null;
+
+/* ══════════════════════════════════════
+   ROLES E PERMISSÕES
+══════════════════════════════════════ */
+var USER_ROLE = null;
+var USER_PROFILE = null;
+
+async function loadUserProfile(){
+  try {
+    var sess = await _sb.auth.getUser();
+    var uid = sess && sess.data && sess.data.user ? sess.data.user.id : null;
+    if(!uid){ USER_ROLE='administrador'; return; }
+    var res = await _sb.from('perfis_usuarios').select('*').eq('id',uid).single();
+    if(res.error || !res.data){
+      USER_ROLE='administrador'; USER_PROFILE=null;
+      return;
+    }
+    USER_ROLE = res.data.role;
+    USER_PROFILE = res.data;
+  } catch(e){
+    USER_ROLE='administrador'; USER_PROFILE=null;
+    console.warn('loadUserProfile erro:',e);
+  }
+}
+
+function applyRoleVisibility(){
+  document.body.classList.remove('role-administrador','role-faturamento','role-profissional_saude','role-recepcionista');
+  if(USER_ROLE) document.body.classList.add('role-'+USER_ROLE);
+  renderModuleTabs();
+}
+
+/* ══════════════════════════════════════
+   NAVEGAÇÃO DE MÓDULOS
+══════════════════════════════════════ */
+var _currentModule = 'gestao';
+
+function renderModuleTabs(){
+  var nav = sid('moduleNav');
+  if(!nav) return;
+  var inner = nav.querySelector('.mnIn');
+  if(!inner) return;
+  var tabs = [
+    {id:'gestao', label:'📊 Gestão', roles:['administrador','faturamento','profissional_saude','recepcionista']},
+    {id:'pacientes', label:'👥 Pacientes', roles:['administrador','profissional_saude','recepcionista']},
+  ];
+  inner.innerHTML = tabs
+    .filter(function(t){ return !USER_ROLE || t.roles.indexOf(USER_ROLE)>=0; })
+    .map(function(t){
+      return '<button class="mnTab'+(_currentModule===t.id?' active':'')+'" onclick="switchModule(''+t.id+'')">'+t.label+'</button>';
+    }).join('');
+}
+
+function switchModule(mod){
+  _currentModule = mod;
+  document.body.classList.remove('mode-gestao','mode-pacientes');
+  document.body.classList.add('mode-'+mod);
+  renderModuleTabs();
+  if(mod==='pacientes') renderPacientes();
+  window.scrollTo(0,0);
+}
+
+/* ══════════════════════════════════════
+   MÓDULO: PACIENTES
+══════════════════════════════════════ */
+var _patSearch = '';
+var _patPage = 0;
+
+async function renderPacientes(){
+  var wrap = sid('patWrap');
+  if(!wrap) return;
+  var pl = sid('patUnitLabel');
+  if(pl) pl.textContent = (UNITS.find(function(u){return u.id===CU;})||UNITS[0]).name;
+  wrap.innerHTML = '<div class="patEmpty">⏳ Carregando...</div>';
+  try {
+    var q = _sb.from('pacientes')
+      .select('id,nome_completo,cpf,celular,data_nascimento,sexo_biologico,unidade_id')
+      .eq('ativo',true)
+      .order('nome_completo');
+    if(USER_ROLE==='recepcionista'||USER_ROLE==='profissional_saude') q=q.eq('unidade_id',CU);
+    if(_patSearch){
+      if(/^\d/.test(_patSearch)) q=q.ilike('cpf','%'+_patSearch.replace(/\D/g,'')+'%');
+      else q=q.ilike('nome_completo','%'+_patSearch+'%');
+    }
+    var {data,error} = await q.range(_patPage*20,_patPage*20+19);
+    if(error) throw error;
+    _renderPatList(data||[]);
+  } catch(e){
+    wrap.innerHTML='<div class="patEmpty" style="color:var(--r6)">⚠️ Erro: '+esc(e.message)+'</div>';
+  }
+}
+
+function _renderPatList(list){
+  var wrap = sid('patWrap');
+  if(!list.length){
+    wrap.innerHTML='<div class="patEmpty">Nenhum paciente'+(_patSearch?' encontrado para "'+esc(_patSearch)+'"':' cadastrado nesta unidade')+'.<br><small>Clique em <strong>➕ Novo Paciente</strong> para começar.</small></div>';
+    return;
+  }
+  wrap.innerHTML = list.map(function(p){
+    var idade = _calcIdade(p.data_nascimento);
+    var un = (UNITS.find(function(u){return u.id===p.unidade_id;})||{name:p.unidade_id}).name;
+    return '<div class="patCard">'+
+      '<div class="patCardMain">'+
+        '<div class="patCardAvatar">'+(p.sexo_biologico==='F'?'👩':'👨')+'</div>'+
+        '<div class="patCardInfo">'+
+          '<div class="patCardName">'+esc(p.nome_completo)+'</div>'+
+          '<div class="patCardMeta">CPF: '+_fmtCPF(p.cpf)+' &middot; '+idade+' anos &middot; '+(p.sexo_biologico==='F'?'Feminino':'Masculino')+'</div>'+
+          '<div class="patCardMeta">📱 '+_fmtFone(p.celular)+' &middot; 🏢 '+esc(un)+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="patCardActions">'+
+        '<button class="btn bG bSm" onclick="editPaciente(''+p.id+'')">✏️ Editar</button>'+
+        (USER_ROLE==='administrador'?'<button class="btn bSm" style="background:var(--r1);color:var(--r7)" onclick="desativarPaciente(''+p.id+'',''+esc(p.nome_completo).replace(/'/g,"\'")+'')" title="Desativar">🗑</button>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+var _editingPatId = null;
+
+function abrirFormPaciente(id){
+  _editingPatId = id||null;
+  _limpaFormPaciente();
+  var sel = sid('patFormUnidade');
+  if(sel) sel.innerHTML = UNITS.map(function(u){return '<option value="'+u.id+'">'+esc(u.name)+'</option>';}).join('');
+  if(id){
+    sid('patModalTitle').textContent='✏️ Editar Paciente';
+    _sb.from('pacientes').select('*').eq('id',id).single().then(function(r){
+      if(r.data) _preencheFormPaciente(r.data);
+    });
+  } else {
+    sid('patModalTitle').textContent='➕ Novo Paciente';
+    if(sel) sel.value=CU;
+  }
+  sid('patFormErr').textContent='';
+  sid('patModal').classList.add('open');
+}
+
+function editPaciente(id){ abrirFormPaciente(id); }
+
+function fecharFormPaciente(){
+  sid('patModal').classList.remove('open');
+  _editingPatId=null;
+}
+
+function _preencheFormPaciente(d){
+  var fi=function(id,v){var e=sid(id);if(e&&v!=null)e.value=v;};
+  fi('patNome',d.nome_completo);fi('patNascimento',d.data_nascimento);
+  fi('patCPF',_fmtCPF(d.cpf));fi('patCelular',_fmtFone(d.celular));
+  fi('patSexo',d.sexo_biologico);fi('patGenero',d.genero);fi('patNomeMae',d.nome_mae);
+  fi('patEmail',d.email);fi('patCEP',d.cep?d.cep.replace(/(\d{5})(\d{3})/,'$1-$2'):'');
+  fi('patLogradouro',d.logradouro);fi('patNumero',d.numero);fi('patComplemento',d.complemento);
+  fi('patBairro',d.bairro);fi('patCidade',d.cidade);fi('patUF',d.uf);
+  fi('patFormUnidade',d.unidade_id);
+}
+
+function _limpaFormPaciente(){
+  ['patNome','patNascimento','patCPF','patCelular','patSexo','patGenero','patNomeMae',
+   'patEmail','patCEP','patLogradouro','patNumero','patComplemento','patBairro','patCidade','patUF']
+  .forEach(function(id){var e=sid(id);if(e)e.value='';});
+}
+
+async function savePaciente(){
+  var btn=sid('patSaveBtn');
+  var errEl=sid('patFormErr');
+  errEl.textContent='';
+  var cpfRaw=(sid('patCPF').value||'').replace(/\D/g,'');
+  var celRaw=(sid('patCelular').value||'').replace(/\D/g,'');
+  var payload={
+    nome_completo:(sid('patNome').value||'').trim(),
+    data_nascimento:sid('patNascimento').value||null,
+    cpf:cpfRaw, celular:celRaw,
+    sexo_biologico:sid('patSexo').value,
+    genero:(sid('patGenero').value||'').trim()||null,
+    nome_mae:(sid('patNomeMae').value||'').trim()||null,
+    email:(sid('patEmail').value||'').trim()||null,
+    cep:(sid('patCEP').value||'').replace(/\D/g,'')||null,
+    logradouro:(sid('patLogradouro').value||'').trim()||null,
+    numero:(sid('patNumero').value||'').trim()||null,
+    complemento:(sid('patComplemento').value||'').trim()||null,
+    bairro:(sid('patBairro').value||'').trim()||null,
+    cidade:(sid('patCidade').value||'').trim()||null,
+    uf:(sid('patUF').value||'')||null,
+    unidade_id:sid('patFormUnidade').value||CU,
+  };
+  if(!payload.nome_completo){errEl.textContent='Nome completo é obrigatório.';return;}
+  if(!payload.data_nascimento){errEl.textContent='Data de nascimento é obrigatória.';return;}
+  if(cpfRaw.length!==11){errEl.textContent='CPF inválido — informe os 11 dígitos.';return;}
+  if(celRaw.length<10){errEl.textContent='Celular inválido.';return;}
+  if(!payload.sexo_biologico){errEl.textContent='Sexo biológico é obrigatório.';return;}
+  btn.textContent='Salvando...'; btn.disabled=true;
+  try {
+    var r;
+    if(_editingPatId){
+      payload.atualizado_em=new Date().toISOString();
+      r=await _sb.from('pacientes').update(payload).eq('id',_editingPatId);
+    } else {
+      var sess=await _sb.auth.getUser();
+      payload.cadastrado_por=sess&&sess.data&&sess.data.user?sess.data.user.id:null;
+      r=await _sb.from('pacientes').insert(payload);
+    }
+    if(r.error) throw r.error;
+    toast(_editingPatId?'✅ Paciente atualizado!':'✅ Paciente cadastrado com sucesso!','');
+    fecharFormPaciente();
+    renderPacientes();
+  } catch(e){
+    var msg=e.message||'';
+    errEl.textContent='Erro: '+(msg.includes('duplicate')||msg.includes('unique')?'Este CPF já está cadastrado.':msg);
+  } finally {
+    btn.textContent='💾 Salvar Paciente'; btn.disabled=false;
+  }
+}
+
+async function desativarPaciente(id,nome){
+  if(!confirm('Desativar o cadastro de "'+nome+'"?\nO paciente ficará oculto mas não será excluído.')) return;
+  var {error}=await _sb.from('pacientes').update({ativo:false,atualizado_em:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Paciente desativado.','');
+  renderPacientes();
+}
+
+async function buscarCEP(v){
+  var c=(v||'').replace(/\D/g,'');
+  if(c.length!==8) return;
+  try{
+    var r=await fetch('https://viacep.com.br/ws/'+c+'/json/');
+    var d=await r.json();
+    if(d.erro){toast('CEP não encontrado.','err');return;}
+    var fi=function(id,val){var e=sid(id);if(e)e.value=val||'';};
+    fi('patLogradouro',d.logradouro);fi('patBairro',d.bairro);fi('patCidade',d.localidade);fi('patUF',d.uf);
+    sid('patNumero')&&sid('patNumero').focus();
+  }catch(e){console.warn('ViaCEP erro:',e);}
+}
+
+/* Helpers de formatação — prefixo _ para não colidir com existentes */
+function _fmtCPF(s){var c=(s||'').replace(/\D/g,'');if(c.length>11)c=c.slice(0,11);if(c.length===11)return c.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');return c.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');}
+function _fmtFone(s){var c=(s||'').replace(/\D/g,'');if(c.length===11)return c.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');return c.replace(/(\d{2})(\d{4})(\d{4})/,'($1) $2-$3');}
+function _fmtFoneI(s){var c=(s||'').replace(/\D/g,'');if(c.length>11)c=c.slice(0,11);if(c.length<=10)return c.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3').replace(/-$/,'');return c.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3').replace(/-$/,'');}
+function _fmtCEP(s){var c=(s||'').replace(/\D/g,'').slice(0,8);return c.replace(/(\d{5})(\d{0,3})/,'$1-$2').replace(/-$/,'');}
+function _calcIdade(d){if(!d)return'?';var h=new Date(),n=new Date(d),a=h.getFullYear()-n.getFullYear();var m=h.getMonth()-n.getMonth();if(m<0||(m===0&&h.getDate()<n.getDate()))a--;return a;}
+
 (async function init(){
   /* ── MODO RECUPERAÇÃO DE SENHA ── */
   const _hParams = new URLSearchParams(window.location.hash.replace(/^#/,''));
@@ -994,6 +1412,7 @@ let _prevMonth=null;
   document.getElementById('loginOverlay').style.display = 'none';
   /* Carrega dados do Supabase antes de renderizar */
   await supaLoad();
+  await loadUserProfile(); applyRoleVisibility(); switchModule('gestao');
   /* Logo — header e tela de login */
   if(LOGO_URL){
     const le=document.getElementById('bLogoEl');
@@ -1094,6 +1513,7 @@ function onUnitChange(nu){
 function updateUnitDisplay(){
   const u=UNITS.find(u=>u.id===CU)||UNITS[0];
   sid('hUnitName').textContent=u.name;
+  const _pl=sid('patUnitLabel'); if(_pl) _pl.textContent=u.name;
 }
 
 /* ══════════════════════════════════════
