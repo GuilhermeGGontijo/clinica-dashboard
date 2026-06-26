@@ -262,6 +262,42 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
   header{top:52px}
 }
 
+/* ══ PRINT / PDF ══ */
+@media print {
+  #unitBar,header,.agFormWrap,.gcWrap,#ovl,#agOvl,#toast,
+  .topGrid,.ubActions,#sBanner,#importFile,.gcLegend{display:none!important}
+  #printHeader{display:block!important}
+  body{background:#fff!important}
+  main{padding:8px 0!important;max-width:100%!important}
+  .kpiGrid{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}
+  .kC{break-inside:avoid;box-shadow:none!important;border:1px solid #e2e8f0!important;page-break-inside:avoid}
+  .cCh{display:none!important}
+  .histWrap,.compWrap{break-inside:avoid;page-break-inside:avoid}
+  .hTab,.compGrid{font-size:.74rem}
+  @page{margin:1.5cm;size:A4}
+}
+#printHeader{display:none;padding:0 0 14px;margin-bottom:10px;border-bottom:3px solid #14532d}
+#printHeader h1{font-size:1.25rem;font-weight:900;color:#14532d;margin:0 0 3px}
+#printHeader p{font-size:.79rem;color:#64748b;margin:0}
+
+/* ══ COMPARATIVO ENTRE UNIDADES ══ */
+.compWrap{background:var(--w);border:1px solid var(--s2);border-radius:var(--R);box-shadow:var(--sh);overflow:hidden}
+.compLoading{padding:32px;text-align:center;color:var(--s4);font-size:.82rem;font-style:italic}
+.compGrid{display:grid;width:100%;border-top:2px solid var(--g1)}
+.compUnit{border-right:1px solid var(--s2);padding:16px 20px;border-top:3px solid transparent;transition:background .2s}
+.compUnit:last-child{border-right:none}
+.compBest{background:linear-gradient(180deg,var(--g0) 0%,var(--w) 70%);border-top:3px solid var(--g5)!important}
+.compUnitName{font-size:.75rem;font-weight:800;color:var(--g9);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--g1);display:flex;align-items:center;gap:6px}
+.compBest .compUnitName{color:var(--g7);border-bottom-color:var(--g5)}
+.compRow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px dashed var(--s1);font-size:.79rem;gap:6px}
+.compRow:last-child{border-bottom:none}
+.compLabel{color:var(--s5);font-weight:600;flex-shrink:0}
+.compVal{font-weight:800;color:var(--s9);text-align:right;display:flex;align-items:center;gap:4px}
+.compVal.green{color:var(--g6)}.compVal.red{color:var(--r6)}.compVal.amber{color:var(--amb)}
+.compBadge{font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:20px;white-space:nowrap}
+.compNoData{padding:20px 0;text-align:center;color:var(--s4);font-size:.76rem;font-style:italic}
+@media(max-width:900px){.compGrid{grid-template-columns:1fr 1fr!important}.compUnit{border-bottom:1px solid var(--s2)}}
+
 /* ══ GCAL AGENDA ══ */
 .gcWrap{background:var(--w);border:1px solid var(--s2);border-radius:var(--R);box-shadow:var(--sh);overflow:hidden}
 .gcCtrl{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;background:var(--g0);border-bottom:2px solid var(--g1);flex-wrap:wrap}
@@ -343,6 +379,7 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
     <div class="ubActions">
       <button class="ubBtn ubBtnExp" onclick="exportBackup()" title="Exportar todos os dados como arquivo JSON">📤 Exportar Backup</button>
       <button class="ubBtn ubBtnImp" onclick="sid('importFile').click()" title="Importar um arquivo de backup JSON">📥 Importar Dados</button>
+      <button class="ubBtn" onclick="gerarRelatorio()" title="Gerar relatório PDF desta unidade" style="border-color:rgba(147,197,253,.4);color:#93c5fd">📄 Relatório PDF</button>
     </div>
   </div>
 </div>
@@ -401,7 +438,10 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
   </div>
 </div>
 <main>
-
+<div id="printHeader">
+  <h1 id="phTitle">Relatório — Clínica da Família</h1>
+  <p id="phSub">Gerado em: <strong id="phDate"></strong></p>
+</div>
 <div class="secL">🏗️ Cadastro de Serviços &amp; Lançamento Mensal</div>
 <div class="topGrid">
 
@@ -562,6 +602,7 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
     <div class="cInps">
       <div class="iGrp"><label>Total de Agendamentos</label><input type="number" id="i_agend" min="0" placeholder="ex: 150" /><span class="helper">💡 Consultas marcadas na agenda do mês. <strong>(Ex: 150)</strong></span></div>
       <div class="iGrp"><label>Total de Faltas (No-show)</label><input type="number" id="i_faltas" min="0" placeholder="ex: 15" /><span class="helper">💡 Agendados que não vieram sem avisar. <strong>(Ex: 15)</strong></span></div>
+      <div class="iGrp"><label>🎯 Meta de Absenteísmo (%)</label><input type="number" id="i_metaAbs" min="0" max="100" step="1" placeholder="ex: 10" oninput="saveMetaAbs(this.value)" /><span class="helper">💡 Define o limite aceitável. Salvo globalmente para todas as unidades.</span></div>
     </div>
     <div class="cDiv"></div>
     <div class="cRes"><div class="rIt">
@@ -680,6 +721,13 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
   </table>
 </div>
 
+<!-- ════ COMPARATIVO ENTRE UNIDADES ════ -->
+<div class="secL">🔄 Comparativo entre Unidades — <span id="compMesLabel" style="text-transform:none;font-weight:500;font-size:.82rem;color:var(--s5)">selecione um mês</span></div>
+<div class="compWrap">
+  <div class="compLoading" id="compLoading">Salve dados de ao menos um mês para ver o comparativo entre todas as unidades.</div>
+  <div id="compGrid" style="display:none"></div>
+</div>
+
 </main>
 
 <div id="toast"></div>
@@ -779,7 +827,7 @@ let _ram = {};
 ══════════════════════════════════════ */
 const SUPA_URL = 'https://yigqjrfmrgegwqbxotgc.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZ3FqcmZtcmdlZ3dxYnhvdGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MTQwNDcsImV4cCI6MjA5Nzk5MDA0N30.DcOl-UYfh_wrTxh3qNwpDjE6YL5OquCeWLDbXYXqEEc';
-const SUPA_PREFIX = ['tabelaPrecos_','cfv4_lanc_','cfv4_data_','agendaFixa_','agendaCfg_','cf_activeUnit'];
+const SUPA_PREFIX = ['tabelaPrecos_','cfv4_lanc_','cfv4_data_','agendaFixa_','agendaCfg_','cf_activeUnit','cfv4_meta_'];
 const _sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 function togglePass(fieldId, btn) {
@@ -977,6 +1025,7 @@ let _prevMonth=null;
   renderAgenda();
   renderAll();
   onMonthChange();
+  loadMetaAbs();
 
   /* ── AUTO-SAVE a cada 30 segundos ── */
   setInterval(function(){
@@ -1038,7 +1087,9 @@ function onUnitChange(nu){
   renderAgenda();
   renderAll();
   onMonthChange();
+  loadMetaAbs();
   toast('🏢 '+UNITS.find(u=>u.id===CU).name+' carregada','');
+  renderComparativo();
 }
 function updateUnitDisplay(){
   const u=UNITS.find(u=>u.id===CU)||UNITS[0];
@@ -1163,6 +1214,8 @@ function onMonthChange(){
   /* recalcula footer e cards com lancamentos + inputs do novo mês */
   const _t=computeFromUI();syncFooter(_t);syncMod3Auto(_t);
   const d=getInputs();updateCards(calc(d),d);
+  loadMetaAbs();
+  renderComparativo();
 }
 function fillKPIInputs(d){
   const si=(id,v)=>{const e=sid(id);if(e)e.value=(v!=null&&v!=='')?v:'';};
@@ -1212,7 +1265,8 @@ function calc(d){
 ══════════════════════════════════════ */
 function updateCards(k,d){
   sV('r_abs',k.absent,1);if(k.absent!=null)sid('r_abs').style.color='var(--r6)';
-  bdg('b_abs',k.absent,v=>v<=5?['bG1','✅ Excelente (≤5%)']:v<=15?['bW1','⚠️ Atenção (5–15%)']:['bR1','🔴 Crítico (>15%)']);
+  var _meta=getMetaAbs();
+  bdg('b_abs',k.absent,v=>v<=_meta?['bG1','✅ Excelente (≤'+_meta+'%)']:v<=_meta*2?['bW1','⚠️ Atenção']:['bR1','🔴 Crítico (>'+(_meta*2)+'%)']);
   sV('r_repr',k.repr,1);if(k.repr!=null)sid('r_repr').style.color='var(--g6)';
   bdg('b_repr',k.repr,v=>v>=20?['bG1','✅ Alta']:v>=10?['bW1','⚠️ Média']:['bR1','🔴 Baixa (<10%)']);
   const rF=sid('r_fat'),rL=sid('r_recLiq'),rLq=sid('r_lucro');
@@ -1257,6 +1311,7 @@ function renderAll(){
   dLine('ch_tick','nd_tick',labels,kArr.map(k=>k.ticket),'Ticket Médio (R$)','#15803d',true);
   dLine('ch_ocio','nd_ocio',labels,kArr.map(k=>k.ocio),'Ociosidade (%)','#dc2626',false);
   buildHist(data,keys,enriched,kArr);
+  renderComparativo();
   stamp();
 }
 function dLine(cid,ndid,lbs,vals,label,hex,isMoney){
@@ -1319,6 +1374,7 @@ function resetEmpty(){
   ['ch_abs','ch_repr','ch_fat','ch_tick','ch_ocio'].forEach(id=>{const e=sid(id);if(e)e.style.display='none';});
   ['nd_abs','nd_repr','nd_fat','nd_tick','nd_ocio'].forEach(id=>{const e=sid(id);if(e)e.style.display='flex';});
   sid('histBody').innerHTML='<tr class="hERow"><td colspan="10">Nenhum dado registrado. Preencha os campos e clique em <strong>Salvar Mês</strong>.</td></tr>';
+  renderComparativo();
 }
 
 document.querySelectorAll('.cInps input[type="number"]:not([readonly])').forEach(inp=>{
@@ -1547,6 +1603,139 @@ function pad(n){return String(n).padStart(2,'0');}
 function sid(id){return document.getElementById(id);}
 let _tt;
 function toast(msg,type){const el=sid('toast');el.textContent=msg;el.className='on'+(type?' '+type:'');clearTimeout(_tt);_tt=setTimeout(()=>el.className='',3500);}
+
+/* ══════════════════════════════════════
+   META DE ABSENTEÍSMO
+══════════════════════════════════════ */
+function getMetaAbs(){ return parseFloat(lsGet('cfv4_meta_abs',10))||10; }
+function saveMetaAbs(v){
+  var val=parseFloat(v);
+  if(!isNaN(val)&&val>=0) lsSet('cfv4_meta_abs',val);
+  var d=getInputs(); updateCards(calc(d),d);
+}
+function loadMetaAbs(){
+  var el=sid('i_metaAbs');
+  if(el){ var v=getMetaAbs(); el.value=(v!=null&&!isNaN(v))?v:''; }
+}
+
+/* ══════════════════════════════════════
+   OCUPAÇÃO DAS SALAS (agenda)
+══════════════════════════════════════ */
+function calcRoomOccupancy(agendaData,agHours){
+  var totalSlots=agHours.length*AG_DAYS.length*3;
+  var occ=0;
+  AG_DAYS.forEach(function(day){
+    agHours.forEach(function(hr){
+      var key=day+'-'+hr;
+      var cd=agendaData[key]||{};
+      [1,2,3].forEach(function(n){
+        var rm=cd['s'+n]||{};
+        if(rm.proc||rm.prof||rm.bloq) occ++;
+      });
+    });
+  });
+  return totalSlots>0?(occ/totalSlots)*100:null;
+}
+
+/* ══════════════════════════════════════
+   COMPARATIVO ENTRE UNIDADES
+══════════════════════════════════════ */
+function renderComparativo(){
+  var month=getMonth();
+  var lbl=sid('compMesLabel');
+  var loading=sid('compLoading');
+  var grid=sid('compGrid');
+  if(!loading||!grid) return;
+  if(!month){
+    loading.style.display='block';
+    loading.textContent='Selecione um mês acima para ver o comparativo entre unidades.';
+    grid.style.display='none';
+    if(lbl) lbl.textContent='selecione um mês';
+    return;
+  }
+  if(lbl) lbl.textContent=fmt(month);
+
+  var unitsData=UNITS.map(function(u){
+    var services=lsGet('tabelaPrecos_'+u.id,[]);
+    var lancAll=lsGet('cfv4_lanc_'+u.id,{});
+    var dataAll=lsGet('cfv4_data_'+u.id,{});
+    var agendaData=lsGet('agendaFixa_'+u.id,{});
+    var agCfg=lsGet('agendaCfg_'+u.id,{start:7,end:18});
+    var lancM=lancAll[month]||{};
+    var kpiM=dataAll[month]||{};
+    var sMap={};
+    services.forEach(function(s){ sMap[s.id]=s; });
+    var fat=0,rep=0;
+    Object.entries(lancM).forEach(function(e2){
+      var s=sMap[parseInt(e2[0])];
+      if(s&&e2[1]>0){ fat+=e2[1]*s.valor; rep+=e2[1]*s.valor*(s.perc/100); }
+    });
+    var d=Object.assign({},kpiM,{fat:fat,rep:rep});
+    var k=calc(d);
+    var st2=parseInt(agCfg.start)||7, en2=parseInt(agCfg.end)||18;
+    var agH=[];
+    for(var h2=st2;h2<en2;h2++) agH.push(pad(h2));
+    var occPct=calcRoomOccupancy(agendaData,agH);
+    var hasData=fat>0||d.agend>0||d.faltas>0||d.exC>0||d.cus>0||d.pac>0;
+    return{u:u,d:d,k:k,occPct:occPct,hasData:hasData};
+  });
+
+  var anyData=unitsData.some(function(x){return x.hasData;});
+  if(!anyData){
+    loading.style.display='block';
+    loading.textContent='Nenhuma unidade tem dados para '+fmt(month)+'. Insira dados e clique em Salvar Mês.';
+    grid.style.display='none';
+    return;
+  }
+  loading.style.display='none';
+  grid.style.display='grid';
+  grid.style.gridTemplateColumns='repeat('+UNITS.length+',1fr)';
+
+  var maxFat=Math.max.apply(null,unitsData.map(function(x){return x.d.fat||0;}));
+  var minAbs=Infinity;
+  unitsData.forEach(function(x){if(x.k.absent!=null&&x.k.absent<minAbs) minAbs=x.k.absent;});
+  var maxLucro=-Infinity;
+  unitsData.forEach(function(x){if(x.k.lucro!=null&&x.k.lucro>maxLucro) maxLucro=x.k.lucro;});
+  var meta=getMetaAbs();
+  var absCount=unitsData.filter(function(x){return x.k.absent!=null;}).length;
+  var lucroCount=unitsData.filter(function(x){return x.k.lucro!=null;}).length;
+
+  var html='';
+  unitsData.forEach(function(x){
+    var isBestFat=x.d.fat>0&&x.d.fat===maxFat&&maxFat>0;
+    var isBestAbs=x.k.absent!=null&&x.k.absent===minAbs&&absCount>1;
+    var isBestLucro=x.k.lucro!=null&&x.k.lucro===maxLucro&&maxLucro>-Infinity&&lucroCount>1;
+    html+='<div class="compUnit'+(isBestFat?' compBest':'')+'">';
+    html+='<div class="compUnitName">'+(isBestFat?'🏆 ':'🏢 ')+esc(x.u.name)+'</div>';
+    if(!x.hasData){
+      html+='<div class="compNoData">Sem dados este mês</div>';
+    } else {
+      html+='<div class="compRow"><span class="compLabel">💰 Faturamento</span><span class="compVal'+(x.d.fat>0?' green':'')+'">'+( x.d.fat>0?'R$&nbsp;'+brl(x.d.fat):'—')+'</span></div>';
+      var lc=x.k.lucro!=null?(x.k.lucro>=0?' green':' red'):'';
+      html+='<div class="compRow"><span class="compLabel">📈 Lucro Líq.</span><span class="compVal'+lc+'">'+( x.k.lucro!=null?'R$&nbsp;'+brl(x.k.lucro):'—')+(isBestLucro?'<span class="compBadge bG1">🥇</span>':'')+'</span></div>';
+      var ac=x.k.absent!=null?(x.k.absent<=meta?' green':x.k.absent<=meta*2?' amber':' red'):'';
+      html+='<div class="compRow"><span class="compLabel">🚫 Absenteísmo</span><span class="compVal'+ac+'">'+( x.k.absent!=null?x.k.absent.toFixed(1)+'%':'—')+(isBestAbs?'<span class="compBadge bG1">✅</span>':'')+'</span></div>';
+      html+='<div class="compRow"><span class="compLabel">🎟️ Ticket Médio</span><span class="compVal'+(x.k.ticket!=null?' green':'')+'">'+( x.k.ticket!=null?'R$&nbsp;'+brl(x.k.ticket):'—')+'</span></div>';
+      var oc=x.occPct!=null?(x.occPct>=60?' green':x.occPct>=30?' amber':' red'):'';
+      html+='<div class="compRow"><span class="compLabel">🚪 Ocup. Agenda</span><span class="compVal'+oc+'">'+( x.occPct!=null?x.occPct.toFixed(1)+'%':'—')+'</span></div>';
+    }
+    html+='</div>';
+  });
+  grid.innerHTML=html;
+}
+
+/* ══════════════════════════════════════
+   RELATÓRIO PDF
+══════════════════════════════════════ */
+function gerarRelatorio(){
+  var u=UNITS.find(function(u2){return u2.id===CU;})||UNITS[0];
+  var month=getMonth();
+  var phTitle=sid('phTitle');
+  var phDate=sid('phDate');
+  if(phTitle) phTitle.textContent='Relatório — '+u.name;
+  if(phDate) phDate.textContent=(month?fmt(month)+' — ':'')+new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  window.print();
+}
 
 /* ══════════════════════════════════════
    PAINEL DE CADASTRO RÁPIDO
