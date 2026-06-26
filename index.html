@@ -456,7 +456,11 @@ body.sidebar-open #moduleNav{display:none!important}
 body.sb-active main>*{display:none!important}
 body.sb-home #secHome{display:block!important}
 body.sb-pacientes #modulePacientes{display:block!important}
+body.sb-agenda #secAgenda{display:block!important}
 body.sb-prontuario #secProntuario{display:block!important}
+body.sb-relatorios #secRelatorios{display:block!important}
+body.sb-admin-cadastro #secAdminCadastro{display:block!important}
+body.sb-admin-controle #secAdminControle{display:block!important}
 body.sb-fin-dashboard #printHeader,
 body.sb-fin-dashboard #slCadastro,body.sb-fin-dashboard .topGrid,
 body.sb-fin-dashboard #slKpis,body.sb-fin-dashboard .kpiGrid,
@@ -486,8 +490,9 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 .homeTip{background:var(--s1);border:1px solid var(--s2);border-radius:var(--Rs);
   padding:12px 16px;font-size:.8rem;color:var(--s5);line-height:1.5}
 
-/* ══ PRONTUÁRIO PLACEHOLDER ══ */
-#secProntuario{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:440px}
+/* ══ PLACEHOLDERS (Prontuário, Agenda, Relatórios, Administrativo) ══ */
+#secProntuario,#secAgenda,#secRelatorios,#secAdminCadastro,#secAdminControle{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:440px}
 .proWrap{max-width:400px;text-align:center}
 .proIco{font-size:4rem;margin-bottom:14px}
 .proTitle{font-size:1.08rem;font-weight:800;color:var(--s7);margin-bottom:8px}
@@ -592,8 +597,16 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
       <span class="sbItemIco">👥</span><span class="sbItemLbl">Cadastro de Pacientes</span>
     </div>
 
+    <div class="sbItem" data-mod="agenda" onclick="switchSidebar('agenda')">
+      <span class="sbItemIco">📅</span><span class="sbItemLbl">Agenda</span>
+    </div>
+
     <div class="sbItem" data-mod="prontuario" onclick="switchSidebar('prontuario')">
       <span class="sbItemIco">📋</span><span class="sbItemLbl">Prontuário Eletrônico</span>
+    </div>
+
+    <div class="sbItem" data-mod="relatorios" onclick="switchSidebar('relatorios')">
+      <span class="sbItemIco">📊</span><span class="sbItemLbl">Relatórios</span>
     </div>
 
     <div class="sbDivider"></div>
@@ -606,6 +619,22 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
     <div class="sbSub open" id="sbGrpFin">
       <div class="sbSubItem" data-mod="fin-dashboard" onclick="switchSidebar('fin-dashboard')">
         Dashboard
+      </div>
+    </div>
+
+    <div class="sbDivider"></div>
+
+    <div class="sbItem" data-mod="administrativo" onclick="toggleSbGroup(this,'sbGrpAdmin')">
+      <span class="sbItemIco">🏢</span>
+      <span class="sbItemLbl">Administrativo</span>
+      <span class="sbItemChev">▾</span>
+    </div>
+    <div class="sbSub open" id="sbGrpAdmin">
+      <div class="sbSubItem" data-mod="admin-cadastro" onclick="switchSidebar('admin-cadastro')">
+        Cadastro de Usuários
+      </div>
+      <div class="sbSubItem" data-mod="admin-controle" onclick="switchSidebar('admin-controle')">
+        Controle de Usuário
       </div>
     </div>
 
@@ -628,7 +657,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
       <div class="homeCardIco g">👥</div>
       <div><div class="homeCardLabel">Módulo</div><div class="homeCardTitle">Cadastro de Pacientes</div></div>
     </div>
-    <div class="homeCard" onclick="switchSidebar('fin-dashboard')">
+    <div class="homeCard" onclick="switchSidebar('agenda')">
       <div class="homeCardIco b">📅</div>
       <div><div class="homeCardLabel">Módulo</div><div class="homeCardTitle">Agenda</div></div>
     </div>
@@ -636,7 +665,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
       <div class="homeCardIco p">📋</div>
       <div><div class="homeCardLabel">Em breve</div><div class="homeCardTitle">Prontuário Eletrônico</div></div>
     </div>
-    <div class="homeCard" onclick="switchSidebar('fin-dashboard')">
+    <div class="homeCard" onclick="switchSidebar('relatorios')">
       <div class="homeCardIco o">📊</div>
       <div><div class="homeCardLabel">Módulo</div><div class="homeCardTitle">Relatórios</div></div>
     </div>
@@ -655,6 +684,54 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
     <div class="proDesc">
       Este módulo permitirá o registro completo de atendimentos clínicos: anamnese,
       diagnóstico CID-10, solicitação de exames, receituário digital e emissão de atestados.
+    </div>
+    <div class="proBadge">🔧 Em desenvolvimento</div>
+  </div>
+</div>
+
+<div id="secAgenda">
+  <div class="proWrap">
+    <div class="proIco">📅</div>
+    <div class="proTitle">Agenda</div>
+    <div class="proDesc">
+      Módulo de agendamento de consultas, controle de disponibilidade por profissional
+      e visualização do mapa de ocupação por unidade.
+    </div>
+    <div class="proBadge">🔧 Em desenvolvimento</div>
+  </div>
+</div>
+
+<div id="secRelatorios">
+  <div class="proWrap">
+    <div class="proIco">📊</div>
+    <div class="proTitle">Relatórios</div>
+    <div class="proDesc">
+      Central de relatórios gerenciais: produção por profissional, ocupação de agenda,
+      histórico de atendimentos e indicadores de desempenho clínico.
+    </div>
+    <div class="proBadge">🔧 Em desenvolvimento</div>
+  </div>
+</div>
+
+<div id="secAdminCadastro">
+  <div class="proWrap">
+    <div class="proIco">👤</div>
+    <div class="proTitle">Cadastro de Usuários</div>
+    <div class="proDesc">
+      Criação e edição de usuários do sistema com definição de perfil de acesso,
+      unidades vinculadas e especialidade profissional.
+    </div>
+    <div class="proBadge">🔧 Em desenvolvimento</div>
+  </div>
+</div>
+
+<div id="secAdminControle">
+  <div class="proWrap">
+    <div class="proIco">🔐</div>
+    <div class="proTitle">Controle de Usuário</div>
+    <div class="proDesc">
+      Gerenciamento de permissões, ativação/desativação de contas e auditoria
+      de acessos por usuário e unidade.
     </div>
     <div class="proBadge">🔧 Em desenvolvimento</div>
   </div>
