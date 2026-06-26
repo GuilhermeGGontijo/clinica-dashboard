@@ -461,6 +461,8 @@ body.sb-prontuario #secProntuario{display:block!important}
 body.sb-relatorios #secRelatorios{display:block!important}
 body.sb-admin-cadastro #secAdminCadastro{display:block!important}
 body.sb-admin-controle #secAdminControle{display:block!important}
+body.sb-admin-unidades #secAdminUnidades{display:block!important}
+body.sb-admin-salas #secAdminSalas{display:block!important}
 body.sb-fin-dashboard #printHeader,
 body.sb-fin-dashboard #slCadastro,body.sb-fin-dashboard .topGrid,
 body.sb-fin-dashboard #slKpis,body.sb-fin-dashboard .kpiGrid,
@@ -636,6 +638,12 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
       <div class="sbSubItem" data-mod="admin-controle" onclick="switchSidebar('admin-controle')">
         Controle de Usuário
       </div>
+      <div class="sbSubItem" data-mod="admin-unidades" onclick="switchSidebar('admin-unidades')">
+        Cadastro de Unidades
+      </div>
+      <div class="sbSubItem" data-mod="admin-salas" onclick="switchSidebar('admin-salas')">
+        Cadastro de Salas
+      </div>
     </div>
 
   </div>
@@ -732,6 +740,30 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
     <div class="proDesc">
       Gerenciamento de permissões, ativação/desativação de contas e auditoria
       de acessos por usuário e unidade.
+    </div>
+    <div class="proBadge">🔧 Em desenvolvimento</div>
+  </div>
+</div>
+
+<div id="secAdminUnidades">
+  <div class="proWrap">
+    <div class="proIco">🏥</div>
+    <div class="proTitle">Cadastro de Unidades</div>
+    <div class="proDesc">
+      Cadastro e gestão das unidades da clínica: nome, endereço, contato,
+      logo e configurações específicas de cada unidade.
+    </div>
+    <div class="proBadge">🔧 Em desenvolvimento</div>
+  </div>
+</div>
+
+<div id="secAdminSalas">
+  <div class="proWrap">
+    <div class="proIco">🚪</div>
+    <div class="proTitle">Cadastro de Salas</div>
+    <div class="proDesc">
+      Configuração das salas de atendimento por unidade: tipo, capacidade,
+      disponibilidade e vinculação com profissionais.
     </div>
     <div class="proBadge">🔧 Em desenvolvimento</div>
   </div>
