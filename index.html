@@ -845,16 +845,11 @@ async function supaSet(key, value) {
   try {
     const {data:{session}} = await _sb.auth.getSession();
     if (!session) return;
-    await fetch(SUPA_URL+'/rest/v1/clinica_dados', {
-      method: 'POST',
-      headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': 'Bearer '+session.access_token,
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
-      },
-      body: JSON.stringify({chave: key, valor: value, atualizado_em: new Date().toISOString()})
-    });
+    const {error} = await _sb.from('clinica_dados').upsert(
+      {chave: key, valor: value, atualizado_em: new Date().toISOString()},
+      {onConflict: 'chave'}
+    );
+    if (error) console.warn('supaSet erro:', error.message);
   } catch(e) { console.warn('Supabase sync erro:', e); }
 }
 
@@ -862,18 +857,16 @@ async function supaLoad() {
   try {
     const {data:{session}} = await _sb.auth.getSession();
     if (!session) return;
-    const res = await fetch(SUPA_URL+'/rest/v1/clinica_dados?select=chave,valor', {
-      headers: {'apikey': SUPA_KEY, 'Authorization': 'Bearer '+session.access_token}
-    });
-    const rows = await res.json();
-    if (Array.isArray(rows)) {
+    const {data: rows, error} = await _sb.from('clinica_dados').select('chave,valor');
+    if (error) { console.warn('supaLoad erro:', error.message); return; }
+    if (Array.isArray(rows) && rows.length > 0) {
       rows.forEach(function(row) {
         if (row.chave && row.valor !== undefined) {
           try { localStorage.setItem(row.chave, JSON.stringify(row.valor)); } catch(e) {}
         }
       });
+      console.log('Supabase: '+rows.length+' registros carregados.');
     }
-    console.log('Supabase: '+rows.length+' registros carregados.');
   } catch(e) { console.warn('Supabase load erro:', e); }
 }
 
