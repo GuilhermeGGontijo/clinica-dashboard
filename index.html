@@ -1191,7 +1191,7 @@ function renderModuleTabs(){
   inner.innerHTML = tabs
     .filter(function(t){ return !USER_ROLE || t.roles.indexOf(USER_ROLE)>=0; })
     .map(function(t){
-      return '<button class="mnTab'+(_currentModule===t.id?' active':'')+'" onclick="switchModule(''+t.id+'')">'+t.label+'</button>';
+      return '<button class="mnTab'+(_currentModule===t.id?' active':'')+'" data-mod="'+t.id+'" onclick="switchModule(this.dataset.mod)">'+t.label+'</button>';
     }).join('');
 }
 
@@ -1253,8 +1253,8 @@ function _renderPatList(list){
         '</div>'+
       '</div>'+
       '<div class="patCardActions">'+
-        '<button class="btn bG bSm" onclick="editPaciente(''+p.id+'')">✏️ Editar</button>'+
-        (USER_ROLE==='administrador'?'<button class="btn bSm" style="background:var(--r1);color:var(--r7)" onclick="desativarPaciente(''+p.id+'',''+esc(p.nome_completo).replace(/'/g,"\'")+'')" title="Desativar">🗑</button>':'')+
+        '<button class="btn bG bSm" data-pid="'+p.id+'" onclick="editPaciente(this.dataset.pid)">✏️ Editar</button>'+ 
+        (USER_ROLE==='administrador'?'<button class="btn bSm" style="background:var(--r1);color:var(--r7)" data-pid="'+p.id+'" data-pnome="'+esc(p.nome_completo)+'" onclick="desativarPaciente(this.dataset.pid,this.dataset.pnome)" title="Desativar">🗑</button>':'')+
       '</div>'+
     '</div>';
   }).join('');
