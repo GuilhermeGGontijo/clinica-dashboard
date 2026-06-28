@@ -456,7 +456,7 @@ body.sidebar-open #moduleNav{display:none!important}
 body.sb-active main>*{display:none!important}
 body.sb-home #secHome{display:block!important}
 body.sb-pacientes #modulePacientes{display:block!important}
-body.sb-agenda #secAgenda{display:block!important}
+body.sb-agenda #secAgenda{display:flex!important;flex-direction:column}
 body.sb-prontuario #secProntuario{display:block!important}
 body.sb-relatorios #secRelatorios{display:block!important}
 body.sb-admin-cadastro #secAdminCadastro{display:block!important}
@@ -531,7 +531,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 .agGradeHdrCol .agDiaLabel{font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;display:block}
 .agGradeHdrCol .agDiaNum{font-size:1.25rem;font-weight:800;display:block;color:var(--s8);line-height:1.3}
 .agGradeHdrCol.hoje .agDiaNum{background:var(--g6);color:#fff;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1rem;margin:2px auto 0}
-.agGradeBody{display:flex;overflow-y:auto;max-height:calc(100vh - 290px);min-height:380px;position:relative}
+.agGradeBody{display:flex;overflow-y:scroll;height:calc(100vh - 310px);min-height:420px;position:relative}
 .agGradeTimeCol{width:66px;flex-shrink:0;border-right:1px solid var(--s2);background:var(--w);position:sticky;left:0;z-index:5}
 .agTimeSlot{height:54px;border-bottom:1px solid var(--s1);display:flex;align-items:flex-start;padding:3px 6px 0;font-size:.66rem;color:var(--s4);font-weight:600;user-select:none}
 .agGradeCols{flex:1;display:flex;overflow-x:auto;min-width:0}
@@ -561,7 +561,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 .agPacItem strong{color:var(--g7);display:block}
 .agPacItem small{color:var(--s4);font-size:.72rem}
 .agConflitoBadge{padding:8px 12px;background:var(--r1);border:1px solid #fca5a5;border-radius:var(--Rs);color:var(--r7);font-size:.81rem;display:flex;gap:6px;align-items:flex-start}
-@media(max-width:700px){.agFiltro{min-width:120px;font-size:.73rem}.agGradeHdrCol,.agGradeCol{min-width:80px}.agTitulo{font-size:.92rem}}
+#secAgenda .bGh,#modalAgendamento .bGh{background:var(--s1);color:var(--s7);border:1.5px solid var(--s3)}#secAgenda .bGh:hover,#modalAgendamento .bGh:hover{background:var(--s2);color:var(--s8);border-color:var(--s4)}@media(max-width:700px){.agFiltro{min-width:120px;font-size:.73rem}.agGradeHdrCol,.agGradeCol{min-width:80px}.agTitulo{font-size:.92rem}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -796,74 +796,6 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   </div>
 </div>
 
-<!-- MODAL AGENDAMENTO -->
-<div id="modalAgendamento" class="ovl" style="display:none;align-items:flex-start;padding-top:40px" onclick="if(event.target===this)AgendaMod.fecharModal()">
-  <div class="mBox" style="max-width:580px;width:96%;padding:24px 22px;max-height:90vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <h3 id="agModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">&#10133; Novo Agendamento</h3>
-      <button class="bDel" onclick="AgendaMod.fecharModal()" style="font-size:1.1rem;padding:2px 7px">&#10005;</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 150px;gap:10px;margin-bottom:10px">
-      <div class="patFG agPacWrap">
-        <label class="afLabel">Paciente *</label>
-        <input type="text" id="agPacBusca" class="afInp" placeholder="Nome ou CPF..." autocomplete="off" oninput="AgendaMod.buscarPaciente(this.value)"/>
-        <input type="hidden" id="agPacId"/>
-        <div id="agPacResultados" class="agPacDrop" style="display:none"></div>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Status</label>
-        <select id="agStatus" class="afInp">
-          <option value="Agendado">Agendado</option>
-          <option value="Confirmado">Confirmado</option>
-          <option value="Recepcao">Recepção</option>
-          <option value="Atendimento">Atendimento</option>
-          <option value="Finalizado">Finalizado</option>
-          <option value="Falta">Falta</option>
-        </select>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div class="patFG">
-        <label class="afLabel">Profissional *</label>
-        <select id="agProfId" class="afInp" required></select>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Sala *</label>
-        <select id="agSalaId" class="afInp" required></select>
-      </div>
-    </div>
-    <div class="patFG" style="margin-bottom:10px">
-      <label class="afLabel">Procedimento *</label>
-      <select id="agProcId" class="afInp" required onchange="AgendaMod.aoSelecionarProcedimento()"></select>
-    </div>
-    <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px;margin-bottom:10px">
-      <div class="patFG">
-        <label class="afLabel">Data *</label>
-        <input type="date" id="agData" class="afInp" required/>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Início *</label>
-        <input type="time" id="agHoraInicio" class="afInp" step="900" required onchange="AgendaMod.sugerirFim()"/>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Fim *</label>
-        <input type="time" id="agHoraFim" class="afInp" step="900" required/>
-      </div>
-    </div>
-    <div class="patFG" style="margin-bottom:14px">
-      <label class="afLabel">Observações</label>
-      <textarea id="agObs" class="afInp" rows="2" placeholder="Anotações adicionais..." style="resize:vertical"></textarea>
-    </div>
-    <div id="agConflito" class="agConflitoBadge" style="display:none;margin-bottom:12px">
-      &#9888; <span id="agConflitoMsg"></span>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
-      <button id="agBtnDel" class="btn bR bSm" style="display:none;margin-right:auto" onclick="AgendaMod.excluirAgendamento()">&#128465; Excluir</button>
-      <button class="btn bGh bSm" onclick="AgendaMod.fecharModal()">Cancelar</button>
-      <button class="btn bG  bSm" onclick="AgendaMod.salvarAgendamento()">&#128190; Salvar</button>
-    </div>
-  </div>
-</div>
 
 <div id="secRelatorios">
   <div class="proWrap">
@@ -1235,6 +1167,75 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 </div>
 
 </main>
+
+<!-- MODAL AGENDAMENTO -->
+<div id="modalAgendamento" class="ovl" style="display:none;align-items:flex-start;padding-top:40px" onclick="if(event.target===this)AgendaMod.fecharModal()">
+  <div class="mBox" style="max-width:580px;width:96%;padding:24px 22px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h3 id="agModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">&#10133; Novo Agendamento</h3>
+      <button class="bDel" onclick="AgendaMod.fecharModal()" style="font-size:1.1rem;padding:2px 7px">&#10005;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 150px;gap:10px;margin-bottom:10px">
+      <div class="patFG agPacWrap">
+        <label class="afLabel">Paciente *</label>
+        <input type="text" id="agPacBusca" class="afInp" placeholder="Nome ou CPF..." autocomplete="off" oninput="AgendaMod.buscarPaciente(this.value)"/>
+        <input type="hidden" id="agPacId"/>
+        <div id="agPacResultados" class="agPacDrop" style="display:none"></div>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Status</label>
+        <select id="agStatus" class="afInp">
+          <option value="Agendado">Agendado</option>
+          <option value="Confirmado">Confirmado</option>
+          <option value="Recepcao">Recepção</option>
+          <option value="Atendimento">Atendimento</option>
+          <option value="Finalizado">Finalizado</option>
+          <option value="Falta">Falta</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">Profissional *</label>
+        <select id="agProfId" class="afInp" required></select>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Sala *</label>
+        <select id="agSalaId" class="afInp" required></select>
+      </div>
+    </div>
+    <div class="patFG" style="margin-bottom:10px">
+      <label class="afLabel">Procedimento *</label>
+      <select id="agProcId" class="afInp" required onchange="AgendaMod.aoSelecionarProcedimento()"></select>
+    </div>
+    <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">Data *</label>
+        <input type="date" id="agData" class="afInp" required/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Início *</label>
+        <input type="time" id="agHoraInicio" class="afInp" step="900" required onchange="AgendaMod.sugerirFim()"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Fim *</label>
+        <input type="time" id="agHoraFim" class="afInp" step="900" required/>
+      </div>
+    </div>
+    <div class="patFG" style="margin-bottom:14px">
+      <label class="afLabel">Observações</label>
+      <textarea id="agObs" class="afInp" rows="2" placeholder="Anotações adicionais..." style="resize:vertical"></textarea>
+    </div>
+    <div id="agConflito" class="agConflitoBadge" style="display:none;margin-bottom:12px">
+      &#9888; <span id="agConflitoMsg"></span>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
+      <button id="agBtnDel" class="btn bR bSm" style="display:none;margin-right:auto" onclick="AgendaMod.excluirAgendamento()">&#128465; Excluir</button>
+      <button class="btn bGh bSm" onclick="AgendaMod.fecharModal()">Cancelar</button>
+      <button class="btn bG  bSm" onclick="AgendaMod.salvarAgendamento()">&#128190; Salvar</button>
+    </div>
+  </div>
+</div>
 
 <div id="toast"></div>
 
