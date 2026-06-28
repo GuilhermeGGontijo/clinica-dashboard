@@ -457,7 +457,7 @@ body.sb-active main>*{display:none!important}
 body.sb-home #secHome{display:block!important}
 body.sb-pacientes #modulePacientes{display:block!important}
 body.sb-agenda #secAgenda{display:flex!important;flex-direction:column}
-body.sb-prontuario #secProntuario{display:block!important}
+body.sb-prontuario #secProntuario{display:flex!important;flex-direction:column}
 body.sb-relatorios #secRelatorios{display:block!important}
 body.sb-admin-cadastro #secAdminCadastro{display:block!important}
 body.sb-admin-controle #secAdminControle{display:block!important}
@@ -562,6 +562,496 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 .agPacItem small{color:var(--s4);font-size:.72rem}
 .agConflitoBadge{padding:8px 12px;background:var(--r1);border:1px solid #fca5a5;border-radius:var(--Rs);color:var(--r7);font-size:.81rem;display:flex;gap:6px;align-items:flex-start}
 #secAgenda .bGh,#modalAgendamento .bGh{background:var(--s1);color:var(--s7);border:1.5px solid var(--s3)}#secAgenda .bGh:hover,#modalAgendamento .bGh:hover{background:var(--s2);color:var(--s8);border-color:var(--s4)}@media(max-width:700px){.agFiltro{min-width:120px;font-size:.73rem}.agGradeHdrCol,.agGradeCol{min-width:80px}.agTitulo{font-size:.92rem}}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   PRONTUÁRIO ELETRÔNICO — CSS
+   Cole DENTRO do <style> existente, antes do fechamento </style>
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Container principal ─── */
+#secProntuario {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 100px);
+  min-height: 500px;
+  gap: 0;
+}
+
+/* ─── Área de busca de paciente ─── */
+.prnBuscaArea {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 24px;
+  flex: 1;
+}
+.prnBuscaCard {
+  background: var(--w);
+  border: 1px solid var(--s2);
+  border-radius: var(--R);
+  box-shadow: var(--shm);
+  padding: 40px 44px;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+}
+.prnBuscaIco    { font-size: 3rem; margin-bottom: 10px; line-height: 1; }
+.prnBuscaTitulo { font-size: 1.05rem; font-weight: 800; color: var(--s9); margin-bottom: 6px; }
+.prnBuscaDesc   { font-size: .81rem; color: var(--s4); margin-bottom: 20px; line-height: 1.5; }
+.prnBuscaWrap   { position: relative; }
+#prnBuscaInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--s2);
+  border-radius: var(--Rs);
+  font-size: .88rem;
+  color: var(--s9);
+  background: var(--w);
+  box-sizing: border-box;
+  transition: border-color .15s, box-shadow .15s;
+}
+#prnBuscaInput:focus {
+  border-color: var(--g5);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(22,163,74,.13);
+}
+.prnPacDrop {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--w);
+  border: 1.5px solid var(--s2);
+  border-top: none;
+  border-radius: 0 0 var(--Rs) var(--Rs);
+  max-height: 270px;
+  overflow-y: auto;
+  z-index: 200;
+  box-shadow: 0 8px 28px rgba(0,0,0,.13);
+  text-align: left;
+}
+.prnPacItem {
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: .83rem;
+  border-bottom: 1px solid var(--s1);
+  transition: background .1s;
+}
+.prnPacItem:last-child { border-bottom: none; }
+.prnPacItem:hover { background: var(--g0); }
+.prnPacItem strong { color: var(--s9); display: block; margin-bottom: 1px; }
+.prnPacItem small  { color: var(--s4); font-size: .72rem; }
+
+/* ─── Área principal (após seleção do paciente) ─── */
+#prnMain {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  gap: 10px;
+}
+
+/* ─── Header fixo do paciente ─── */
+.prnHeaderPac {
+  background: var(--w);
+  border: 1px solid var(--s2);
+  border-radius: var(--R);
+  padding: 11px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: var(--sh);
+  flex-shrink: 0;
+}
+.prnPacInfo       { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.prnPacNome       { font-size: 1rem; font-weight: 800; color: var(--s9); }
+.prnPacMeta       { display: flex; gap: 16px; flex-wrap: wrap; }
+.prnPacMeta span  { font-size: .75rem; color: var(--s5); }
+.prnHeaderActs    { display: flex; gap: 8px; flex-shrink: 0; }
+
+/* ─── Corpo: timeline + conteúdo ─── */
+.prnCorpo {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ─── Timeline lateral ─── */
+.prnTimeline {
+  width: 210px;
+  flex-shrink: 0;
+  background: var(--w);
+  border: 1px solid var(--s2);
+  border-radius: var(--R);
+  box-shadow: var(--sh);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.prnTlHeader {
+  padding: 11px 14px;
+  font-size: .77rem;
+  font-weight: 800;
+  color: var(--s9);
+  border-bottom: 1px solid var(--s2);
+  position: sticky;
+  top: 0;
+  background: var(--w);
+  z-index: 2;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+.prnTlBtnNovo {
+  margin: 8px 10px 4px;
+  width: calc(100% - 20px);
+  padding: 7px 10px;
+  background: var(--g6);
+  color: #fff;
+  border: none;
+  border-radius: var(--Rs);
+  font-size: .76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+}
+.prnTlBtnNovo:hover { background: var(--g7); }
+.prnTlItem {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--s1);
+  cursor: pointer;
+  transition: background .1s;
+  border-left: 3px solid transparent;
+}
+.prnTlItem:hover  { background: var(--g0); border-left-color: var(--g4); }
+.prnTlItem.ativo  { background: var(--g1); border-left-color: var(--g6); }
+.prnTlData        { font-size: .8rem; font-weight: 700; color: var(--s8); }
+.prnTlHora        { font-size: .71rem; color: var(--s4); }
+.prnTlProf        { font-size: .71rem; color: var(--s5); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prnTlVazio       { padding: 24px 14px; font-size: .81rem; color: var(--s3); text-align: center; line-height: 1.6; }
+
+/* ─── Área de conteúdo central ─── */
+.prnContentArea {
+  flex: 1;
+  background: var(--w);
+  border: 1px solid var(--s2);
+  border-radius: var(--R);
+  box-shadow: var(--sh);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Estado vazio */
+.prnEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--s3);
+  font-size: .88rem;
+  gap: 10px;
+}
+.prnEmptyIco { font-size: 2.8rem; }
+
+/* ─── Atendimento aberto ─── */
+#prnAtendimento {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Cabeçalho do atendimento */
+.prnAtdHeader {
+  padding: 10px 18px 0;
+  border-bottom: 2px solid var(--s2);
+  flex-shrink: 0;
+}
+.prnAtdData {
+  font-size: .74rem;
+  color: var(--s4);
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+/* ─── Abas ─── */
+.prnTabs { display: flex; gap: 2px; }
+.prnTab {
+  padding: 7px 15px;
+  border: none;
+  background: none;
+  font-size: .79rem;
+  font-weight: 600;
+  color: var(--s5);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color .13s, border-color .13s;
+  white-space: nowrap;
+}
+.prnTab:hover         { color: var(--g6); }
+.prnTab.ativa         { color: var(--g6); border-bottom-color: var(--g6); }
+
+/* ─── Conteúdo das abas ─── */
+.prnAbaContent {
+  padding: 16px 18px 12px;
+  overflow-y: auto;
+  flex: 1;
+  display: none;
+}
+.prnAbaContent.ativa { display: block; }
+
+.prnAbaLabel {
+  display: block;
+  font-size: .74rem;
+  font-weight: 700;
+  color: var(--s5);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.prnAbaActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* ─── Evolução: barra de modelo + textarea ─── */
+.prnModeloRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.prnModeloSel {
+  flex: 1;
+  font-size: .78rem;
+  padding: 6px 8px;
+  min-width: 160px;
+}
+#prnEvolucaoTxt, #prnExamesTxt {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: .84rem;
+  line-height: 1.65;
+  padding: 10px 12px;
+  border: 1.5px solid var(--s2);
+  border-radius: var(--Rs);
+  color: var(--s9);
+  background: #fafbfc;
+  box-sizing: border-box;
+  transition: border-color .15s, background .15s;
+}
+#prnEvolucaoTxt:focus, #prnExamesTxt:focus {
+  border-color: var(--g5);
+  outline: none;
+  background: var(--w);
+  box-shadow: 0 0 0 3px rgba(22,163,74,.1);
+}
+
+/* ─── Receituário: itens de medicamento ─── */
+.prnMedItem {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 11px 12px;
+  border: 1px solid var(--s2);
+  border-radius: var(--Rs);
+  margin-bottom: 8px;
+  background: #fafbfc;
+  transition: border-color .15s;
+}
+.prnMedItem:hover { border-color: var(--s3); }
+.prnMedNum {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--g6);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.prnMedFields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.prnMedGrid3  { display: grid; grid-template-columns: 1fr 1fr 90px; gap: 6px; }
+.prnMedRemove {
+  background: none;
+  border: none;
+  color: var(--r5, #dc2626);
+  cursor: pointer;
+  font-size: .95rem;
+  padding: 3px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: background .1s;
+}
+.prnMedRemove:hover { background: var(--r1, #fee2e2); }
+.prnMedVazio        { color: var(--s3); font-size: .83rem; text-align: center; padding: 20px; }
+.prnBtnAddMed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px;
+  background: none;
+  border: 1.5px dashed var(--s3);
+  border-radius: var(--Rs);
+  color: var(--s5);
+  font-size: .8rem;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: border-color .13s, color .13s, background .13s;
+}
+.prnBtnAddMed:hover { border-color: var(--g6); color: var(--g6); background: var(--g0); }
+
+/* ─── Atestado ─── */
+.prnAtestadoGrid {
+  display: grid;
+  grid-template-columns: 1fr 110px 170px;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+@media (max-width: 640px) {
+  .prnAtestadoGrid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ─── Modal Salvar Modelo ─── */
+#modalSalvarModelo .mBox { max-width: 420px; width: 96%; }
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   IMPRESSÃO — @media print  (documento A4)
+   O div #prnDocImpressao fica invisível na tela e aparece apenas ao imprimir
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Esconde o div de impressão na tela */
+#prnDocImpressao { display: none; }
+
+@media print {
+
+  /* Tamanho da página */
+  @page {
+    size: A4 portrait;
+    margin: 20mm 22mm;
+  }
+
+  /* Isola o print do prontuário com classe no body — não interfere com @media print do dashboard */
+  body.prn-imprimindo * { visibility: hidden !important; }
+
+  body.prn-imprimindo #prnDocImpressao,
+  body.prn-imprimindo #prnDocImpressao * { visibility: visible !important; }
+
+  body.prn-imprimindo #prnDocImpressao {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11.5pt;
+    color: #111;
+    line-height: 1.65;
+  }
+
+  /* ── Cabeçalho do documento ── */
+  body.prn-imprimindo .prnImpHdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2.5pt solid #111;
+    padding-bottom: 10pt;
+    margin-bottom: 14pt;
+  }
+  body.prn-imprimindo .prnImpLogoWrap { display: flex; flex-direction: column; gap: 2pt; }
+  body.prn-imprimindo .prnImpLogoNome { font-size: 17pt; font-weight: bold; letter-spacing: -.01em; }
+  body.prn-imprimindo .prnImpLogoSub { font-size: 9pt; color: #555; }
+  body.prn-imprimindo .prnImpHdrRight { text-align: right; font-size: 9pt; color: #444; }
+  body.prn-imprimindo .prnImpHdrData { font-size: 10pt; font-weight: bold; color: #111; }
+
+  /* ── Faixa de dados do paciente ── */
+  body.prn-imprimindo .prnImpPacFaixa {
+    background: #f2f2f2;
+    padding: 8pt 11pt;
+    border-radius: 3pt;
+    font-size: 10pt;
+    margin-bottom: 14pt;
+    line-height: 1.8;
+  }
+  body.prn-imprimindo .prnImpPacLabel { font-weight: bold; }
+
+  /* ── Divisor ── */
+  body.prn-imprimindo .prnImpDivisor {
+    border: none;
+    border-top: 1pt solid #bbb;
+    margin: 12pt 0;
+  }
+
+  /* ── Seções ── */
+  body.prn-imprimindo .prnImpSecao { margin-bottom: 16pt; page-break-inside: avoid; }
+  body.prn-imprimindo .prnImpSecaoTitulo {
+    font-size: 8.5pt;
+    font-weight: bold;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #444;
+    border-bottom: 1pt solid #ccc;
+    margin-bottom: 8pt;
+    padding-bottom: 3pt;
+  }
+  body.prn-imprimindo .prnImpTexto { font-size: 11.5pt; white-space: pre-wrap; }
+
+  /* Receituário */
+  body.prn-imprimindo .prnImpMed {
+    padding: 4pt 0 4pt 14pt;
+    border-left: 2pt solid #ccc;
+    margin-bottom: 6pt;
+  }
+  body.prn-imprimindo .prnImpMedNome { font-weight: bold; }
+  body.prn-imprimindo .prnImpMedPos { font-style: italic; font-size: 10.5pt; color: #333; }
+
+  /* ── Rodapé legal ── */
+  body.prn-imprimindo .prnImpRodape {
+    margin-top: 44pt;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    page-break-inside: avoid;
+  }
+  body.prn-imprimindo .prnImpAssinaturaLinha {
+    border-top: 1pt solid #111;
+    width: 240pt;
+    margin-bottom: 5pt;
+    margin-top: 28pt;
+  }
+  body.prn-imprimindo .prnImpProfNome { font-size: 11.5pt; font-weight: bold; }
+  body.prn-imprimindo .prnImpProfConselho { font-size: 10pt; color: #444; }
+  body.prn-imprimindo .prnImpLocalData { font-size: 10pt; color: #555; margin-top: 6pt; }
+
+  /* Quebra de página entre seções longas */
+  body.prn-imprimindo .prnImpPB { page-break-before: always; }
+}
+/* ══════════════════════════════════════════════════════════════════════════════
+   FIM DO CSS DO PRONTUÁRIO
+   ══════════════════════════════════════════════════════════════════════════════ */
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -747,16 +1237,151 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 </div>
 
 <div id="secProntuario">
-  <div class="proWrap">
-    <div class="proIco">📋</div>
-    <div class="proTitle">Prontuário Eletrônico</div>
-    <div class="proDesc">
-      Este módulo permitirá o registro completo de atendimentos clínicos: anamnese,
-      diagnóstico CID-10, solicitação de exames, receituário digital e emissão de atestados.
+
+  <!-- ─── ÁREA DE BUSCA ─── -->
+  <div id="prnBuscaArea" class="prnBuscaArea">
+    <div class="prnBuscaCard">
+      <div class="prnBuscaIco">🩺</div>
+      <div class="prnBuscaTitulo">Prontuário Eletrônico</div>
+      <div class="prnBuscaDesc">Busque o paciente pelo nome ou CPF para acessar ou criar um atendimento.</div>
+      <div class="prnBuscaWrap">
+        <input type="text" id="prnBuscaInput" placeholder="Nome ou CPF do paciente..."
+               autocomplete="off" oninput="ProntuarioMod.buscarPaciente(this.value)"/>
+        <div id="prnPacDrop" class="prnPacDrop" style="display:none"></div>
+      </div>
     </div>
-    <div class="proBadge">🔧 Em desenvolvimento</div>
   </div>
-</div>
+
+  <!-- ─── ÁREA PRINCIPAL (visível após seleção do paciente) ─── -->
+  <div id="prnMain">
+
+    <!-- Header fixo do paciente -->
+    <div class="prnHeaderPac">
+      <div class="prnPacInfo">
+        <div class="prnPacNome" id="prnPacNome">—</div>
+        <div class="prnPacMeta">
+          <span id="prnPacCPF">—</span>
+          <span id="prnPacTel">—</span>
+          <span id="prnPacIdade">—</span>
+        </div>
+      </div>
+      <div class="prnHeaderActs">
+        <button class="btn bG bSm" onclick="ProntuarioMod.imprimir()">🖨 Imprimir / PDF</button>
+        <button class="btn bSm" style="background:var(--s1);color:var(--s7);border:1px solid var(--s2)"
+                onclick="ProntuarioMod.fecharPaciente()">✕ Fechar</button>
+      </div>
+    </div>
+
+    <!-- Corpo: timeline lateral + conteúdo central -->
+    <div class="prnCorpo">
+
+      <!-- Timeline de atendimentos -->
+      <div class="prnTimeline" id="prnTimeline">
+        <div class="prnTlHeader">Atendimentos</div>
+        <button class="prnTlBtnNovo" onclick="ProntuarioMod.novoAtendimento()">+ Novo Atendimento</button>
+        <div class="prnTlVazio">Nenhum atendimento registrado</div>
+      </div>
+
+      <!-- Área central de conteúdo -->
+      <div class="prnContentArea">
+
+        <!-- Estado vazio (nenhum atendimento selecionado) -->
+        <div class="prnEmpty" id="prnEmpty">
+          <div class="prnEmptyIco">📋</div>
+          <div>Selecione ou crie um atendimento na lista ao lado</div>
+        </div>
+
+        <!-- Atendimento selecionado -->
+        <div id="prnAtendimento">
+
+          <!-- Cabeçalho do atendimento (data + abas) -->
+          <div class="prnAtdHeader">
+            <div class="prnAtdData" id="prnAtdData">—</div>
+            <div class="prnTabs">
+              <button class="prnTab ativa" data-aba="evolucao"    onclick="ProntuarioMod.mudarAba('evolucao')">📝 Evolução</button>
+              <button class="prnTab"       data-aba="exames"      onclick="ProntuarioMod.mudarAba('exames')">🔬 Exames</button>
+              <button class="prnTab"       data-aba="receituario" onclick="ProntuarioMod.mudarAba('receituario')">💊 Receituário</button>
+              <button class="prnTab"       data-aba="atestado"    onclick="ProntuarioMod.mudarAba('atestado')">📄 Atestado</button>
+            </div>
+          </div>
+
+          <!-- ─── ABA: EVOLUÇÃO ─── -->
+          <div class="prnAbaContent ativa" id="prnAbaEvolucao" data-aba="evolucao">
+            <div class="prnModeloRow">
+              <label class="prnAbaLabel" style="margin:0;white-space:nowrap;text-transform:none;letter-spacing:0;font-size:.8rem">
+                Inserir modelo:
+              </label>
+              <select id="prnModeloSel" class="afInp prnModeloSel" onchange="ProntuarioMod.injetarModelo()">
+                <option value="">— Selecione —</option>
+              </select>
+              <button class="btn bSm" style="white-space:nowrap;background:var(--s1);color:var(--s7);border:1px solid var(--s2);flex-shrink:0"
+                      onclick="ProntuarioMod.abrirSalvarModelo()">💾 Salvar modelo</button>
+            </div>
+            <textarea id="prnEvolucaoTxt"
+                      placeholder="S (Subjetivo): queixa principal&#10;O (Objetivo): exame físico e sinais vitais&#10;A (Avaliação): hipótese diagnóstica&#10;P (Plano): condutas e encaminhamentos"></textarea>
+            <div class="prnAbaActions">
+              <button class="btn bG bSm" onclick="ProntuarioMod.salvarEvolucao()">💾 Salvar Evolução</button>
+            </div>
+          </div>
+
+          <!-- ─── ABA: EXAMES ─── -->
+          <div class="prnAbaContent" id="prnAbaExames" data-aba="exames">
+            <label class="prnAbaLabel">Solicitação de Exames e Procedimentos</label>
+            <textarea id="prnExamesTxt" rows="10"
+                      placeholder="Ex: Hemograma completo&#10;Glicemia em jejum&#10;TSH e T4L&#10;Ultrassonografia abdominal total"></textarea>
+            <div class="prnAbaActions">
+              <button class="btn bG bSm" onclick="ProntuarioMod.salvarExames()">💾 Salvar Solicitação</button>
+            </div>
+          </div>
+
+          <!-- ─── ABA: RECEITUÁRIO ─── -->
+          <div class="prnAbaContent" id="prnAbaReceituario" data-aba="receituario">
+            <label class="prnAbaLabel">Medicamentos Prescritos</label>
+            <div id="prnMedicamentosWrap">
+              <div class="prnMedVazio">Nenhum medicamento adicionado</div>
+            </div>
+            <button class="prnBtnAddMed" onclick="ProntuarioMod.adicionarMedicamento()">＋ Adicionar Medicamento</button>
+            <div class="prnAbaActions">
+              <button class="btn bG bSm" onclick="ProntuarioMod.salvarReceituario()">💾 Salvar Receituário</button>
+            </div>
+          </div>
+
+          <!-- ─── ABA: ATESTADO ─── -->
+          <div class="prnAbaContent" id="prnAbaAtestado" data-aba="atestado">
+            <label class="prnAbaLabel">Tipo de Documento</label>
+            <div class="prnAtestadoGrid">
+              <div class="patFG">
+                <label class="afLabel">Tipo *</label>
+                <select id="prnAtestadoTipo" class="afInp">
+                  <option value="MEDICO">Atestado Médico (afastamento)</option>
+                  <option value="ACOMPANHAMENTO">Atestado de Acompanhamento</option>
+                  <option value="COMPARECIMENTO">Declaração de Comparecimento</option>
+                </select>
+              </div>
+              <div class="patFG">
+                <label class="afLabel">Dias</label>
+                <input type="number" id="prnAtestadoDias" class="afInp" min="1" placeholder="Ex: 3"/>
+              </div>
+              <div class="patFG">
+                <label class="afLabel">CID-10</label>
+                <input type="text" id="prnAtestadoCid" class="afInp" placeholder="Ex: J11.1" maxlength="10"/>
+              </div>
+            </div>
+            <div class="patFG">
+              <label class="afLabel">Observações / Texto adicional</label>
+              <textarea id="prnAtestadoObs" class="afInp" rows="4"
+                        placeholder="Informações complementares para o documento..."></textarea>
+            </div>
+            <div class="prnAbaActions">
+              <button class="btn bG bSm" onclick="ProntuarioMod.salvarAtestado()">💾 Salvar Atestado</button>
+            </div>
+          </div>
+
+        </div><!-- /#prnAtendimento -->
+      </div><!-- /.prnContentArea -->
+    </div><!-- /.prnCorpo -->
+  </div><!-- /#prnMain -->
+</div><!-- /#secProntuario -->
 
 <div id="secAgenda">
   <div class="agModHdr">
@@ -1403,6 +2028,48 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 <!-- Input oculto para importação de backup -->
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)" />
 
+
+<!-- PRONTUÁRIO: Modal Salvar Modelo -->
+<div id="modalSalvarModelo" class="ovl" style="display:none"
+     onclick="if(event.target===this)ProntuarioMod.fecharSalvarModelo()">
+  <div class="mBox" style="max-width:420px;width:96%;padding:24px 22px">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h3 style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">💾 Salvar como Modelo</h3>
+      <button class="bDel" onclick="ProntuarioMod.fecharSalvarModelo()"
+              style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
+    </div>
+
+    <div class="patFG" style="margin-bottom:12px">
+      <label class="afLabel">Título do modelo *</label>
+      <input type="text" id="prnModeloTitulo" class="afInp"
+             placeholder="Ex: SOAP Básico, Retorno HAS, Pré-natal..."/>
+    </div>
+
+    <div class="patFG" id="prnModeloTipoWrap" style="margin-bottom:18px">
+      <label class="afLabel">Visibilidade</label>
+      <select id="prnModeloTipoAcesso" class="afInp">
+        <option value="PRIVADO">🔒 Meu modelo (privado)</option>
+        <option value="GLOBAL">🌐 Compartilhado com toda a clínica</option>
+      </select>
+      <small style="color:var(--s4);font-size:.71rem;margin-top:4px;display:block">
+        Apenas administradores podem criar modelos compartilhados.
+      </small>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn bGh bSm" onclick="ProntuarioMod.fecharSalvarModelo()">Cancelar</button>
+      <button class="btn bG bSm"  onclick="ProntuarioMod.confirmarSalvarModelo()">💾 Salvar</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- PRONTUÁRIO: Documento de Impressão -->
+<div id="prnDocImpressao">
+  <!-- Conteúdo preenchido dinamicamente por ProntuarioMod.imprimir() -->
+</div>
+
 <script>
 /* ══════════════════════════════════════
    UNIDADES — EDITE OS NOMES AQUI
@@ -1621,7 +2288,8 @@ function switchSidebar(mod){
   window.scrollTo(0,0);
 
   // Inicializar módulos conforme ativado
-  if(mod==='agenda'){ setTimeout(function(){ AgendaMod.init(); },50); }
+  if(mod==='agenda'){     setTimeout(function(){ AgendaMod.init();     },50); }
+  if(mod==='prontuario'){ setTimeout(function(){ ProntuarioMod.init(); },50); }
 }
 
 function toggleSbGroup(el,grpId){
@@ -3223,6 +3891,712 @@ const AgendaMod = (function () {
            fecharModal, salvarAgendamento, excluirAgendamento, buscarPaciente, selecionarPaciente,
            pacItemClick, slotClick, cardClick, sugerirFim, aoSelecionarProcedimento };
 })();
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   PRONTUÁRIO ELETRÔNICO — ProntuarioMod
+   Cole DENTRO do bloco <script> existente, junto com AgendaMod e demais módulos.
+   Depende de: _sb, CU, USER_ROLE, USER_PROFILE, sid(), esc(), toast(), switchSidebar()
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+const ProntuarioMod = (function () {
+  'use strict';
+
+  /* ── Estado interno ── */
+  var _pac       = null;  // paciente atual {id, nome_completo, cpf, telefone, data_nascimento}
+  var _atd       = null;  // atendimento aberto
+  var _lista     = [];    // histórico de atendimentos
+  var _modelos   = [];    // templates de prontuário
+  var _meds      = [];    // medicamentos da receita atual
+  var _aba       = 'evolucao';
+  var _buscarTmr = null;
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     INIT
+     ══════════════════════════════════════════════════════════════════════════ */
+  async function init() {
+    if (!_sb) return;
+    // Esconde o select GLOBAL para quem não é admin
+    _ajustarPermissaoModelo();
+    // Se outro módulo pré-selecionou um paciente
+    if (window._prnPacienteId) {
+      var pid = window._prnPacienteId;
+      window._prnPacienteId = null;
+      await carregarPaciente(pid);
+    } else {
+      // Garante estado limpo ao re-abrir o módulo
+      _mostrarBusca();
+    }
+  }
+
+  function _ajustarPermissaoModelo() {
+    var sel = sid('prnModeloTipoAcesso');
+    if (!sel) return;
+    if (USER_ROLE !== 'administrador') {
+      // Remove opção GLOBAL para não-admins (RLS já bloqueia no backend)
+      for (var i = sel.options.length - 1; i >= 0; i--) {
+        if (sel.options[i].value === 'GLOBAL') sel.remove(i);
+      }
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     BUSCA DE PACIENTE
+     ══════════════════════════════════════════════════════════════════════════ */
+  function buscarPaciente(q) {
+    var drop = sid('prnPacDrop');
+    if (!drop) return;
+    if (!q || q.trim().length < 2) { drop.style.display = 'none'; return; }
+    clearTimeout(_buscarTmr);
+    _buscarTmr = setTimeout(async function () {
+      var r = await _sb.from('pacientes')
+        .select('id,nome_completo,cpf,data_nascimento')
+        .or('nome_completo.ilike.%' + q.trim() + '%,cpf.ilike.%' + q.trim() + '%')
+        .limit(8);
+      if (!drop) return;
+      var dados = r.data || [];
+      if (!dados.length) {
+        drop.innerHTML = '<div class="prnPacItem" style="color:var(--s4);cursor:default">Nenhum resultado encontrado</div>';
+        drop.style.display = 'block';
+        return;
+      }
+      drop.innerHTML = dados.map(function (p) {
+        return '<div class="prnPacItem" data-pid="' + p.id + '" onclick="ProntuarioMod.selPacienteDrop(this)">'
+          + '<strong>' + esc(p.nome_completo) + '</strong>'
+          + '<small>' + (p.cpf || 'CPF não informado') + '</small>'
+          + '</div>';
+      }).join('');
+      drop.style.display = 'block';
+    }, 280);
+  }
+
+  function selPacienteDrop(el) {
+    var pid = el.getAttribute('data-pid');
+    var drop = sid('prnPacDrop');
+    var inp  = sid('prnBuscaInput');
+    if (drop) drop.style.display = 'none';
+    if (inp)  inp.value = el.querySelector('strong').textContent;
+    carregarPaciente(pid);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     CARREGAR PACIENTE
+     ══════════════════════════════════════════════════════════════════════════ */
+  async function carregarPaciente(pacienteId) {
+    var r = await _sb.from('pacientes')
+      .select('id,nome_completo,cpf,telefone,data_nascimento')
+      .eq('id', pacienteId)
+      .single();
+    if (r.error || !r.data) { toast('Paciente não encontrado', 'error'); return; }
+    _pac = r.data;
+    _renderizarHeaderPac();
+    _mostrarPrincipal();
+    await Promise.all([_carregarLista(), _carregarModelos()]);
+    _renderizarTimeline();
+  }
+
+  function _renderizarHeaderPac() {
+    if (!_pac) return;
+    var nome  = sid('prnPacNome');
+    var cpf   = sid('prnPacCPF');
+    var tel   = sid('prnPacTel');
+    var idade = sid('prnPacIdade');
+    if (nome)  nome.textContent  = _pac.nome_completo || '—';
+    if (cpf)   cpf.textContent   = 'CPF: ' + (_pac.cpf || '—');
+    if (tel)   tel.textContent   = 'Tel: ' + (_pac.telefone || '—');
+    if (idade) idade.textContent = _pac.data_nascimento
+      ? 'Idade: ' + calcularIdadeExata(_pac.data_nascimento)
+      : '—';
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     CÁLCULO DE IDADE EXATA
+     ══════════════════════════════════════════════════════════════════════════ */
+  function calcularIdadeExata(dataNasc) {
+    // dataNasc esperado: 'YYYY-MM-DD'
+    var nasc  = new Date(dataNasc + 'T00:00:00');
+    var hoje  = new Date();
+    var anos  = hoje.getFullYear() - nasc.getFullYear();
+    var meses = hoje.getMonth()    - nasc.getMonth();
+    var dias  = hoje.getDate()     - nasc.getDate();
+
+    if (dias < 0) {
+      meses--;
+      var ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth(), 0).getDate();
+      dias += ultimoDia;
+    }
+    if (meses < 0) { anos--; meses += 12; }
+
+    var partes = [];
+    if (anos  > 0) partes.push(anos  + (anos  === 1 ? ' ano'  : ' anos'));
+    if (meses > 0) partes.push(meses + (meses === 1 ? ' mês'  : ' meses'));
+    if (dias  > 0 || partes.length === 0)
+                   partes.push(dias  + (dias  === 1 ? ' dia'  : ' dias'));
+    return partes.join(', ');
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     LISTA DE ATENDIMENTOS (TIMELINE)
+     ══════════════════════════════════════════════════════════════════════════ */
+  async function _carregarLista() {
+    if (!_pac) return;
+    var r = await _sb.from('atendimentos_clinicos')
+      .select('id,data_atendimento,profissional_id,profissional:profissional_id(nome,especialidade)')
+      .eq('paciente_id', _pac.id)
+      .order('data_atendimento', { ascending: false });
+    _lista = r.data || [];
+  }
+
+  function _renderizarTimeline() {
+    var tl = sid('prnTimeline');
+    if (!tl) return;
+
+    var btnNovo = '<button class="prnTlBtnNovo" onclick="ProntuarioMod.novoAtendimento()">+ Novo Atendimento</button>';
+
+    if (!_lista.length) {
+      tl.innerHTML = '<div class="prnTlHeader">Atendimentos</div>'
+        + btnNovo
+        + '<div class="prnTlVazio">Nenhum atendimento registrado</div>';
+      return;
+    }
+
+    var html = '<div class="prnTlHeader">Atendimentos</div>' + btnNovo;
+    _lista.forEach(function (a) {
+      var d    = new Date(a.data_atendimento);
+      var data = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      var hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      var prof = (a.profissional && a.profissional.nome) ? a.profissional.nome : '—';
+      var ativo = _atd && _atd.id === a.id ? ' ativo' : '';
+      html += '<div class="prnTlItem' + ativo + '" data-atdid="' + a.id + '" onclick="ProntuarioMod.tlClick(this)">'
+        + '<div class="prnTlData">' + data + '</div>'
+        + '<div class="prnTlHora">' + hora + '</div>'
+        + '<div class="prnTlProf">' + esc(prof) + '</div>'
+        + '</div>';
+    });
+    tl.innerHTML = html;
+  }
+
+  function tlClick(el) {
+    abrirAtendimento(el.getAttribute('data-atdid'));
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     NOVO ATENDIMENTO
+     ══════════════════════════════════════════════════════════════════════════ */
+  async function novoAtendimento() {
+    if (!_pac) { toast('Selecione um paciente primeiro', 'warn'); return; }
+    if (!USER_PROFILE || !USER_PROFILE.id) { toast('Sessão inválida, recarregue a página', 'error'); return; }
+    if (USER_ROLE !== 'profissional_saude' && USER_ROLE !== 'administrador') {
+      toast('Sem permissão para criar atendimentos', 'warn'); return;
+    }
+
+    var r = await _sb.from('atendimentos_clinicos').insert({
+      paciente_id:      _pac.id,
+      profissional_id:  USER_PROFILE.id,
+      unidade_id:       CU,
+      data_atendimento: new Date().toISOString()
+    }).select().single();
+
+    if (r.error) { toast('Erro ao criar atendimento: ' + r.error.message, 'error'); return; }
+
+    await _carregarLista();
+    await abrirAtendimento(r.data.id);
+    _renderizarTimeline();
+    toast('Novo atendimento criado', 'success');
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ABRIR ATENDIMENTO EXISTENTE
+     ══════════════════════════════════════════════════════════════════════════ */
+  async function abrirAtendimento(atdId) {
+    var r = await _sb.from('atendimentos_clinicos')
+      .select('*,profissional:profissional_id(nome,especialidade,conselho,uf_conselho,numero_conselho)')
+      .eq('id', atdId)
+      .single();
+    if (r.error || !r.data) { toast('Atendimento não encontrado', 'error'); return; }
+    _atd = r.data;
+
+    // Limpa estado das abas
+    _meds = [];
+    var campos = ['prnEvolucaoTxt','prnExamesTxt','prnAtestadoObs','prnAtestadoDias','prnAtestadoCid'];
+    campos.forEach(function(id) { var el = sid(id); if (el) el.value = ''; });
+    var tipoSel = sid('prnAtestadoTipo'); if (tipoSel) tipoSel.value = 'MEDICO';
+
+    // Data/hora do atendimento
+    var datEl = sid('prnAtdData');
+    if (datEl) {
+      var d = new Date(_atd.data_atendimento);
+      datEl.textContent = d.toLocaleDateString('pt-BR', {
+        weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+      }) + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Mostra painel de atendimento
+    var empty = sid('prnEmpty');
+    var atdEl = sid('prnAtendimento');
+    if (empty) empty.style.display = 'none';
+    if (atdEl) atdEl.style.display = 'flex';
+
+    // Carrega dados
+    await Promise.all([_carregarEvolucao(), _carregarDocumentos()]);
+
+    _renderizarTimeline();
+    mudarAba('evolucao');
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ABA — EVOLUÇÃO
+     ══════════════════════════════════════════════════════════════════════════ */
+  async function _carregarEvolucao() {
+    if (!_atd) return;
+    var r = await _sb.from('evolucoes').select('texto_evolucao').eq('atendimento_id', _atd.id).maybeSingle();
+    var el = sid('prnEvolucaoTxt');
+    if (el && r.data) el.value = r.data.texto_evolucao || '';
+  }
+
+  async function salvarEvolucao() {
+    if (!_atd) { toast('Abra um atendimento primeiro', 'warn'); return; }
+    var el = sid('prnEvolucaoTxt');
+    if (!el) return;
+    var txt = el.value;
+
+    var check = await _sb.from('evolucoes').select('id').eq('atendimento_id', _atd.id).maybeSingle();
+    var r;
+    if (check.data) {
+      r = await _sb.from('evolucoes')
+        .update({ texto_evolucao: txt, atualizado_em: new Date().toISOString() })
+        .eq('id', check.data.id);
+    } else {
+      r = await _sb.from('evolucoes').insert({ atendimento_id: _atd.id, texto_evolucao: txt });
+    }
+    if (r.error) { toast('Erro ao salvar evolução', 'error'); return; }
+    toast('Evolução salva com sucesso', 'success');
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     MODELOS DE PRONTUÁRIO
+     ══════════════════════════════════════════════════════════════════════════ */
+  async function _carregarModelos() {
+    if (!USER_PROFILE) return;
+    var r = await _sb.from('modelos_prontuario')
+      .select('id,titulo,conteudo,tipo_acesso,profissional_id')
+      .or('tipo_acesso.eq.GLOBAL,profissional_id.eq.' + USER_PROFILE.id)
+      .order('tipo_acesso')
+      .order('titulo');
+    _modelos = r.data || [];
+    _renderizarModeloSelect();
+  }
+
+  function _renderizarModeloSelect() {
+    var sel = sid('prnModeloSel');
+    if (!sel || !USER_PROFILE) return;
+
+    var meus    = _modelos.filter(function (m) { return m.profissional_id === USER_PROFILE.id && m.tipo_acesso === 'PRIVADO'; });
+    var globais = _modelos.filter(function (m) { return m.tipo_acesso === 'GLOBAL'; });
+
+    var html = '<option value="">— Inserir modelo —</option>';
+    if (meus.length) {
+      html += '<optgroup label="Meus Modelos">';
+      meus.forEach(function (m) { html += '<option value="' + m.id + '">' + esc(m.titulo) + '</option>'; });
+      html += '</optgroup>';
+    }
+    if (globais.length) {
+      html += '<optgroup label="Modelos da Clínica">';
+      globais.forEach(function (m) { html += '<option value="' + m.id + '">' + esc(m.titulo) + '</option>'; });
+      html += '</optgroup>';
+    }
+    if (!meus.length && !globais.length) {
+      html += '<option value="" disabled>Nenhum modelo disponível</option>';
+    }
+    sel.innerHTML = html;
+  }
+
+  function injetarModelo() {
+    var sel = sid('prnModeloSel');
+    if (!sel || !sel.value) return;
+    var modelo = _modelos.find(function (m) { return m.id === sel.value; });
+    if (!modelo) return;
+    var txt = sid('prnEvolucaoTxt');
+    if (!txt) { sel.value = ''; return; }
+
+    var inicio = txt.selectionStart || txt.value.length;
+    var fim    = txt.selectionEnd   || txt.value.length;
+    var antes  = txt.value.substring(0, inicio);
+    var depois = txt.value.substring(fim);
+    // Separa com quebra de linha se houver conteúdo
+    var sep = (antes && !antes.endsWith('\n')) ? '\n' : '';
+    txt.value = antes + sep + modelo.conteudo + depois;
+    txt.focus();
+    sel.value = '';
+    toast('Modelo inserido', 'info');
+  }
+
+  function abrirSalvarModelo() {
+    var txt = sid('prnEvolucaoTxt');
+    if (!txt || !txt.value.trim()) { toast('Digite o texto da evolução antes de salvar como modelo', 'warn'); return; }
+    var el = sid('prnModeloTitulo'); if (el) el.value = '';
+    var modal = sid('modalSalvarModelo');
+    if (modal) { modal.style.display = 'flex'; setTimeout(function() { var t = sid('prnModeloTitulo'); if(t) t.focus(); }, 50); }
+  }
+
+  function fecharSalvarModelo() {
+    var modal = sid('modalSalvarModelo');
+    if (modal) modal.style.display = 'none';
+  }
+
+  async function confirmarSalvarModelo() {
+    var titulo = (sid('prnModeloTitulo') || {}).value || '';
+    if (!titulo.trim()) { toast('Digite um título para o modelo', 'warn'); return; }
+
+    var acesso = (sid('prnModeloTipoAcesso') || {}).value || 'PRIVADO';
+    if (acesso === 'GLOBAL' && USER_ROLE !== 'administrador') {
+      toast('Apenas administradores podem criar modelos compartilhados', 'warn'); return;
+    }
+
+    var txt = (sid('prnEvolucaoTxt') || {}).value || '';
+    var payload = {
+      titulo:      titulo.trim(),
+      conteudo:    txt,
+      tipo_acesso: acesso
+    };
+    if (acesso === 'PRIVADO') payload.profissional_id = USER_PROFILE.id;
+
+    var r = await _sb.from('modelos_prontuario').insert(payload);
+    if (r.error) { toast('Erro ao salvar modelo: ' + r.error.message, 'error'); return; }
+
+    fecharSalvarModelo();
+    await _carregarModelos();
+    toast('Modelo "' + titulo.trim() + '" salvo com sucesso', 'success');
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ABA — EXAMES
+     ══════════════════════════════════════════════════════════════════════════ */
+  async function salvarExames() {
+    var el = sid('prnExamesTxt');
+    if (!el) return;
+    if (await _salvarDocumento('EXAME', { texto: el.value })) {
+      toast('Solicitação de exames salva', 'success');
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ABA — RECEITUÁRIO
+     ══════════════════════════════════════════════════════════════════════════ */
+  function adicionarMedicamento() {
+    _meds.push({ apresentacao: '', quantidade: '', posologia: '', dias: '' });
+    _renderizarMeds();
+  }
+
+  function removerMedicamento(idx) {
+    _meds.splice(idx, 1);
+    _renderizarMeds();
+  }
+
+  function medInput(el) {
+    var idx   = parseInt(el.getAttribute('data-idx'));
+    var campo = el.getAttribute('data-campo');
+    if (!isNaN(idx) && _meds[idx] !== undefined) _meds[idx][campo] = el.value;
+  }
+
+  function _renderizarMeds() {
+    var wrap = sid('prnMedicamentosWrap');
+    if (!wrap) return;
+    if (!_meds.length) {
+      wrap.innerHTML = '<div class="prnMedVazio">Nenhum medicamento adicionado</div>';
+      return;
+    }
+    wrap.innerHTML = _meds.map(function (m, i) {
+      return '<div class="prnMedItem">'
+        + '<div class="prnMedNum">' + (i + 1) + '</div>'
+        + '<div class="prnMedFields">'
+        +   '<input class="afInp" placeholder="Apresentação (ex: Dipirona 500mg)" '
+        +          'data-idx="' + i + '" data-campo="apresentacao" '
+        +          'value="' + esc(m.apresentacao) + '" oninput="ProntuarioMod.medInput(this)"/>'
+        +   '<div class="prnMedGrid3">'
+        +     '<input class="afInp" placeholder="Quantidade" '
+        +            'data-idx="' + i + '" data-campo="quantidade" '
+        +            'value="' + esc(m.quantidade) + '" oninput="ProntuarioMod.medInput(this)"/>'
+        +     '<input class="afInp" placeholder="Posologia (ex: 1 cp a cada 8h)" '
+        +            'data-idx="' + i + '" data-campo="posologia" '
+        +            'value="' + esc(m.posologia) + '" oninput="ProntuarioMod.medInput(this)"/>'
+        +     '<input class="afInp" type="number" min="1" placeholder="Dias" '
+        +            'data-idx="' + i + '" data-campo="dias" '
+        +            'value="' + esc(m.dias) + '" oninput="ProntuarioMod.medInput(this)"/>'
+        +   '</div>'
+        + '</div>'
+        + '<button class="prnMedRemove" onclick="ProntuarioMod.removerMedicamento(' + i + ')" title="Remover">✕</button>'
+        + '</div>';
+    }).join('');
+  }
+
+  async function salvarReceituario() {
+    if (await _salvarDocumento('RECEITUARIO', { medicamentos: _meds })) {
+      toast('Receituário salvo', 'success');
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ABA — ATESTADO
+     ══════════════════════════════════════════════════════════════════════════ */
+  async function salvarAtestado() {
+    var conteudo = {
+      tipo:        ((sid('prnAtestadoTipo') || {}).value) || 'MEDICO',
+      dias:        ((sid('prnAtestadoDias') || {}).value) || '',
+      cid:         ((sid('prnAtestadoCid')  || {}).value) || '',
+      observacoes: ((sid('prnAtestadoObs')  || {}).value) || ''
+    };
+    if (await _salvarDocumento('ATESTADO', conteudo)) {
+      toast('Atestado salvo', 'success');
+    }
+  }
+
+  /* ── Helper: upsert de documento ── */
+  async function _salvarDocumento(tipo, conteudo) {
+    if (!_atd) { toast('Abra um atendimento primeiro', 'warn'); return false; }
+    var check = await _sb.from('documentos_atendimento')
+      .select('id').eq('atendimento_id', _atd.id).eq('tipo', tipo).maybeSingle();
+    var r;
+    if (check.data) {
+      r = await _sb.from('documentos_atendimento').update({ conteudo: conteudo }).eq('id', check.data.id);
+    } else {
+      r = await _sb.from('documentos_atendimento').insert({ atendimento_id: _atd.id, tipo: tipo, conteudo: conteudo });
+    }
+    if (r.error) { toast('Erro ao salvar: ' + r.error.message, 'error'); console.error(r.error); return false; }
+    return true;
+  }
+
+  /* ── Carrega todos os documentos do atendimento ── */
+  async function _carregarDocumentos() {
+    if (!_atd) return;
+    var r = await _sb.from('documentos_atendimento').select('*').eq('atendimento_id', _atd.id);
+    var docs = r.data || [];
+    docs.forEach(function (doc) {
+      if (doc.tipo === 'EXAME') {
+        var el = sid('prnExamesTxt');
+        if (el) el.value = (doc.conteudo && doc.conteudo.texto) ? doc.conteudo.texto : '';
+      } else if (doc.tipo === 'RECEITUARIO') {
+        _meds = (doc.conteudo && doc.conteudo.medicamentos) ? doc.conteudo.medicamentos : [];
+        _renderizarMeds();
+      } else if (doc.tipo === 'ATESTADO') {
+        var c = doc.conteudo || {};
+        var tipo = sid('prnAtestadoTipo'); if (tipo) tipo.value = c.tipo || 'MEDICO';
+        var dias = sid('prnAtestadoDias'); if (dias) dias.value = c.dias || '';
+        var cid  = sid('prnAtestadoCid');  if (cid)  cid.value  = c.cid  || '';
+        var obs  = sid('prnAtestadoObs');  if (obs)  obs.value  = c.observacoes || '';
+      }
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     TROCA DE ABA
+     ══════════════════════════════════════════════════════════════════════════ */
+  function mudarAba(aba) {
+    _aba = aba;
+    document.querySelectorAll('.prnTab').forEach(function (btn) {
+      btn.classList.toggle('ativa', btn.getAttribute('data-aba') === aba);
+    });
+    document.querySelectorAll('.prnAbaContent').forEach(function (div) {
+      var estaAtivo = div.getAttribute('data-aba') === aba;
+      div.style.display = estaAtivo ? 'block' : 'none';
+      div.classList.toggle('ativa', estaAtivo);
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     IMPRESSÃO / GERAÇÃO DE PDF
+     ══════════════════════════════════════════════════════════════════════════ */
+  function imprimir() {
+    if (!_pac) { toast('Selecione um paciente primeiro', 'warn'); return; }
+    if (!_atd) { toast('Selecione ou crie um atendimento para imprimir', 'warn'); return; }
+    _montarDocImpressao();
+    document.body.classList.add('prn-imprimindo');
+    window.print();
+    document.body.classList.remove('prn-imprimindo');
+  }
+
+  function _montarDocImpressao() {
+    var doc = sid('prnDocImpressao');
+    if (!doc) return;
+
+    var prof    = (_atd && _atd.profissional) ? _atd.profissional : {};
+    var d       = new Date((_atd && _atd.data_atendimento) ? _atd.data_atendimento : new Date());
+    var dataFmt = d.toLocaleDateString('pt-BR',  { day: '2-digit', month: 'long', year: 'numeric' });
+    var horaFmt = d.toLocaleTimeString('pt-BR',  { hour: '2-digit', minute: '2-digit' });
+
+    var evolucao  = ((sid('prnEvolucaoTxt') || {}).value  || '').trim();
+    var exames    = ((sid('prnExamesTxt')   || {}).value  || '').trim();
+    var atTipo    = ((sid('prnAtestadoTipo')|| {}).value  || '');
+    var atDias    = ((sid('prnAtestadoDias')|| {}).value  || '');
+    var atCid     = ((sid('prnAtestadoCid') || {}).value  || '');
+    var atObs     = ((sid('prnAtestadoObs') || {}).value  || '').trim();
+
+    var nomeProfissional = prof.nome            || '';
+    var conselho         = prof.conselho        || 'CRM';
+    var uf               = prof.uf_conselho     || '';
+    var numCons          = prof.numero_conselho || '';
+
+    var html = '';
+
+    /* ── Cabeçalho ── */
+    html += '<div class="prnImpHdr">'
+      + '<div class="prnImpLogoWrap">'
+      +   '<div class="prnImpLogoNome">Clínica da Família</div>'
+      +   '<div class="prnImpLogoSub">Prontuário Eletrônico</div>'
+      + '</div>'
+      + '<div class="prnImpHdrRight">'
+      +   '<div class="prnImpHdrData">' + dataFmt + '</div>'
+      +   '<div>às ' + horaFmt + '</div>'
+      + '</div>'
+      + '</div>';
+
+    /* ── Dados do paciente ── */
+    var idadeStr = (_pac && _pac.data_nascimento) ? calcularIdadeExata(_pac.data_nascimento) : '—';
+    html += '<div class="prnImpPacFaixa">'
+      + '<span class="prnImpPacLabel">Paciente:</span> ' + esc((_pac && _pac.nome_completo) || '—')
+      + '&nbsp;&nbsp;&nbsp;'
+      + '<span class="prnImpPacLabel">CPF:</span> ' + esc((_pac && _pac.cpf) || '—')
+      + '&nbsp;&nbsp;&nbsp;'
+      + '<span class="prnImpPacLabel">Idade:</span> ' + idadeStr;
+    if (_pac && _pac.telefone) {
+      html += '&nbsp;&nbsp;&nbsp;<span class="prnImpPacLabel">Tel:</span> ' + esc(_pac.telefone);
+    }
+    html += '</div>';
+
+    /* ── Evolução ── */
+    if (evolucao) {
+      html += '<div class="prnImpSecao">'
+        + '<div class="prnImpSecaoTitulo">Evolução Clínica</div>'
+        + '<div class="prnImpTexto">' + evolucao.replace(/\n/g, '<br>') + '</div>'
+        + '</div>'
+        + '<hr class="prnImpDivisor">';
+    }
+
+    /* ── Exames ── */
+    if (exames) {
+      html += '<div class="prnImpSecao">'
+        + '<div class="prnImpSecaoTitulo">Solicitação de Exames / Procedimentos</div>'
+        + '<div class="prnImpTexto">' + exames.replace(/\n/g, '<br>') + '</div>'
+        + '</div>'
+        + '<hr class="prnImpDivisor">';
+    }
+
+    /* ── Receituário ── */
+    if (_meds && _meds.length) {
+      html += '<div class="prnImpSecao">'
+        + '<div class="prnImpSecaoTitulo">Receituário Médico</div>';
+      _meds.forEach(function (m, i) {
+        html += '<div class="prnImpMed">'
+          + '<div class="prnImpMedNome">' + (i + 1) + '. ' + esc(m.apresentacao || '—') + (m.quantidade ? ' — ' + esc(m.quantidade) : '') + '</div>'
+          + (m.posologia ? '<div class="prnImpMedPos">' + esc(m.posologia) + (m.dias ? ', por ' + esc(m.dias) + ' dia(s)' : '') + '</div>' : '')
+          + '</div>';
+      });
+      html += '</div><hr class="prnImpDivisor">';
+    }
+
+    /* ── Atestado ── */
+    if (atTipo) {
+      var labelTipo = {
+        MEDICO:         'Atestado Médico',
+        ACOMPANHAMENTO: 'Atestado de Acompanhamento',
+        COMPARECIMENTO: 'Declaração de Comparecimento'
+      };
+      html += '<div class="prnImpSecao">'
+        + '<div class="prnImpSecaoTitulo">' + (labelTipo[atTipo] || 'Atestado') + '</div>'
+        + '<div class="prnImpTexto">';
+
+      html += 'Atesto que o(a) paciente <strong>' + esc((_pac && _pac.nome_completo) || '—') + '</strong>';
+      if (atTipo === 'MEDICO') {
+        html += ' necessita de afastamento de suas atividades por '
+          + '<strong>' + (atDias || '___') + ' dia(s)</strong>';
+      } else if (atTipo === 'ACOMPANHAMENTO') {
+        html += ' necessita de acompanhante por <strong>' + (atDias || '___') + ' dia(s)</strong>';
+      } else if (atTipo === 'COMPARECIMENTO') {
+        html += ' compareceu a esta unidade de saúde na data acima';
+      }
+      if (atCid)  html += ' (CID-10: <strong>' + esc(atCid) + '</strong>)';
+      html += '.';
+      if (atObs)  html += ' ' + esc(atObs);
+      html += '</div></div>';
+    }
+
+    /* ── Rodapé legal ── */
+    html += '<div class="prnImpRodape">'
+      + '<div class="prnImpAssinaturaLinha"></div>'
+      + '<div class="prnImpProfNome">' + esc(nomeProfissional) + '</div>'
+      + '<div class="prnImpProfConselho">' + conselho + (uf ? '-' + uf : '') + (numCons ? ' nº ' + numCons : '') + '</div>'
+      + '<div class="prnImpLocalData">Data: ' + dataFmt + '</div>'
+      + '</div>';
+
+    doc.innerHTML = html;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     CONTROLE DE VISIBILIDADE
+     ══════════════════════════════════════════════════════════════════════════ */
+  function _mostrarBusca() {
+    var busca   = sid('prnBuscaArea');
+    var main    = sid('prnMain');
+    var inp     = sid('prnBuscaInput');
+    var drop    = sid('prnPacDrop');
+    if (busca)  busca.style.display = 'flex';
+    if (main)   main.style.display  = 'none';
+    if (inp)    inp.value  = '';
+    if (drop)   drop.style.display = 'none';
+  }
+
+  function _mostrarPrincipal() {
+    var busca = sid('prnBuscaArea');
+    var main  = sid('prnMain');
+    if (busca) busca.style.display = 'none';
+    if (main)  { main.style.display = 'flex'; main.style.flexDirection = 'column'; }
+  }
+
+  function fecharPaciente() {
+    _pac  = null;
+    _atd  = null;
+    _lista  = [];
+    _modelos = [];
+    _meds   = [];
+    var empty = sid('prnEmpty');
+    var atdEl = sid('prnAtendimento');
+    if (empty) empty.style.display = 'flex';
+    if (atdEl) atdEl.style.display = 'none';
+    _mostrarBusca();
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     API PÚBLICA
+     ══════════════════════════════════════════════════════════════════════════ */
+  return {
+    init,
+    buscarPaciente,
+    selPacienteDrop,
+    carregarPaciente,
+    tlClick,
+    novoAtendimento,
+    abrirAtendimento,
+    fecharPaciente,
+    mudarAba,
+    salvarEvolucao,
+    injetarModelo,
+    abrirSalvarModelo,
+    fecharSalvarModelo,
+    confirmarSalvarModelo,
+    salvarExames,
+    adicionarMedicamento,
+    removerMedicamento,
+    medInput,
+    salvarReceituario,
+    salvarAtestado,
+    imprimir,
+    calcularIdadeExata
+  };
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   FIM ProntuarioMod
+   ══════════════════════════════════════════════════════════════════════════════ */
+
 
 </script>
 </body>
