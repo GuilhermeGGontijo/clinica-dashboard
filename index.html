@@ -534,7 +534,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 .agGradeBody{display:flex;overflow-y:scroll;height:calc(100vh - 310px);min-height:420px;position:relative}
 .agGradeTimeCol{width:66px;flex-shrink:0;border-right:1px solid var(--s2);background:var(--w);position:sticky;left:0;z-index:5}
 .agTimeSlot{height:54px;border-bottom:1px solid var(--s1);display:flex;align-items:flex-start;padding:3px 6px 0;font-size:.66rem;color:var(--s4);font-weight:600;user-select:none}
-.agGradeCols{flex:1;display:flex;overflow-x:auto;min-width:0}
+.agGradeCols{flex:1;display:flex;min-width:0;overflow-x:visible}
 .agGradeCol{flex:1;min-width:120px;border-right:1px solid var(--s2);position:relative}
 .agSlot{height:54px;border-bottom:1px solid var(--s1);cursor:crosshair;position:relative;transition:background .1s}
 .agSlot:hover{background:rgba(59,130,246,.06)}
@@ -1180,7 +1180,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
         <label class="afLabel">Paciente *</label>
         <input type="text" id="agPacBusca" class="afInp" placeholder="Nome ou CPF..." autocomplete="off" oninput="AgendaMod.buscarPaciente(this.value)"/>
         <input type="hidden" id="agPacId"/>
-        <div id="agPacResultados" class="agPacDrop" style="display:none"></div>
+        <div id="agPacResultados" class="agPacDrop" style="display:none"></div><div style="font-size:.71rem;color:var(--s4);margin-top:4px">Paciente não encontrado? <a href="#" onclick="event.preventDefault();AgendaMod.fecharModal();switchSidebar('pacientes')" style="color:var(--g6);text-decoration:underline;font-weight:600">Cadastrar novo paciente</a></div>
       </div>
       <div class="patFG">
         <label class="afLabel">Status</label>
