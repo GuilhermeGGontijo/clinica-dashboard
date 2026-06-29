@@ -133,6 +133,9 @@
       <div class="sbSubItem" data-mod="admin-salas" onclick="switchSidebar('admin-salas')">
         Cadastro de Salas
       </div>
+      <div class="sbSubItem" data-mod="admin-atendimentos" onclick="switchSidebar('admin-atendimentos')">
+        Cadastrar Atendimentos
+      </div>
     </div>
 
   </div>
@@ -423,6 +426,82 @@
   </div>
   <div id="salasListWrap" class="salasListWrap">
     <div class="salasVazio">Carregando...</div>
+  </div>
+</div>
+
+<!-- ════ SEÇÃO: CADASTRAR ATENDIMENTOS ════ -->
+<div id="secAdminAtendimentos">
+  <div class="atdHdr">
+    <div>
+      <div class="secL" style="margin:0 0 4px" id="atdSecTitulo">🩺 Consultas Cadastradas</div>
+      <p style="font-size:.76rem;color:var(--s5);margin:0">Unidade ativa: <strong id="atdUnitLabel"></strong></p>
+    </div>
+    <button class="btn bG" id="atdBtnNovo" onclick="AtendMod.abrirNovo()">➕ Nova Consulta</button>
+  </div>
+
+  <!-- Abas de tipo -->
+  <div class="atdTabs">
+    <button id="atdTab_consulta"     class="atdTab atdTabAct" onclick="AtendMod.setTipo('consulta')">🩺 Consultas</button>
+    <button id="atdTab_procedimento" class="atdTab"           onclick="AtendMod.setTipo('procedimento')">💉 Procedimentos</button>
+    <button id="atdTab_exame"        class="atdTab"           onclick="AtendMod.setTipo('exame')">🔬 Exames</button>
+  </div>
+
+  <div class="atdInfo">
+    💡 Os atendimentos cadastrados aqui ficam disponíveis na <strong>Agenda</strong> para agendamento de pacientes.
+  </div>
+
+  <div id="atdListWrap" class="atdListWrap">
+    <div class="atdVazio">Carregando...</div>
+  </div>
+</div>
+
+<!-- ════ MODAL: ATENDIMENTO ════ -->
+<div id="modalAtend" class="mOverlay" style="display:none" onclick="if(event.target===this)AtendMod.fecharModal()">
+  <div class="mBox atdModal">
+    <div class="atdModalHdr">
+      <h3 id="atdModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">➕ Novo Atendimento</h3>
+      <button class="bDel" onclick="AtendMod.fecharModal()" style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
+    </div>
+
+    <!-- Nome -->
+    <div class="patFG" style="margin-bottom:16px">
+      <label class="afLabel">Nome *</label>
+      <input type="text" id="atdNomeInp" class="afInp" placeholder="Ex: Consulta Clínica, Eletrocardiograma..."
+             onkeydown="if(event.key==='Enter')AtendMod.salvar()"/>
+    </div>
+
+    <!-- Valor do atendimento -->
+    <div class="patFG" style="margin-bottom:16px">
+      <label class="afLabel">Valor do Atendimento</label>
+      <div class="atdValorWrap">
+        <span class="atdValorPrefix">R$</span>
+        <input type="text" id="atdValorInp" class="afInp atdValorInp" placeholder="0,00"
+               oninput="AtendMod.fmtInput(this)" inputmode="numeric"/>
+      </div>
+    </div>
+
+    <!-- Valor repasse -->
+    <div class="patFG" style="margin-bottom:20px">
+      <label class="afLabel">Valor Repassado ao Profissional</label>
+      <div class="atdToggleWrap">
+        <button type="button" id="atdBtnFixo" class="atdToggle atdToggleAct" onclick="AtendMod.toggleRepasse('fixo')">R$ Fixo</button>
+        <button type="button" id="atdBtnPct"  class="atdToggle"              onclick="AtendMod.toggleRepasse('percentual')">%</button>
+      </div>
+      <div class="atdValorWrap" style="margin-top:8px">
+        <span class="atdValorPrefix" id="atdRepassePrefix">R$</span>
+        <input type="text" id="atdRepasseInp" class="afInp atdValorInp" placeholder="0,00"
+               oninput="AtendMod.fmtInput(this)" inputmode="numeric" data-tipo-repasse="fixo"/>
+        <span class="atdValorSuffix" id="atdRepasseSuffix"></span>
+      </div>
+      <div class="atdRepasseHint">
+        <span id="atdRepasseHintTxt">Valor fixo em reais repassado ao profissional executante</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn" onclick="AtendMod.fecharModal()" style="min-width:90px">Cancelar</button>
+      <button class="btn bG" onclick="AtendMod.salvar()" style="min-width:110px">💾 Salvar</button>
+    </div>
   </div>
 </div>
 
@@ -1053,6 +1132,7 @@
 <script src="js/modules/pacientes.js?v=20260629d"></script>
 <script src="js/modules/financeiro.js?v=20260629d"></script>
 <script src="js/modules/salas.js?v=20260629d"></script>
+<script src="js/modules/atendimentos.js?v=20260629e"></script>
 <script src="js/modules/agenda.js?v=20260629d"></script>
 <script src="js/modules/prontuario.js?v=20260629d"></script>
 <script src="js/core/main.js?v=20260629d"></script>

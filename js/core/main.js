@@ -124,7 +124,12 @@ function switchSidebar(mod){
   // Inicializar módulos conforme ativado
   if(mod==='agenda'){      setTimeout(function(){ AgendaMod.init();     },50); }
   if(mod==='prontuario'){ setTimeout(function(){ ProntuarioMod.init(); },50); }
-  if(mod==='admin-salas'){ setTimeout(function(){ SalasMod.init();     },50); }
+  if(mod==='admin-salas'){ setTimeout(function(){ SalasMod.init(); },50); }
+  if(mod==='admin-atendimentos'){ setTimeout(function(){
+    var u=(typeof UNITS!=='undefined'?UNITS:[]).find(function(x){return x.id===CU;});
+    var el=sid('atdUnitLabel'); if(el) el.textContent=u?u.name:CU;
+    AtendMod.init();
+  },50); }
 }
 
 function toggleSbGroup(el,grpId){
