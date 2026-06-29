@@ -86,7 +86,7 @@ const ProntuarioMod = (function () {
      ══════════════════════════════════════════════════════════════════════════ */
   async function carregarPaciente(pacienteId) {
     var r = await _sb.from('pacientes')
-      .select('id,nome_completo,cpf,telefone,data_nascimento')
+      .select('id,nome_completo,cpf,celular,data_nascimento')
       .eq('id', pacienteId)
       .single();
     if (r.error || !r.data) { toast('Paciente não encontrado', 'error'); return; }
@@ -105,7 +105,7 @@ const ProntuarioMod = (function () {
     var idade = sid('prnPacIdade');
     if (nome)  nome.textContent  = _pac.nome_completo || '—';
     if (cpf)   cpf.textContent   = 'CPF: ' + (_pac.cpf || '—');
-    if (tel)   tel.textContent   = 'Tel: ' + (_pac.telefone || '—');
+    if (tel)   tel.textContent   = 'Tel: ' + (_pac.celular || '—');
     if (idade) idade.textContent = _pac.data_nascimento
       ? 'Idade: ' + calcularIdadeExata(_pac.data_nascimento)
       : '—';
