@@ -54,10 +54,7 @@ const ProntuarioMod = (function () {
     if (!q || q.trim().length < 2) { drop.style.display = 'none'; return; }
     clearTimeout(_buscarTmr);
     _buscarTmr = setTimeout(async function () {
-      var r = await _sb.from('pacientes')
-        .select('id,nome_completo,cpf,data_nascimento')
-        .or('nome_completo.ilike.%' + q.trim() + '%,cpf.ilike.%' + q.trim() + '%')
-        .limit(8);
+      var r = await _sb.rpc('buscar_pacientes', { q: q.trim() });
       if (!drop) return;
       var dados = r.data || [];
       if (!dados.length) {
