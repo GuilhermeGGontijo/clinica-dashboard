@@ -458,6 +458,7 @@ body.sb-admin-cadastro #secAdminCadastro{display:block!important}
 body.sb-admin-controle #secAdminControle{display:block!important}
 body.sb-admin-unidades #secAdminUnidades{display:block!important}
 body.sb-admin-salas #secAdminSalas{display:block!important}
+body.sb-admin-atendimentos #secAdminAtendimentos{display:block!important}
 body.sb-fin-dashboard #printHeader,
 body.sb-fin-dashboard #slCadastro,body.sb-fin-dashboard .topGrid,
 body.sb-fin-dashboard #slKpis,body.sb-fin-dashboard .kpiGrid,
