@@ -156,13 +156,13 @@ const AtendMod = (function () {
 
   function _abrirModal () {
     var m = sid('modalAtend');
-    if (m) m.style.display = 'flex';
+    if (m) m.classList.add('open');
     setTimeout(function () { var n = sid('atdNomeInp'); if (n) n.focus(); }, 60);
   }
 
   function fecharModal () {
     var m = sid('modalAtend');
-    if (m) m.style.display = 'none';
+    if (m) m.classList.remove('open');
     _editId = null;
   }
 
