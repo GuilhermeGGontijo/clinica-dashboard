@@ -54,17 +54,23 @@ const AtendMod = (function () {
     }
 
     var rows = _itens.map(function (item) {
-      var valorFmt  = _fmtBRL(item.valor_padrao || 0);
-      var repasseFmt = item.tipo_repasse === 'percentual'
-        ? _fmtPct(item.valor_repasse || 0)
-        : _fmtBRL(item.valor_repasse || 0);
+      var valor    = item.valor_padrao  || 0;
+      var repasse  = item.valor_repasse || 0;
+      var isPct    = item.tipo_repasse === 'percentual';
+      var repasseVal = isPct ? (valor * repasse / 100) : repasse;
+      var clinica    = valor - repasseVal;
+
+      var valorFmt   = _fmtBRL(valor);
+      var repasseFmt = isPct ? _fmtPct(repasse) : _fmtBRL(repasse);
+      var clinicaFmt = _fmtBRL(clinica);
 
       return '<tr>'
         + '<td class="atdNome">' + esc(item.nome) + '</td>'
         + '<td class="atdVal">' + valorFmt + '</td>'
         + '<td class="atdVal">' + repasseFmt
-        +   '<span class="atdBadgeTipo">' + (item.tipo_repasse === 'percentual' ? '%' : 'R$') + '</span>'
+        +   '<span class="atdBadgeTipo">' + (isPct ? '%' : 'R$') + '</span>'
         + '</td>'
+        + '<td class="atdVal atdClinica">' + clinicaFmt + '</td>'
         + '<td class="atdAcoes">'
         +   '<button class="btn bGh bSm" onclick="AtendMod.abrirEditar(\'' + item.id + '\')" title="Editar">✏️</button>'
         +   '<button class="btn bSm" style="background:var(--r1);color:var(--r6);border:1px solid var(--r3)" '
@@ -77,7 +83,8 @@ const AtendMod = (function () {
       + '<thead><tr>'
       + '<th>Nome</th>'
       + '<th style="width:130px">Valor</th>'
-      + '<th style="width:160px">Repasse Profissional</th>'
+      + '<th style="width:150px">Repasse Profissional</th>'
+      + '<th style="width:140px">Para a Clínica</th>'
       + '<th style="width:100px">Ações</th>'
       + '</tr></thead>'
       + '<tbody>' + rows + '</tbody>'

@@ -549,6 +549,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 .agMesCellHoje{background:#eff6ff}
 .agMesDiaNum{font-size:.78rem;font-weight:500;color:var(--s5);margin-bottom:3px;line-height:1}
 .agMesDiaHoje{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--b5);color:#fff;font-weight:700}
+.atdClinica{color:var(--g6)!important;font-weight:700}
 .agMesEvt{font-size:.67rem;padding:2px 5px;border-radius:3px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
 .agMesMais{font-size:.67rem;color:var(--b5);font-weight:600;padding:0 2px}
 .agCard{position:absolute;left:3px;right:3px;border-radius:6px;padding:3px 7px 3px 8px;font-size:.71rem;line-height:1.3;cursor:pointer;z-index:3;box-shadow:0 1px 5px rgba(0,0,0,.18);overflow:hidden;transition:filter .12s,transform .1s;border-left:4px solid rgba(0,0,0,.25);border-top:1px solid rgba(255,255,255,.25)}
