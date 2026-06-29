@@ -204,13 +204,14 @@ const AgendaMod = (function () {
     if (gr) gr.style.display = 'none';
     try {
       _dbg('carregando salas/proc/profs...');
-      await Promise.all([_carregarSalas(), _carregarProcedimentos(), _carregarProfissionais()]);
+      var _timeout = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('Timeout: Supabase nao respondeu em 8s')); }, 8000); });
+      await Promise.race([Promise.all([_carregarSalas(), _carregarProcedimentos(), _carregarProfissionais()]), _timeout]);
       _dbg('filtros e role...');
       _popularFiltros();
       _ajustarRole();
       _dataRef = _view === 'semana' ? _inicioSemana(new Date()) : _zerarHora(new Date());
       _dbg('carregando agendamentos...');
-      await _carregarAgendamentos();
+      await Promise.race([_carregarAgendamentos(), new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('Timeout agendamentos')); }, 8000); })]);
       _dbg('chamando render()...');
     } catch(e) {
       console.error('[AgendaMod] init error', e);
