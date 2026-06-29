@@ -434,7 +434,7 @@ body.mode-pacientes #modulePacientes{display:block!important}
 .sbItemLbl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sbItemChev{font-size:.65rem;margin-left:auto;transition:transform .2s;flex-shrink:0}
 .sbSub{max-height:0;overflow:hidden;transition:max-height .25s ease}
-.sbSub.open{max-height:300px}
+.sbSub.open{max-height:600px}
 .sbSubItem{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 44px;font-size:.76rem;font-weight:600;
   color:rgba(255,255,255,.38);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
 .sbSubItem:hover{color:rgba(255,255,255,.72);background:rgba(255,255,255,.04)}
