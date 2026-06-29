@@ -182,8 +182,18 @@ const AgendaMod = (function () {
   var MESES_EXT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
   /* ── Init ── */
+  function _dbg (msg) {
+    var lo = sid('agLoading');
+    if (lo) lo.innerHTML = '⏳ ' + msg;
+  }
+
   async function init () {
-    if (!_sb) { console.error('[AgendaMod] _sb não definido'); return; }
+    _dbg('init() chamado');
+    if (!_sb) {
+      _dbg('ERRO: _sb não definido');
+      console.error('[AgendaMod] _sb não definido'); return;
+    }
+    _dbg('_sb ok, verificando inicializado...');
     if (_inicializado) {
       try { await _carregarAgendamentos(); } catch(e){ console.error('[AgendaMod] reload',e); }
       render(); return;
@@ -193,11 +203,15 @@ const AgendaMod = (function () {
     if (lo) lo.style.display = 'block';
     if (gr) gr.style.display = 'none';
     try {
+      _dbg('carregando salas/proc/profs...');
       await Promise.all([_carregarSalas(), _carregarProcedimentos(), _carregarProfissionais()]);
+      _dbg('filtros e role...');
       _popularFiltros();
       _ajustarRole();
       _dataRef = _view === 'semana' ? _inicioSemana(new Date()) : _zerarHora(new Date());
+      _dbg('carregando agendamentos...');
       await _carregarAgendamentos();
+      _dbg('chamando render()...');
     } catch(e) {
       console.error('[AgendaMod] init error', e);
       if (lo) lo.style.display = 'none';
