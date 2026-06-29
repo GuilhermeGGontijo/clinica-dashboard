@@ -455,56 +455,6 @@
   </div>
 </div>
 
-<!-- ════ MODAL: ATENDIMENTO ════ -->
-<div id="modalAtend" class="mOverlay" style="display:none" onclick="if(event.target===this)AtendMod.fecharModal()">
-  <div class="mBox atdModal">
-    <div class="atdModalHdr">
-      <h3 id="atdModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">➕ Novo Atendimento</h3>
-      <button class="bDel" onclick="AtendMod.fecharModal()" style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
-    </div>
-
-    <!-- Nome -->
-    <div class="patFG" style="margin-bottom:16px">
-      <label class="afLabel">Nome *</label>
-      <input type="text" id="atdNomeInp" class="afInp" placeholder="Ex: Consulta Clínica, Eletrocardiograma..."
-             onkeydown="if(event.key==='Enter')AtendMod.salvar()"/>
-    </div>
-
-    <!-- Valor do atendimento -->
-    <div class="patFG" style="margin-bottom:16px">
-      <label class="afLabel">Valor do Atendimento</label>
-      <div class="atdValorWrap">
-        <span class="atdValorPrefix">R$</span>
-        <input type="text" id="atdValorInp" class="afInp atdValorInp" placeholder="0,00"
-               oninput="AtendMod.fmtInput(this)" inputmode="numeric"/>
-      </div>
-    </div>
-
-    <!-- Valor repasse -->
-    <div class="patFG" style="margin-bottom:20px">
-      <label class="afLabel">Valor Repassado ao Profissional</label>
-      <div class="atdToggleWrap">
-        <button type="button" id="atdBtnFixo" class="atdToggle atdToggleAct" onclick="AtendMod.toggleRepasse('fixo')">R$ Fixo</button>
-        <button type="button" id="atdBtnPct"  class="atdToggle"              onclick="AtendMod.toggleRepasse('percentual')">%</button>
-      </div>
-      <div class="atdValorWrap" style="margin-top:8px">
-        <span class="atdValorPrefix" id="atdRepassePrefix">R$</span>
-        <input type="text" id="atdRepasseInp" class="afInp atdValorInp" placeholder="0,00"
-               oninput="AtendMod.fmtInput(this)" inputmode="numeric" data-tipo-repasse="fixo"/>
-        <span class="atdValorSuffix" id="atdRepasseSuffix"></span>
-      </div>
-      <div class="atdRepasseHint">
-        <span id="atdRepasseHintTxt">Valor fixo em reais repassado ao profissional executante</span>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="btn" onclick="AtendMod.fecharModal()" style="min-width:90px">Cancelar</button>
-      <button class="btn bG" onclick="AtendMod.salvar()" style="min-width:110px">💾 Salvar</button>
-    </div>
-  </div>
-</div>
-
 <div id="printHeader">
   <h1 id="phTitle">Relatório — Clínica da Família</h1>
   <p id="phSub">Gerado em: <strong id="phDate"></strong></p>
@@ -815,6 +765,49 @@
 </div>
 
 </main>
+
+<!-- ════ MODAL: ATENDIMENTO ════ -->
+<div id="modalAtend" class="mOverlay" style="display:none" onclick="if(event.target===this)AtendMod.fecharModal()">
+  <div class="mBox atdModal">
+    <div class="atdModalHdr">
+      <h3 id="atdModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">➕ Novo Atendimento</h3>
+      <button class="bDel" onclick="AtendMod.fecharModal()" style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
+    </div>
+    <div class="patFG" style="margin-bottom:16px">
+      <label class="afLabel">Nome *</label>
+      <input type="text" id="atdNomeInp" class="afInp" placeholder="Ex: Consulta Clínica, Eletrocardiograma..."
+             onkeydown="if(event.key==='Enter')AtendMod.salvar()"/>
+    </div>
+    <div class="patFG" style="margin-bottom:16px">
+      <label class="afLabel">Valor do Atendimento</label>
+      <div class="atdValorWrap">
+        <span class="atdValorPrefix">R$</span>
+        <input type="text" id="atdValorInp" class="afInp atdValorInp" placeholder="0,00"
+               oninput="AtendMod.fmtInput(this)" inputmode="numeric"/>
+      </div>
+    </div>
+    <div class="patFG" style="margin-bottom:20px">
+      <label class="afLabel">Valor Repassado ao Profissional</label>
+      <div class="atdToggleWrap">
+        <button type="button" id="atdBtnFixo" class="atdToggle atdToggleAct" onclick="AtendMod.toggleRepasse('fixo')">R$ Fixo</button>
+        <button type="button" id="atdBtnPct"  class="atdToggle"              onclick="AtendMod.toggleRepasse('percentual')">%</button>
+      </div>
+      <div class="atdValorWrap" style="margin-top:8px">
+        <span class="atdValorPrefix" id="atdRepassePrefix">R$</span>
+        <input type="text" id="atdRepasseInp" class="afInp atdValorInp" placeholder="0,00"
+               oninput="AtendMod.fmtInput(this)" inputmode="numeric" data-tipo-repasse="fixo"/>
+        <span class="atdValorSuffix" id="atdRepasseSuffix"></span>
+      </div>
+      <div class="atdRepasseHint">
+        <span id="atdRepasseHintTxt">Valor fixo em reais repassado ao profissional executante</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn" onclick="AtendMod.fecharModal()" style="min-width:90px">Cancelar</button>
+      <button class="btn bG" onclick="AtendMod.salvar()" style="min-width:110px">💾 Salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL AGENDAMENTO -->
 <div id="modalAgendamento" class="ovl" style="display:none;align-items:flex-start;padding-top:40px" onclick="if(event.target===this)AgendaMod.fecharModal()">

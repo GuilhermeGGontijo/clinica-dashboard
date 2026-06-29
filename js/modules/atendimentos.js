@@ -20,6 +20,8 @@ const AtendMod = (function () {
   /* ── Init ── */
   async function init () {
     if (!_sb) return;
+    var u = (typeof UNITS !== 'undefined' ? UNITS : []).find(function(x){ return x.id === CU; });
+    var el = sid('atdUnitLabel'); if (el) el.textContent = u ? u.name : CU;
     await _carregar();
     _render();
   }
