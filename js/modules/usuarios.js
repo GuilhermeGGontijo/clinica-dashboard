@@ -215,7 +215,7 @@ const UsuariosMod = (function () {
     var sw = sid('usuSenhaWrap');
     if (sw) sw.style.display = 'none';
     var em = sid('usuEmail');
-    if (em) { em.value = u.email || ''; em.readOnly = true; }
+    if (em) { em.value = u.email || ''; em.readOnly = false; }
     var set = function(id2, val){ var el=sid(id2); if(el) el.value = val||''; };
     set('usuNome',        u.nome);
     set('usuTelefone',    u.telefone);
