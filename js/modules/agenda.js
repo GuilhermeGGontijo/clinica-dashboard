@@ -758,7 +758,11 @@ const AgendaMod = (function () {
   /* ── Utils ── */
   function _inicioSemana (d) { var r = new Date(d); r.setDate(r.getDate() - r.getDay()); return _zerarHora(r); }
   function _zerarHora (d) { var r = new Date(d); r.setHours(0, 0, 0, 0); return r; }
-  function _fmtDate (d) { return d.toISOString().split('T')[0]; }
+  function _fmtDate (d) {
+    return d.getFullYear() + '-'
+      + String(d.getMonth() + 1).padStart(2, '0') + '-'
+      + String(d.getDate()).padStart(2, '0');
+  }
   function _horaToPx (t) { var p = t.split(':').map(Number); return ((p[0] * 60 + p[1] - H_INI * 60) / SLOT) * SLOT_PX; }
   function _tMin (t) { var p = t.split(':').map(Number); return p[0] * 60 + (p[1] || 0); }
   function _somarMin (t, min) {
