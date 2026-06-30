@@ -626,6 +626,7 @@ const AgendaMod = (function () {
     el = sid('agNumGuia');    if (el) el.value = ag.numero_guia       || '';
     el = sid('agValorCob');   if (el) el.value = ag.valor_cobrado     || '';
     onFormaPgtoChange();
+    aoSelecionarProcedimento(); /* auto-preenche valor se vazio */
     el = sid('modalAgendamento'); if (el) el.style.display = 'flex';
   }
 

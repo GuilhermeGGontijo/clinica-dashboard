@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260630c">
+  <link rel="stylesheet" href="css/style.css?v=20260630d">
 </head>
 <body>
 
@@ -63,6 +63,10 @@
     </div>
     <button id="loginBtn" onclick="doLogin()">Entrar</button>
     <div id="loginErr"></div>
+    <div style="text-align:center;margin-top:14px">
+      <a href="#" onclick="mostrarEsqueciSenha();return false;"
+         style="font-size:.8rem;color:#64748b;text-decoration:none">🔑 Esqueci minha senha</a>
+    </div>
   </div>
 </div>
 <!-- ════ SIDEBAR NAVIGATION ════ -->
@@ -1404,6 +1408,37 @@
   </div>
 </div>
 
+<!-- MODAL: Troca de Senha no Primeiro Acesso -->
+<div id="modalTrocaSenha" class="ovl" style="display:none;align-items:center">
+  <div class="mBox" style="max-width:420px;width:96%;padding:28px 24px">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:2.5rem;margin-bottom:8px">🔐</div>
+      <h3 style="color:var(--s9);font-size:1rem;font-weight:800;margin:0 0 6px">Defina sua Nova Senha</h3>
+      <p style="font-size:.82rem;color:var(--s4);margin:0">
+        Este é seu primeiro acesso. Por segurança, crie uma senha pessoal.
+      </p>
+    </div>
+    <div class="patFG" style="margin-bottom:10px">
+      <label class="afLabel">Nova Senha *</label>
+      <div class="lFieldWrap" style="margin:0">
+        <input type="password" id="trocaPass1" class="afInp" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+        <button class="eyeBtn" type="button" onclick="togglePass('trocaPass1',this)">👁</button>
+      </div>
+    </div>
+    <div class="patFG" style="margin-bottom:18px">
+      <label class="afLabel">Confirmar Senha *</label>
+      <div class="lFieldWrap" style="margin:0">
+        <input type="password" id="trocaPass2" class="afInp" placeholder="Repita a nova senha" autocomplete="new-password"/>
+        <button class="eyeBtn" type="button" onclick="togglePass('trocaPass2',this)">👁</button>
+      </div>
+    </div>
+    <div id="trocaErr" style="color:var(--r6);font-size:.8rem;margin-bottom:10px;min-height:18px"></div>
+    <button class="btn bG" id="trocaBtn" onclick="salvarTrocaSenha()" style="width:100%;justify-content:center">
+      🔐 Salvar Nova Senha
+    </button>
+  </div>
+</div>
+
 <!-- MODAL: Cadastro / Edição de Usuário -->
 <div id="usuModalUsuario" class="ovl" style="display:none;align-items:flex-start;padding-top:40px"
      onclick="if(event.target===this)UsuariosMod.fecharModal()">
@@ -1443,12 +1478,15 @@
     </div>
 
     <!-- Senha (apenas criação) -->
-    <div id="usuSenhaWrap" class="patFG" style="margin-bottom:10px">
-      <label class="afLabel">Senha Provisória *</label>
-      <input type="password" id="usuSenha" class="afInp" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
-      <small style="color:var(--s4);font-size:.71rem;margin-top:4px;display:block">
-        O usuário poderá alterar a senha no primeiro acesso.
-      </small>
+    <div id="usuSenhaWrap" style="margin-bottom:10px">
+      <div class="patFG" style="margin-bottom:8px">
+        <label class="afLabel">Senha Provisória *</label>
+        <input type="password" id="usuSenha" class="afInp" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+      </div>
+      <label class="usuCheckRow">
+        <input type="checkbox" id="usuSenhaProvis" checked/>
+        <span>Exigir troca de senha no primeiro acesso</span>
+      </label>
     </div>
 
     <!-- Seção: Dados Profissionais (condicional) -->
@@ -1540,19 +1578,19 @@
      ou: python -m http.server 8000) — não abra index.html diretamente.
      ══════════════════════════════════════════════════════════════════════ -->
 <script src="js/core/supabase.js?v=20260629d"></script>
-<script src="js/core/auth.js?v=20260629d"></script>
+<script src="js/core/auth.js?v=20260630d"></script>
 <script src="js/modules/pacientes.js?v=20260629d"></script>
 <script src="js/modules/financeiro.js?v=20260629d"></script>
 <script src="js/modules/salas.js?v=20260629d"></script>
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
-<script src="js/modules/agenda.js?v=20260630b"></script>
+<script src="js/modules/agenda.js?v=20260630d"></script>
 <script src="js/modules/prontuario.js?v=20260629j"></script>
 <script src="js/modules/recepcao.js?v=20260630b"></script>
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260630a"></script>
-<script src="js/modules/usuarios.js?v=20260630c"></script>
-<script src="js/core/main.js?v=20260630c"></script>
+<script src="js/modules/usuarios.js?v=20260630d"></script>
+<script src="js/core/main.js?v=20260630d"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');

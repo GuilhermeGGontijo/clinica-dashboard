@@ -1416,6 +1416,17 @@ body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
 @media(max-width:600px){.ctrlRow{grid-template-columns:1fr auto;gap:8px}
   .ctrlRowBadge{display:none}}
 
+/* Checkbox row no modal de usuários */
+.usuCheckRow{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--s6);cursor:pointer;
+  background:var(--b0);border:1px solid var(--b2);border-radius:var(--Rs);padding:8px 12px}
+.usuCheckRow input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--g6);flex-shrink:0}
+
+/* Troca de senha: lFieldWrap dentro de modal */
+.mBox .lFieldWrap{display:flex;align-items:center;gap:6px;margin:0}
+.mBox .lFieldWrap .afInp{flex:1}
+.mBox .lFieldWrap .eyeBtn{padding:8px 10px;background:var(--s1);border:1px solid var(--s2);
+  border-radius:var(--Rs);cursor:pointer;font-size:.9rem;flex-shrink:0}
+
 /* ══ VISIBILIDADE DO SIDEBAR POR PERFIL ══ */
 /* Recepcionista: sem prontuário, relatórios, financeiro, administrativo */
 body.role-recepcionista [data-mod="prontuario"],

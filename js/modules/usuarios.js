@@ -232,6 +232,10 @@ const UsuariosMod = (function () {
     var btn = sid('usuBtnSalvar');
     if (btn) { btn.disabled=true; btn.textContent='Salvando...'; }
 
+    var senhaProvis = !_editId
+      ? !!(sid('usuSenhaProvis') && sid('usuSenhaProvis').checked)
+      : undefined;
+
     var payload = {
       nome: nome,
       email: email,
@@ -243,6 +247,7 @@ const UsuariosMod = (function () {
       conselho_uf: cuf||null,
       ativo: true
     };
+    if (senhaProvis !== undefined) payload.senha_provisoria = senhaProvis;
 
     try {
       if (_editId) {
