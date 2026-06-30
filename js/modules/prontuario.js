@@ -220,9 +220,16 @@ const ProntuarioMod = (function () {
 
     // Limpa estado das abas
     _meds = [];
-    var campos = ['prnEvolucaoTxt','prnExamesTxt','prnAtestadoObs','prnAtestadoDias','prnAtestadoCid'];
+    var campos = ['prnEvolucaoTxt','prnExamesTxt','prnAtestadoObs','prnAtestadoDias','prnAtestadoCid',
+                  'trgPaSis','trgPaDia','trgFc','trgFr','trgTemp','trgSpo2','trgAltura','trgPeso','trgObs'];
     campos.forEach(function(id) { var el = sid(id); if (el) el.value = ''; });
     var tipoSel = sid('prnAtestadoTipo'); if (tipoSel) tipoSel.value = 'MEDICO';
+    var imcEl = sid('trgImcVal'); if (imcEl) imcEl.value = '';
+    document.querySelectorAll('.prnImcRow').forEach(function(r) {
+      r.classList.remove('ativo-imc');
+      r.style.removeProperty('--imc-bg');
+      r.style.removeProperty('--imc-color');
+    });
 
     // Data/hora do atendimento
     var datEl = sid('prnAtdData');
@@ -370,6 +377,81 @@ const ProntuarioMod = (function () {
   }
 
   /* ══════════════════════════════════════════════════════════════════════════
+     ABA — TRIAGEM
+     ══════════════════════════════════════════════════════════════════════════ */
+  function calcIMC() {
+    var h = parseFloat((sid('trgAltura') || {}).value);
+    var p = parseFloat((sid('trgPeso')   || {}).value);
+    var el = sid('trgImcVal');
+    if (!el) return;
+
+    document.querySelectorAll('.prnImcRow').forEach(function (r) {
+      r.classList.remove('ativo-imc');
+      r.style.removeProperty('--imc-bg');
+      r.style.removeProperty('--imc-color');
+    });
+
+    if (!h || !p || h <= 0 || p <= 0) { el.value = ''; return; }
+
+    var imc = p / ((h / 100) * (h / 100));
+    el.value = imc.toFixed(1);
+
+    var rowId;
+    if      (imc < 18.5) { rowId = 'imcRowBaixo';  }
+    else if (imc < 25.0) { rowId = 'imcRowNormal';  }
+    else if (imc < 30.0) { rowId = 'imcRowPreObe'; _imcActivar('imcRowSobre'); }
+    else if (imc < 35.0) { rowId = 'imcRowObesI';  _imcActivar('imcRowSobre'); }
+    else if (imc < 40.0) { rowId = 'imcRowObesII'; _imcActivar('imcRowSobre'); }
+    else                 { rowId = 'imcRowObesIII'; _imcActivar('imcRowSobre'); }
+    _imcActivar(rowId);
+  }
+
+  function _imcActivar(id) {
+    var r = sid(id);
+    if (!r) return;
+    r.classList.add('ativo-imc');
+    r.style.setProperty('--imc-bg',    r.getAttribute('data-imc-bg')    || '#e8f5e9');
+    r.style.setProperty('--imc-color', r.getAttribute('data-imc-color') || '#1b5e20');
+  }
+
+  function _numVal(id) {
+    var v = parseFloat((sid(id) || {}).value);
+    return isNaN(v) ? null : v;
+  }
+
+  async function salvarTriagem() {
+    var dados = {
+      pa_sis: _numVal('trgPaSis'),
+      pa_dia: _numVal('trgPaDia'),
+      fc:     _numVal('trgFc'),
+      fr:     _numVal('trgFr'),
+      temp:   _numVal('trgTemp'),
+      spo2:   _numVal('trgSpo2'),
+      altura: _numVal('trgAltura'),
+      peso:   _numVal('trgPeso'),
+      imc:    _numVal('trgImcVal'),
+      obs:    ((sid('trgObs') || {}).value || '').trim()
+    };
+    if (await _salvarDocumento('TRIAGEM', dados)) {
+      toast('Triagem salva com sucesso', 'success');
+    }
+  }
+
+  function _preencherTriagem(c) {
+    var map = {
+      trgPaSis: c.pa_sis, trgPaDia: c.pa_dia,
+      trgFc: c.fc, trgFr: c.fr, trgTemp: c.temp, trgSpo2: c.spo2,
+      trgAltura: c.altura, trgPeso: c.peso
+    };
+    Object.keys(map).forEach(function (id) {
+      var el = sid(id);
+      if (el) el.value = map[id] != null ? map[id] : '';
+    });
+    var obs = sid('trgObs'); if (obs) obs.value = c.obs || '';
+    calcIMC();
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
      ABA — EXAMES
      ══════════════════════════════════════════════════════════════════════════ */
   async function salvarExames() {
@@ -484,6 +566,8 @@ const ProntuarioMod = (function () {
         var dias = sid('prnAtestadoDias'); if (dias) dias.value = c.dias || '';
         var cid  = sid('prnAtestadoCid');  if (cid)  cid.value  = c.cid  || '';
         var obs  = sid('prnAtestadoObs');  if (obs)  obs.value  = c.observacoes || '';
+      } else if (doc.tipo === 'TRIAGEM') {
+        _preencherTriagem(doc.conteudo || {});
       }
     });
   }
@@ -683,6 +767,8 @@ const ProntuarioMod = (function () {
     abrirSalvarModelo,
     fecharSalvarModelo,
     confirmarSalvarModelo,
+    calcIMC,
+    salvarTriagem,
     salvarExames,
     adicionarMedicamento,
     removerMedicamento,

@@ -1228,4 +1228,35 @@ body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
 .rcpBtnPrn:hover{background:var(--s2);color:var(--s9);}
 
 .rcpVazio{text-align:center;padding:60px 20px;color:var(--s4);font-size:.95rem;}
+
+/* ─── TRIAGEM ──────────────────────────────────────────────────── */
+#prnAbaTriagem{overflow-y:auto;padding:0 2px 8px;}
+.trgSecTitle{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s4);border-bottom:1px solid var(--s2);padding-bottom:4px;margin:12px 0 8px;}
+.trgSecTitle:first-child{margin-top:2px;}
+.trgGrid6{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:4px;}
+@media(max-width:900px){.trgGrid6{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.trgGrid6{grid-template-columns:repeat(2,1fr);}}
+.trgField{display:flex;flex-direction:column;gap:3px;}
+.trgLabel{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--s4);}
+.trgInpWrap{display:flex;align-items:center;gap:4px;}
+.trgInp{min-width:0;flex:1;padding:5px 7px;font-size:.85rem;}
+.trgUnit{font-size:.7rem;color:var(--s4);white-space:nowrap;flex-shrink:0;}
+.trgImcReadonly{background:var(--s1)!important;font-weight:700;color:var(--s7)!important;cursor:default;}
+
+/* IMC layout */
+.trgImcArea{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
+.trgImcLeft{display:flex;flex-direction:column;gap:8px;flex:0 0 auto;min-width:220px;}
+
+/* IMC table */
+.trgImcTable{flex-shrink:0;}
+.trgImcTable table{border-collapse:collapse;font-size:.78rem;width:auto;}
+.trgImcTable th{background:var(--s2);color:var(--s5);padding:5px 12px;text-align:left;font-size:.69rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.trgImcTable td{padding:5px 12px;border-bottom:1px solid var(--s2);color:var(--s5);transition:background .2s,color .2s;}
+.trgImcSub{padding-left:20px!important;font-style:italic;}
+.trgImcGrupo td{font-weight:700;font-style:normal;background:var(--s1);color:var(--s4);font-size:.7rem;letter-spacing:.05em;}
+.prnImcRow.ativo-imc td{font-weight:700;background:var(--imc-bg,#e8f5e9);color:var(--imc-color,#1b5e20);}
+.trgImcGrupo.ativo-imc td{font-weight:700;}
+
+/* Obs textarea triagem */
+.trgObsTxt{resize:vertical;min-height:60px;max-height:120px;font-size:.85rem;}
 </style>

@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260629b">
+  <link rel="stylesheet" href="css/style.css?v=20260629c">
 </head>
 <body>
 
@@ -243,10 +243,80 @@
           <div class="prnAtdHeader">
             <div class="prnAtdData" id="prnAtdData">—</div>
             <div class="prnTabs">
+              <button class="prnTab"       data-aba="triagem"    onclick="ProntuarioMod.mudarAba('triagem')">🩺 Triagem</button>
               <button class="prnTab ativa" data-aba="evolucao"    onclick="ProntuarioMod.mudarAba('evolucao')">📝 Evolução</button>
               <button class="prnTab"       data-aba="exames"      onclick="ProntuarioMod.mudarAba('exames')">🔬 Exames</button>
               <button class="prnTab"       data-aba="receituario" onclick="ProntuarioMod.mudarAba('receituario')">💊 Receituário</button>
               <button class="prnTab"       data-aba="atestado"    onclick="ProntuarioMod.mudarAba('atestado')">📄 Atestado</button>
+            </div>
+          </div>
+
+          <!-- ─── ABA: TRIAGEM ─── -->
+          <div class="prnAbaContent" id="prnAbaTriagem" data-aba="triagem">
+            <div class="trgSecTitle">Sinais Vitais</div>
+            <div class="trgGrid6">
+              <div class="trgField">
+                <label class="trgLabel">PA Sistólica</label>
+                <div class="trgInpWrap"><input type="number" id="trgPaSis" class="afInp trgInp" placeholder="120" min="50" max="300"><span class="trgUnit">mmHg</span></div>
+              </div>
+              <div class="trgField">
+                <label class="trgLabel">PA Diastólica</label>
+                <div class="trgInpWrap"><input type="number" id="trgPaDia" class="afInp trgInp" placeholder="80" min="30" max="200"><span class="trgUnit">mmHg</span></div>
+              </div>
+              <div class="trgField">
+                <label class="trgLabel">FC</label>
+                <div class="trgInpWrap"><input type="number" id="trgFc" class="afInp trgInp" placeholder="72" min="20" max="300"><span class="trgUnit">bpm</span></div>
+              </div>
+              <div class="trgField">
+                <label class="trgLabel">FR</label>
+                <div class="trgInpWrap"><input type="number" id="trgFr" class="afInp trgInp" placeholder="16" min="4" max="60"><span class="trgUnit">rpm</span></div>
+              </div>
+              <div class="trgField">
+                <label class="trgLabel">Temperatura</label>
+                <div class="trgInpWrap"><input type="number" id="trgTemp" class="afInp trgInp" placeholder="36.5" min="30" max="44" step="0.1"><span class="trgUnit">°C</span></div>
+              </div>
+              <div class="trgField">
+                <label class="trgLabel">SpO₂</label>
+                <div class="trgInpWrap"><input type="number" id="trgSpo2" class="afInp trgInp" placeholder="98" min="50" max="100"><span class="trgUnit">%</span></div>
+              </div>
+            </div>
+
+            <div class="trgSecTitle">Antropometria e IMC</div>
+            <div class="trgImcArea">
+              <div class="trgImcLeft">
+                <div class="trgField">
+                  <label class="trgLabel">Altura</label>
+                  <div class="trgInpWrap"><input type="number" id="trgAltura" class="afInp trgInp" placeholder="170" min="50" max="250" oninput="ProntuarioMod.calcIMC()"><span class="trgUnit">cm</span></div>
+                </div>
+                <div class="trgField">
+                  <label class="trgLabel">Peso</label>
+                  <div class="trgInpWrap"><input type="number" id="trgPeso" class="afInp trgInp" placeholder="70.0" min="1" max="500" step="0.1" oninput="ProntuarioMod.calcIMC()"><span class="trgUnit">kg</span></div>
+                </div>
+                <div class="trgField">
+                  <label class="trgLabel">IMC calculado</label>
+                  <div class="trgInpWrap"><input type="text" id="trgImcVal" class="afInp trgInp trgImcReadonly" placeholder="—" readonly><span class="trgUnit">kg/m²</span></div>
+                </div>
+              </div>
+              <div class="trgImcTable">
+                <table>
+                  <thead><tr><th>Classificação</th><th>IMC (kg/m²)</th></tr></thead>
+                  <tbody>
+                    <tr class="prnImcRow" id="imcRowBaixo"   data-imc-bg="#dbeafe" data-imc-color="#1e3a8a"><td>Baixo peso</td><td>&lt; 18,5</td></tr>
+                    <tr class="prnImcRow" id="imcRowNormal"  data-imc-bg="#dcfce7" data-imc-color="#14532d"><td>Normal</td><td>18,5 – 24,9</td></tr>
+                    <tr class="prnImcRow trgImcGrupo" id="imcRowSobre"  data-imc-bg="#fef9c3" data-imc-color="#713f12"><td colspan="2">Sobrepeso (IMC ≥ 25,0)</td></tr>
+                    <tr class="prnImcRow" id="imcRowPreObe"  data-imc-bg="#fef9c3" data-imc-color="#78350f"><td class="trgImcSub">Pré-obeso</td><td>25,0 – 29,9</td></tr>
+                    <tr class="prnImcRow" id="imcRowObesI"   data-imc-bg="#ffedd5" data-imc-color="#7c2d12"><td class="trgImcSub">Obeso I</td><td>30,0 – 34,9</td></tr>
+                    <tr class="prnImcRow" id="imcRowObesII"  data-imc-bg="#fce7f3" data-imc-color="#831843"><td class="trgImcSub">Obeso II</td><td>35,0 – 39,9</td></tr>
+                    <tr class="prnImcRow" id="imcRowObesIII" data-imc-bg="#fee2e2" data-imc-color="#7f1d1d"><td class="trgImcSub">Obeso III</td><td>≥ 40</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="trgSecTitle">Observações de Triagem</div>
+            <textarea id="trgObs" class="afInp trgObsTxt" placeholder="Queixas principais, alergias, motivo da consulta..."></textarea>
+            <div class="prnAbaActions">
+              <button class="btn bG bSm" onclick="ProntuarioMod.salvarTriagem()">💾 Salvar Triagem</button>
             </div>
           </div>
 
@@ -1169,7 +1239,7 @@
 <script src="js/modules/salas.js?v=20260629d"></script>
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
 <script src="js/modules/agenda.js?v=20260629j"></script>
-<script src="js/modules/prontuario.js?v=20260629i"></script>
+<script src="js/modules/prontuario.js?v=20260629j"></script>
 <script src="js/modules/recepcao.js?v=20260629h"></script>
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/core/main.js?v=20260629l"></script>
