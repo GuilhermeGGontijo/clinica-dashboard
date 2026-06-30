@@ -464,8 +464,8 @@ body.sb-active main>*{display:none!important}
 body.sb-home #secHome{display:block!important}
 body.sb-pacientes #modulePacientes{display:block!important}
 body.sb-agenda #secAgenda{display:flex!important;flex-direction:column}
-body.sb-prontuario main{padding:0!important;overflow:hidden;height:calc(100vh - 86px)}
-body.sb-prontuario #secProntuario{display:flex!important;flex-direction:column;height:100%!important}
+body.sb-prontuario main{padding:0!important;overflow:hidden;height:calc(100vh - 86px);max-width:100%!important;width:100%!important}
+body.sb-prontuario #secProntuario{display:flex!important;flex-direction:column;height:100%!important;width:100%!important;align-items:stretch!important;justify-content:flex-start!important}
 body.sb-relatorios #secRelatorios{display:block!important}
 body.sb-admin-cadastro #secAdminCadastro{display:block!important}
 body.sb-admin-controle #secAdminControle{display:block!important}
@@ -674,6 +674,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  width: 100%;
   gap: 10px;
 }
 
