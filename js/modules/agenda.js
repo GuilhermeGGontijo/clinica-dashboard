@@ -166,6 +166,7 @@ const AgendaMod = (function () {
   var _filtroProf    = '';
   var _filtroSala    = '';
   var _editandoId    = null;
+  var _convenios     = [];
   var _relogioTimer  = null;
   var _inicializado  = false;
 
@@ -205,7 +206,7 @@ const AgendaMod = (function () {
     try {
       _dbg('carregando salas/proc/profs...');
       var _timeout = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('Timeout: Supabase nao respondeu em 8s')); }, 8000); });
-      await Promise.race([Promise.all([_carregarSalas(), _carregarProcedimentos(), _carregarProfissionais()]), _timeout]);
+      await Promise.race([Promise.all([_carregarSalas(), _carregarProcedimentos(), _carregarProfissionais(), _carregarConvenios()]), _timeout]);
       _dbg('filtros e role...');
       _popularFiltros();
       _ajustarRole();
@@ -240,6 +241,25 @@ const AgendaMod = (function () {
       .eq('ativo', true).order('nome');
     _profissionais = r.data || [];
   }
+  async function _carregarConvenios () {
+    var r = await _sb.from('convenios').select('id,nome').eq('ativo', true).order('nome');
+    _convenios = r.data || [];
+  }
+
+  function _popularConvenioSelect (selectedId) {
+    var el = sid('agConvenioId'); if (!el) return;
+    el.innerHTML = '<option value="">— Selecione o convênio —</option>'
+      + _convenios.map(function (c) {
+          return '<option value="' + c.id + '"' + (c.id == selectedId ? ' selected' : '') + '>' + esc(c.nome) + '</option>';
+        }).join('');
+  }
+
+  function onFormaPgtoChange () {
+    var forma = ((sid('agFormaPgto') || {}).value) || '';
+    var wrap  = sid('agConvenioWrap');
+    if (wrap) wrap.style.display = forma === 'CONVENIO' ? 'block' : 'none';
+  }
+
   async function _carregarAgendamentos () {
     var ini, fim;
     if (_view === 'mes') {
@@ -568,6 +588,12 @@ const AgendaMod = (function () {
     if (_filtroProf && !profId) { el = sid('agProfId'); if (el) el.value = _filtroProf; }
     if (_filtroSala && !salaId) { el = sid('agSalaId'); if (el) el.value = _filtroSala; }
     if (USER_ROLE === 'profissional_saude' && USER_PROFILE) { el = sid('agProfId'); if (el) el.value = USER_PROFILE.id; }
+    _popularConvenioSelect(null);
+    el = sid('agFormaPgto');  if (el) el.value = '';
+    el = sid('agConvenioId'); if (el) el.value = '';
+    el = sid('agNumGuia');    if (el) el.value = '';
+    el = sid('agValorCob');   if (el) el.value = '';
+    onFormaPgtoChange();
     el = sid('modalAgendamento'); if (el) el.style.display = 'flex';
   }
 
@@ -594,6 +620,12 @@ const AgendaMod = (function () {
     el = sid('agSalaId'); if (el) el.value = ag.sala_id || '';
     el = sid('agProcId'); if (el) el.value = ag.procedimento_id || '';
     if (USER_ROLE === 'profissional_saude') _habilitarCampos(false, ['agStatus', 'agObs']);
+    _popularConvenioSelect(ag.convenio_id);
+    el = sid('agFormaPgto');  if (el) el.value = ag.forma_pagamento  || '';
+    el = sid('agConvenioId'); if (el) el.value = ag.convenio_id       || '';
+    el = sid('agNumGuia');    if (el) el.value = ag.numero_guia       || '';
+    el = sid('agValorCob');   if (el) el.value = ag.valor_cobrado     || '';
+    onFormaPgtoChange();
     el = sid('modalAgendamento'); if (el) el.style.display = 'flex';
   }
 
@@ -614,7 +646,7 @@ const AgendaMod = (function () {
   }
 
   function _habilitarCampos (hab, excluir) {
-    ['agPacBusca','agProfId','agSalaId','agProcId','agData','agHoraInicio','agHoraFim','agStatus','agObs'].forEach(function (id) {
+    ['agPacBusca','agProfId','agSalaId','agProcId','agData','agHoraInicio','agHoraFim','agStatus','agObs','agFormaPgto','agConvenioId','agNumGuia','agValorCob'].forEach(function (id) {
       var el = sid(id); if (!el) return;
       el.disabled = !hab;
     });
@@ -704,11 +736,20 @@ const AgendaMod = (function () {
     }
     var cb2 = sid('agConflito'); if (cb2) cb2.style.display = 'none';
 
+    var formaPgto = ((sid('agFormaPgto')  || {}).value || '').trim() || null;
+    var convId    = ((sid('agConvenioId') || {}).value || '').trim() || null;
+    var numGuia   = ((sid('agNumGuia')    || {}).value || '').trim() || null;
+    var valorCob  = parseFloat((sid('agValorCob') || {}).value) || null;
+
     var payload = {
       unidade_id: CU, sala_id: salaId || null, profissional_id: profId || null,
       procedimento_id: procId || null, data_agendamento: data,
       hora_inicio: hi, hora_fim: hf, status: status,
-      observacoes: obs || null, atualizado_em: new Date().toISOString()
+      observacoes: obs || null, atualizado_em: new Date().toISOString(),
+      forma_pagamento: formaPgto,
+      convenio_id:     convId ? parseInt(convId) : null,
+      numero_guia:     numGuia,
+      valor_cobrado:   valorCob
     };
 
     var error;
@@ -786,7 +827,8 @@ const AgendaMod = (function () {
 
   return { init, render, navData, irHoje, setView, filtrar, abrirModalNovo, abrirModalEditar,
            fecharModal, salvarAgendamento, excluirAgendamento, buscarPaciente, selecionarPaciente,
-           pacItemClick, slotClick, cardClick, sugerirFim, aoSelecionarProcedimento, mesDiaClick };
+           pacItemClick, slotClick, cardClick, sugerirFim, aoSelecionarProcedimento, mesDiaClick,
+           onFormaPgtoChange };
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════════

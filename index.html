@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260629c">
+  <link rel="stylesheet" href="css/style.css?v=20260630a">
 </head>
 <body>
 
@@ -115,6 +115,9 @@
       <div class="sbSubItem" data-mod="fin-dashboard" onclick="switchSidebar('fin-dashboard')">
         Dashboard
       </div>
+      <div class="sbSubItem" data-mod="recebimentos" onclick="switchSidebar('recebimentos')">
+        Recebimentos
+      </div>
     </div>
 
     <div class="sbDivider"></div>
@@ -139,6 +142,9 @@
       </div>
       <div class="sbSubItem" data-mod="admin-atendimentos" onclick="switchSidebar('admin-atendimentos')">
         Cadastrar Atendimentos
+      </div>
+      <div class="sbSubItem" data-mod="admin-convenios" onclick="switchSidebar('admin-convenios')">
+        Cadastro de Convênios
       </div>
     </div>
 
@@ -567,6 +573,71 @@
   </div>
 </div>
 
+<!-- ════ SEÇÃO: CONVÊNIOS ════ -->
+<div id="secAdminConvenios">
+  <div class="convHdr">
+    <div>
+      <div class="convHdrTitle">🤝 Cadastro de Convênios</div>
+      <div class="convHdrSub">Gerencie os planos de saúde e formas de convênio aceitas pela clínica</div>
+    </div>
+    <button class="btn bG bSm" onclick="ConveniosMod.abrirNovo()">➕ Novo Convênio</button>
+  </div>
+  <div id="convListWrap">
+    <div class="convVazio">⏳ Carregando convênios...</div>
+  </div>
+</div>
+
+<!-- ════ SEÇÃO: RECEBIMENTOS ════ -->
+<div id="secRecebimentos">
+  <div class="recebHdr">
+    <div class="recebHdrTitle">💳 Recebimentos</div>
+    <div class="recebHdrSub">Controle de pagamentos dos atendimentos realizados</div>
+  </div>
+
+  <div class="recebKpis">
+    <div class="recebKpi">
+      <div class="recebKpiLabel">Total do Período</div>
+      <div class="recebKpiVal" id="recebKpiTotal">—</div>
+    </div>
+    <div class="recebKpi green">
+      <div class="recebKpiLabel">Recebidos</div>
+      <div class="recebKpiVal" id="recebKpiPagos">—</div>
+    </div>
+    <div class="recebKpi amber">
+      <div class="recebKpiLabel">Pendentes</div>
+      <div class="recebKpiVal" id="recebKpiPend">—</div>
+    </div>
+    <div class="recebKpi green">
+      <div class="recebKpiLabel">Valor Recebido</div>
+      <div class="recebKpiVal" id="recebKpiValor">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div class="recebFiltros">
+    <div>
+      <label>De</label>
+      <input type="date" id="recebFiltroIni"/>
+    </div>
+    <div>
+      <label>Até</label>
+      <input type="date" id="recebFiltroFim"/>
+    </div>
+    <div>
+      <label>Status</label>
+      <select id="recebFiltroStatus">
+        <option value="">Todos</option>
+        <option value="PENDENTE">Pendentes</option>
+        <option value="RECEBIDO">Recebidos</option>
+      </select>
+    </div>
+    <button class="btn bG bSm" onclick="RecebMod.filtrar()" style="align-self:flex-end">🔍 Filtrar</button>
+  </div>
+
+  <div id="recebListWrap">
+    <div class="recebVazio">⏳ Carregando...</div>
+  </div>
+</div>
+
 <div id="printHeader">
   <h1 id="phTitle">Relatório — Clínica da Família</h1>
   <p id="phSub">Gerado em: <strong id="phDate"></strong></p>
@@ -979,6 +1050,36 @@
       <label class="afLabel">Observações</label>
       <textarea id="agObs" class="afInp" rows="2" placeholder="Anotações adicionais..." style="resize:vertical"></textarea>
     </div>
+    <!-- Pagamento -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">Forma de Pagamento</label>
+        <select id="agFormaPgto" class="afInp" onchange="AgendaMod.onFormaPgtoChange()">
+          <option value="">— Selecione —</option>
+          <option value="DINHEIRO">Dinheiro</option>
+          <option value="PIX">PIX</option>
+          <option value="CREDITO">Cartão de Crédito</option>
+          <option value="DEBITO">Cartão de Débito</option>
+          <option value="CONVENIO">Convênio</option>
+        </select>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Valor Cobrado (R$)</label>
+        <input type="number" id="agValorCob" class="afInp" placeholder="0,00" min="0" step="0.01"/>
+      </div>
+    </div>
+    <div id="agConvenioWrap" style="display:none;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="patFG">
+          <label class="afLabel">Convênio</label>
+          <select id="agConvenioId" class="afInp"></select>
+        </div>
+        <div class="patFG">
+          <label class="afLabel">Nº Guia / Autorização</label>
+          <input type="text" id="agNumGuia" class="afInp" placeholder="Número da guia..."/>
+        </div>
+      </div>
+    </div>
     <div id="agConflito" class="agConflitoBadge" style="display:none;margin-bottom:12px">
       &#9888; <span id="agConflitoMsg"></span>
     </div>
@@ -1184,6 +1285,90 @@
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)" />
 
 
+<!-- MODAL CONVÊNIO -->
+<div id="modalConvenio" class="ovl" style="display:none;align-items:center" onclick="if(event.target===this)ConveniosMod.fecharModal()">
+  <div class="mBox" style="max-width:480px;width:96%;padding:24px 22px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h3 id="convModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">➕ Novo Convênio</h3>
+      <button class="bDel" onclick="ConveniosMod.fecharModal()" style="font-size:1.1rem;padding:2px 7px">✕</button>
+    </div>
+    <div class="patFG" style="margin-bottom:10px">
+      <label class="afLabel">Nome do Convênio *</label>
+      <input type="text" id="convNome" class="afInp" placeholder="Ex: Unimed, Bradesco Saúde..."/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">Tipo</label>
+        <select id="convTipo" class="afInp">
+          <option value="SAUDE">Saúde</option>
+          <option value="ODONTO">Odontologia</option>
+          <option value="VIDA">Vida</option>
+          <option value="PARTICULAR">Particular</option>
+          <option value="DPVAT">DPVAT</option>
+          <option value="OUTRO">Outro</option>
+        </select>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Código ANS (opcional)</label>
+        <input type="text" id="convCodigo" class="afInp" placeholder="000000"/>
+      </div>
+    </div>
+    <div class="patFG" style="margin-bottom:18px;display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="convAtivo" checked style="width:16px;height:16px;cursor:pointer"/>
+      <label for="convAtivo" class="afLabel" style="margin:0;cursor:pointer">Convênio ativo</label>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn bGh bSm" onclick="ConveniosMod.fecharModal()">Cancelar</button>
+      <button class="btn bG  bSm" onclick="ConveniosMod.salvar()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RECEBIMENTO (Dar Baixa) -->
+<div id="modalRecebimento" class="ovl" style="display:none;align-items:center" onclick="if(event.target===this)RecebMod.fecharModal()">
+  <div class="mBox" style="max-width:460px;width:96%;padding:24px 22px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3 style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">💰 Dar Baixa no Pagamento</h3>
+      <button class="bDel" onclick="RecebMod.fecharModal()" style="font-size:1.1rem;padding:2px 7px">✕</button>
+    </div>
+    <div id="recebModalInfo" class="recebModalInfo">—</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">Forma de Pagamento *</label>
+        <select id="recebForma" class="afInp" onchange="RecebMod.onFormaChange()">
+          <option value="DINHEIRO">Dinheiro</option>
+          <option value="PIX">PIX</option>
+          <option value="CREDITO">Cartão de Crédito</option>
+          <option value="DEBITO">Cartão de Débito</option>
+          <option value="CONVENIO">Convênio</option>
+        </select>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Valor Recebido (R$) *</label>
+        <input type="number" id="recebValorInput" class="afInp" placeholder="0,00" min="0" step="0.01"/>
+      </div>
+    </div>
+    <div id="recebConvenioWrap" style="display:none;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">Convênio</label>
+        <select id="recebConvenioId" class="afInp"></select>
+      </div>
+    </div>
+    <div class="patFG" style="margin-bottom:10px">
+      <label class="afLabel">Data do Recebimento *</label>
+      <input type="date" id="recebData" class="afInp"/>
+    </div>
+    <div class="patFG" style="margin-bottom:18px">
+      <label class="afLabel">Observações</label>
+      <input type="text" id="recebObs" class="afInp" placeholder="Referência, comprovante..."/>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn bGh bSm" onclick="RecebMod.fecharModal()">Cancelar</button>
+      <button class="btn bG  bSm" onclick="RecebMod.salvarBaixa()">✅ Confirmar Recebimento</button>
+    </div>
+  </div>
+</div>
+
 <!-- PRONTUÁRIO: Modal Salvar Modelo -->
 <div id="modalSalvarModelo" class="ovl"
      onclick="if(event.target===this)ProntuarioMod.fecharSalvarModelo()">
@@ -1238,11 +1423,13 @@
 <script src="js/modules/financeiro.js?v=20260629d"></script>
 <script src="js/modules/salas.js?v=20260629d"></script>
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
-<script src="js/modules/agenda.js?v=20260629j"></script>
+<script src="js/modules/agenda.js?v=20260630a"></script>
 <script src="js/modules/prontuario.js?v=20260629j"></script>
 <script src="js/modules/recepcao.js?v=20260629h"></script>
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
-<script src="js/core/main.js?v=20260629l"></script>
+<script src="js/modules/convenios.js?v=20260630a"></script>
+<script src="js/modules/recebimentos.js?v=20260630a"></script>
+<script src="js/core/main.js?v=20260630a"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');

@@ -131,6 +131,8 @@ function switchSidebar(mod){
     AtendMod.init();
   },50); }
   if(mod==='admin-recepcao'){ setTimeout(function(){ RecepMod.init(); },50); }
+  if(mod==='admin-convenios'){ setTimeout(function(){ ConveniosMod.init(); },50); }
+  if(mod==='recebimentos'){ setTimeout(function(){ RecebMod.init(); },50); }
 }
 
 function toggleSbGroup(el,grpId){

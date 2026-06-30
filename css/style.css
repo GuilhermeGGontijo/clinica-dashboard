@@ -453,6 +453,7 @@ body.sidebar-open #moduleNav{display:none!important}
 #secHome,#secProntuario,#secAgenda,#secRelatorios,
 #secAdminCadastro,#secAdminControle,#secAdminUnidades,
 #secAdminSalas,#secAdminAtendimentos,#secAdminRecepcao,
+#secAdminConvenios,#secRecebimentos,
 #modulePacientes{display:none}
 /* Elementos soltos do fin-dashboard também ocultos por padrão */
 #printHeader,.topGrid,.agFormWrap,#slCadastro,
@@ -472,6 +473,9 @@ body.sb-admin-controle #secAdminControle{display:block!important}
 body.sb-admin-unidades #secAdminUnidades{display:block!important}
 body.sb-admin-salas #secAdminSalas{display:block!important}
 body.sb-admin-atendimentos #secAdminAtendimentos{display:block!important}
+body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
+body.sb-admin-convenios #secAdminConvenios{display:block!important}
+body.sb-recebimentos #secRecebimentos{display:block!important}
 body.sb-fin-dashboard #printHeader,
 body.sb-fin-dashboard #slCadastro,body.sb-fin-dashboard .topGrid,
 body.sb-fin-dashboard #slKpis,body.sb-fin-dashboard .kpiGrid,
@@ -1259,4 +1263,78 @@ body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
 
 /* Obs textarea triagem */
 .trgObsTxt{resize:vertical;min-height:60px;max-height:120px;font-size:.85rem;}
+
+/* ══ CONVÊNIOS ══ */
+#secAdminConvenios{padding:0}
+.convHdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  background:var(--w);border:1px solid var(--s2);border-radius:var(--R);
+  padding:16px 20px;margin-bottom:16px;box-shadow:var(--sh)}
+.convHdrTitle{font-size:1.05rem;font-weight:800;color:var(--s9)}
+.convHdrSub{font-size:.8rem;color:var(--s4);margin-top:3px}
+.convListWrap{display:flex;flex-direction:column;gap:10px}
+.convCard{background:var(--w);border:1px solid var(--s2);border-radius:var(--R);
+  padding:14px 18px;box-shadow:var(--sh);display:flex;align-items:center;
+  justify-content:space-between;gap:12px;transition:box-shadow .2s}
+.convCard:hover{box-shadow:var(--shm)}
+.convCardInativo{opacity:.6}
+.convCardMain{flex:1;min-width:0}
+.convCardNome{font-size:.95rem;font-weight:700;color:var(--s9);margin-bottom:5px}
+.convCardMeta{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.convTipoBadge{display:inline-block;padding:2px 10px;border-radius:99px;
+  background:var(--b1);color:var(--b6);font-size:.7rem;font-weight:700}
+.convCodigo{display:inline-block;padding:2px 10px;border-radius:99px;
+  background:var(--s1);color:var(--s5);font-size:.7rem;font-weight:600}
+.convBadgeAtivo{display:inline-block;padding:2px 10px;border-radius:99px;
+  background:var(--g1);color:var(--g7);font-size:.7rem;font-weight:700}
+.convBadgeInativo{display:inline-block;padding:2px 10px;border-radius:99px;
+  background:var(--r1);color:var(--r6);font-size:.7rem;font-weight:700}
+.convCardBtns{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap}
+.convBtnEdit{background:var(--s1);color:var(--s7)!important;border-color:var(--s2)!important}
+.convBtnInativa{background:#fff8ed;color:#b45309!important;border-color:#fcd34d!important}
+.convBtnAtiva{background:var(--g1);color:var(--g7)!important;border-color:var(--g5)!important}
+.convVazio{padding:40px;text-align:center;color:var(--s4);font-size:.88rem;
+  background:var(--s0);border:1px dashed var(--s2);border-radius:var(--R)}
+
+/* ══ RECEBIMENTOS ══ */
+#secRecebimentos{padding:0}
+.recebHdr{background:var(--w);border:1px solid var(--s2);border-radius:var(--R);
+  padding:16px 20px;margin-bottom:16px;box-shadow:var(--sh)}
+.recebHdrTitle{font-size:1.05rem;font-weight:800;color:var(--s9);margin-bottom:3px}
+.recebHdrSub{font-size:.8rem;color:var(--s4)}
+.recebKpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:700px){.recebKpis{grid-template-columns:repeat(2,1fr)}}
+.recebKpi{background:var(--w);border:1px solid var(--s2);border-radius:var(--R);
+  padding:14px 16px;box-shadow:var(--sh);text-align:center}
+.recebKpiLabel{font-size:.7rem;font-weight:700;color:var(--s4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.recebKpiVal{font-size:1.4rem;font-weight:800;color:var(--s9)}
+.recebKpi.green .recebKpiVal{color:var(--g6)}
+.recebKpi.amber .recebKpiVal{color:#d97706}
+.recebKpi.red   .recebKpiVal{color:var(--r6)}
+.recebFiltros{background:var(--w);border:1px solid var(--s2);border-radius:var(--R);
+  padding:12px 16px;margin-bottom:14px;display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;box-shadow:var(--sh)}
+.recebFiltros label{font-size:.72rem;font-weight:700;color:var(--s5);display:block;margin-bottom:3px}
+.recebFiltros input,.recebFiltros select{font-size:.82rem;padding:6px 10px;border:1px solid var(--s2);
+  border-radius:var(--Rs);background:var(--s0);color:var(--s8)}
+.recebTableWrap{overflow-x:auto;background:var(--w);border:1px solid var(--s2);
+  border-radius:var(--R);box-shadow:var(--sh)}
+.recebTable{width:100%;border-collapse:collapse;font-size:.82rem}
+.recebTable th{background:var(--s1);color:var(--s5);padding:10px 12px;text-align:left;
+  font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  border-bottom:1px solid var(--s2);white-space:nowrap}
+.recebTable td{padding:10px 12px;border-bottom:1px solid var(--s1);color:var(--s7);vertical-align:middle}
+.recebTable tr:last-child td{border-bottom:none}
+.recebTable tr:hover td{background:var(--s0)}
+.recebTdData{font-weight:600;white-space:nowrap}
+.recebHora{color:var(--s4)}
+.recebValor{font-weight:700;color:var(--s9);white-space:nowrap}
+.recebStPago{display:inline-block;padding:3px 10px;border-radius:99px;
+  background:var(--g1);color:var(--g7);font-size:.72rem;font-weight:700;white-space:nowrap}
+.recebStPend{display:inline-block;padding:3px 10px;border-radius:99px;
+  background:#fef3c7;color:#92400e;font-size:.72rem;font-weight:700;white-space:nowrap}
+.recebBtnBaixa{background:var(--g6)!important;color:#fff!important;border-color:var(--g7)!important}
+.recebBtnEstorno{background:#fff3cd!important;color:#7c3f00!important;border-color:#fcd34d!important}
+.recebVazio{padding:40px;text-align:center;color:var(--s4);font-size:.88rem;
+  background:var(--s0);border:1px dashed var(--s2);border-radius:var(--R)}
+.recebModalInfo{font-size:.82rem;color:var(--s5);background:var(--s0);
+  border:1px solid var(--s2);border-radius:var(--Rs);padding:8px 12px;margin-bottom:14px}
 </style>
