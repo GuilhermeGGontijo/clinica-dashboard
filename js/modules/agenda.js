@@ -691,7 +691,17 @@ const AgendaMod = (function () {
     var dur = pc && pc.selectedOptions[0] ? (parseInt(pc.selectedOptions[0].dataset.dur, 10) || 30) : 30;
     var hf = sid('agHoraFim'); if (hf) hf.value = _somarMin(hi.value, dur);
   }
-  function aoSelecionarProcedimento () { sugerirFim(); }
+  function aoSelecionarProcedimento () {
+    sugerirFim();
+    var procEl = sid('agProcId');
+    if (!procEl || !procEl.value) return;
+    var proc = _procedimentos.find(function (p) { return String(p.id) === String(procEl.value); });
+    if (!proc) return;
+    var valEl = sid('agValorCob');
+    if (valEl && (!valEl.value || parseFloat(valEl.value) === 0)) {
+      valEl.value = proc.valor != null ? parseFloat(proc.valor).toFixed(2) : '';
+    }
+  }
 
   /* ── Validação de conflito ── */
   function _conflito (salaId, profId, data, hi, hf, excluirId) {
