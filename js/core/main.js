@@ -63,11 +63,11 @@ function ldL(){ return lsGet(KL(),{}); }
 function ldD(){ return lsGet(KD(),{}); }
 function ldA(){ return lsGet(KA(),{}); }
 function ldC(){ return lsGet(KC(),{start:8,end:18}); }
-function svG(a){ return lsSet(KG(),a); }
-function svL(o){ return lsSet(KL(),o); }
-function svD(o){ if(lsSet(KD(),o)){stamp();return true;}return false; }
-function svA(o){ return lsSet(KA(),o); }
-function svC(o){ return lsSet(KC(),o); }
+function svG(a){ lsSet(KG(),a); FinDb.saveServicos(CU,a); return true; }
+function svL(o){ lsSet(KL(),o); FinDb.saveLancamentos(CU,o); return true; }
+function svD(o){ if(lsSet(KD(),o)){stamp(); FinDb.saveKpis(CU,o); return true;} return false; }
+function svA(o){ lsSet(KA(),o); FinDb.saveAgendaFixa(CU,o); return true; }
+function svC(o){ lsSet(KC(),o); FinDb.saveAgendaConfig(CU,o); return true; }
 
 function getLancM(m){ const a=ldL();return a[m]||{}; }
 function setLancM(m,d){ const a=ldL();a[m]=d;return svL(a); }
@@ -248,8 +248,12 @@ function switchModule(mod){
   document.getElementById('loginOverlay').style.display = 'none';
   /* Oculta imediatamente todo conteúdo de main enquanto carrega dados */
   document.body.classList.add('sb-active');
-  /* Carrega dados do Supabase antes de renderizar */
+  /* 1. Carrega dados financeiros da tabela dedicada (financeiro_dados) */
+  await FinDb.loadAll();
+  /* 2. Carrega demais chaves do backup genérico (clinica_dados) */
   await supaLoad();
+  /* 3. Migra dados do localStorage → financeiro_dados se a tabela estiver vazia */
+  FinDb.migrarSeVazio();
   await loadUserProfile(); applyRoleVisibility();
   showSidebar(); switchSidebar('home');
   /* Logo — header e tela de login */
@@ -437,7 +441,7 @@ function toast(msg,type){const el=sid('toast');el.textContent=msg;el.className='
 function getMetaAbs(){ return parseFloat(lsGet('cfv4_meta_abs',10))||10; }
 function saveMetaAbs(v){
   var val=parseFloat(v);
-  if(!isNaN(val)&&val>=0) lsSet('cfv4_meta_abs',val);
+  if(!isNaN(val)&&val>=0){ lsSet('cfv4_meta_abs',val); FinDb.saveMeta(val); }
   var d=getInputs(); updateCards(calc(d),d);
 }
 function loadMetaAbs(){
