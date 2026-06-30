@@ -454,6 +454,10 @@ body.sidebar-open #moduleNav{display:none!important}
 #secAdminCadastro,#secAdminControle,#secAdminUnidades,
 #secAdminSalas,#secAdminAtendimentos,#secAdminRecepcao,
 #modulePacientes{display:none}
+/* Elementos soltos do fin-dashboard também ocultos por padrão */
+#printHeader,.topGrid,.agFormWrap,#slCadastro,
+#slKpis,.kpiGrid,#slComparativo,.compWrap,
+#slOcupacao,.gcWrap,#slHistorico,.histWrap{display:none}
 
 /* Com sidebar ativo oculta tudo; cada classe sb- revela o seu módulo */
 body.sb-active main>*{display:none!important}

@@ -246,6 +246,8 @@ function switchModule(mod){
     return;
   }
   document.getElementById('loginOverlay').style.display = 'none';
+  /* Oculta imediatamente todo conteúdo de main enquanto carrega dados */
+  document.body.classList.add('sb-active');
   /* Carrega dados do Supabase antes de renderizar */
   await supaLoad();
   await loadUserProfile(); applyRoleVisibility();
