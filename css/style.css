@@ -7,6 +7,8 @@
 :root{
   --g9:#14532d;--g7:#15803d;--g6:#16a34a;--g5:#22c55e;--g1:#dcfce7;--g0:#f0fdf4;
   --r7:#b91c1c;--r6:#dc2626;--r1:#fee2e2;
+  --b6:#2563eb;--b5:#3b82f6;--b4:#60a5fa;--b3:#93c5fd;--b1:#dbeafe;--b0:#eff6ff;
+  --a8:#92400e;--a6:#d97706;--a5:#f59e0b;--a3:#fcd34d;--a1:#fef3c7;--a0:#fffbeb;
   --w:#ffffff;
   --s9:#0f172a;--s7:#334155;--s5:#64748b;--s4:#94a3b8;--s2:#e2e8f0;--s1:#f1f5f9;--s0:#f8fafc;
   --amb:#b45309;
@@ -1147,4 +1149,63 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 
 /* Hint de repasse */
 .atdRepasseHint{margin-top:5px;font-size:.72rem;color:var(--s4);}
+
+/* ══════════════════════════════════════════════════════════════════
+   MÓDULO RECEPÇÃO
+   ══════════════════════════════════════════════════════════════════ */
+body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
+
+#secAdminRecepcao{padding:24px 28px;max-width:1100px;}
+
+/* Header */
+.rcpHdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:12px;}
+.rcpHdrTitulo{font-size:1.4rem;font-weight:800;color:var(--s9);}
+.rcpHdrData{font-size:.85rem;color:var(--s5);margin-top:3px;text-transform:capitalize;}
+
+/* Stats */
+.rcpStats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
+.rcpStatCard{background:var(--w);border:1px solid var(--s2);border-radius:14px;padding:18px 16px;text-align:center;box-shadow:var(--sh);}
+.rcpStatSt0{border-top:3px solid var(--s4);}
+.rcpStatSt1{border-top:3px solid var(--a5);}
+.rcpStatSt2{border-top:3px solid var(--b5);}
+.rcpStatSt3{border-top:3px solid var(--g5);}
+.rcpStatEmoji{font-size:1.7rem;line-height:1;margin-bottom:6px;}
+.rcpStatNum{font-size:2.1rem;font-weight:800;color:var(--s9);line-height:1;}
+.rcpStatLabel{font-size:.72rem;color:var(--s4);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:4px;}
+
+/* Grupos */
+.rcpListWrap{display:flex;flex-direction:column;gap:0;}
+.rcpGrupo{margin-bottom:22px;}
+.rcpGrupoTitulo{font-size:.88rem;font-weight:700;color:var(--s5);padding-bottom:8px;border-bottom:2px solid var(--s2);margin-bottom:10px;}
+.rcpGrupoCnt{font-weight:400;}
+
+/* Cards */
+.rcpCard{display:flex;align-items:center;gap:16px;background:var(--w);border:1px solid var(--s2);border-radius:12px;padding:14px 18px;margin-bottom:9px;transition:box-shadow .15s;}
+.rcpCard:hover{box-shadow:var(--sh);}
+.rcpCardSt_chegou{background:var(--a0);border-color:var(--a3);border-left:4px solid var(--a5);}
+.rcpCardSt_em_atendimento{background:var(--b0);border-color:var(--b3);border-left:4px solid var(--b5);}
+.rcpCardSt_finalizado{background:var(--g0);border-color:var(--g1);border-left:4px solid var(--g5);opacity:.75;}
+
+.rcpCardLeft{text-align:center;min-width:50px;}
+.rcpCardHora{font-size:.78rem;font-weight:800;color:var(--s5);margin-bottom:2px;}
+.rcpCardEmoji{font-size:1.8rem;line-height:1;}
+
+.rcpCardBody{flex:1;min-width:0;}
+.rcpCardNome{font-size:1rem;font-weight:700;color:var(--s9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rcpCardMeta{font-size:.78rem;color:var(--s5);margin-top:3px;}
+.rcpTimer{display:inline-block;margin-top:7px;font-size:.78rem;font-weight:700;color:var(--a6);background:var(--a1);border-radius:20px;padding:3px 12px;border:1px solid var(--a3);}
+.rcpCardSt_em_atendimento .rcpTimer{color:var(--b6);background:var(--b1);border-color:var(--b3);}
+
+.rcpCardAcoes{display:flex;flex-direction:column;gap:7px;min-width:200px;align-items:stretch;}
+.rcpBtnSt{font-size:.82rem;font-weight:700;padding:8px 14px;border-radius:9px;cursor:pointer;border:none;transition:all .15s;text-align:center;}
+.rcpBtnSt_chegou{background:var(--a1);color:var(--a8);border:1px solid var(--a3);}
+.rcpBtnSt_chegou:hover{background:var(--a3);}
+.rcpBtnSt_em_atendimento{background:var(--b5);color:#fff;}
+.rcpBtnSt_em_atendimento:hover{background:var(--b6);}
+.rcpBtnSt_finalizado{background:var(--g5);color:#fff;}
+.rcpBtnSt_finalizado:hover{background:var(--g6);}
+.rcpBtnPrn{font-size:.82rem;font-weight:600;padding:8px 14px;background:var(--s1);color:var(--s7);border:1px solid var(--s2);border-radius:9px;cursor:pointer;transition:all .15s;}
+.rcpBtnPrn:hover{background:var(--s2);color:var(--s9);}
+
+.rcpVazio{text-align:center;padding:60px 20px;color:var(--s4);font-size:.95rem;}
 </style>

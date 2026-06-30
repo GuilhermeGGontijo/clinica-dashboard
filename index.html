@@ -136,6 +136,9 @@
       <div class="sbSubItem" data-mod="admin-atendimentos" onclick="switchSidebar('admin-atendimentos')">
         Cadastrar Atendimentos
       </div>
+      <div class="sbSubItem" data-mod="admin-recepcao" onclick="switchSidebar('admin-recepcao')">
+        🏥 Recepção
+      </div>
     </div>
 
   </div>
@@ -452,6 +455,44 @@
 
   <div id="atdListWrap" class="atdListWrap">
     <div class="atdVazio">Carregando...</div>
+  </div>
+</div>
+
+<!-- ════ SEÇÃO: RECEPÇÃO ════ -->
+<div id="secAdminRecepcao">
+  <div class="rcpHdr">
+    <div>
+      <div class="rcpHdrTitulo">🏥 Recepção</div>
+      <div id="rcpDataLabel" class="rcpHdrData">—</div>
+    </div>
+    <button class="btn bG bSm" onclick="RecepMod.atualizar()">🔄 Atualizar</button>
+  </div>
+
+  <div class="rcpStats">
+    <div class="rcpStatCard rcpStatSt0">
+      <div class="rcpStatEmoji">⏳</div>
+      <div class="rcpStatNum" id="rcpCntAgendado">0</div>
+      <div class="rcpStatLabel">Agendados</div>
+    </div>
+    <div class="rcpStatCard rcpStatSt1">
+      <div class="rcpStatEmoji">🟡</div>
+      <div class="rcpStatNum" id="rcpCntChegou">0</div>
+      <div class="rcpStatLabel">Na Unidade</div>
+    </div>
+    <div class="rcpStatCard rcpStatSt2">
+      <div class="rcpStatEmoji">🩺</div>
+      <div class="rcpStatNum" id="rcpCntAtend">0</div>
+      <div class="rcpStatLabel">Em Atendimento</div>
+    </div>
+    <div class="rcpStatCard rcpStatSt3">
+      <div class="rcpStatEmoji">✅</div>
+      <div class="rcpStatNum" id="rcpCntFinal">0</div>
+      <div class="rcpStatLabel">Finalizados</div>
+    </div>
+  </div>
+
+  <div id="rcpListWrap" class="rcpListWrap">
+    <div class="rcpVazio">⏳ Carregando...</div>
   </div>
 </div>
 
@@ -1128,6 +1169,7 @@
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
 <script src="js/modules/agenda.js?v=20260629d"></script>
 <script src="js/modules/prontuario.js?v=20260629g"></script>
+<script src="js/modules/recepcao.js?v=20260629h"></script>
 <script src="js/core/main.js?v=20260629d"></script>
 <script>
 window.addEventListener('load', function() {

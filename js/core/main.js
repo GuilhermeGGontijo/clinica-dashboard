@@ -130,6 +130,7 @@ function switchSidebar(mod){
     var el=sid('atdUnitLabel'); if(el) el.textContent=u?u.name:CU;
     AtendMod.init();
   },50); }
+  if(mod==='admin-recepcao'){ setTimeout(function(){ RecepMod.init(); },50); }
 }
 
 function toggleSbGroup(el,grpId){
