@@ -31,6 +31,27 @@ const UsuariosMod = (function () {
     'CRF','CFBM','CRESS','CFM','CFO','CFP','CFF','CFTS','OUTRO'
   ];
 
+  var ESPECIALIDADES_MEDICAS = [
+    'Acupuntura','Alergia e Imunologia','Anestesiologia','Angiologia',
+    'Cancerologia','Cardiologia','Cirurgia Cardiovascular','Cirurgia da Mão',
+    'Cirurgia de Cabeça e Pescoço','Cirurgia do Aparelho Digestivo',
+    'Cirurgia Geral','Cirurgia Pediátrica','Cirurgia Plástica',
+    'Cirurgia Torácica','Cirurgia Vascular','Clínica Médica','Coloproctologia',
+    'Dermatologia','Endocrinologia e Metabologia','Endoscopia',
+    'Gastroenterologia','Genética Médica','Geriatria',
+    'Ginecologia e Obstetrícia','Hematologia e Hemoterapia','Homeopatia',
+    'Infectologia','Mastologia','Medicina de Emergência',
+    'Medicina de Família e Comunidade','Medicina do Trabalho',
+    'Medicina do Tráfego','Medicina Esportiva','Medicina Física e Reabilitação',
+    'Medicina Intensiva','Medicina Legal e Perícia Médica','Medicina Nuclear',
+    'Medicina Preventiva e Social','Nefrologia','Neurocirurgia','Neurologia',
+    'Nutrologia','Oftalmologia','Ortopedia e Traumatologia',
+    'Otorrinolaringologia','Patologia','Patologia Clínica / Med. Laboratorial',
+    'Pediatria','Pneumologia','Psiquiatria',
+    'Radiologia e Diagnóstico por Imagem','Radioterapia',
+    'Reumatologia','Urologia'
+  ];
+
   var UFS = [
     'AC','AL','AM','AP','BA','CE','DF','ES','GO','MA',
     'MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN',
@@ -114,6 +135,11 @@ const UsuariosMod = (function () {
               + esc(u.conselho_tipo) + ' ' + esc(u.conselho_numero)
               + (u.conselho_uf ? '/' + esc(u.conselho_uf) : '') + '</div>'
             : '')
+      +   (u.especialidade_medica
+            ? '<div class="usuMetaRow">🎓 Esp: ' + esc(u.especialidade_medica)
+              + (u.rqe_numero ? ' — RQE ' + esc(u.rqe_numero) + (u.rqe_uf ? '/' + esc(u.rqe_uf) : '') : '')
+              + '</div>'
+            : '')
       + '</div>'
       + '<div class="usuCardStatus">'
       +   (ativo
@@ -145,11 +171,19 @@ const UsuariosMod = (function () {
         + CONSELHOS.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
       ctEl.dataset.populated = '1';
     }
+    var _ufOpts = '<option value="">UF</option>'
+      + UFS.map(function(u){ return '<option value="' + u + '">' + u + '</option>'; }).join('');
     var ufEl = sid('usuConselhoUF');
-    if (ufEl && !ufEl.dataset.populated) {
-      ufEl.innerHTML = '<option value="">UF</option>'
-        + UFS.map(function(u){ return '<option value="' + u + '">' + u + '</option>'; }).join('');
-      ufEl.dataset.populated = '1';
+    if (ufEl && !ufEl.dataset.populated) { ufEl.innerHTML = _ufOpts; ufEl.dataset.populated = '1'; }
+    var rqeUfEl = sid('usuRqeUF');
+    if (rqeUfEl && !rqeUfEl.dataset.populated) { rqeUfEl.innerHTML = _ufOpts; rqeUfEl.dataset.populated = '1'; }
+    var emEl = sid('usuEspMedica');
+    if (emEl && !emEl.dataset.populated) {
+      emEl.innerHTML = '<option value="">Selecione a especialidade médica...</option>'
+        + ESPECIALIDADES_MEDICAS.map(function(s){
+            return '<option value="' + esc(s) + '">' + esc(s) + '</option>';
+          }).join('');
+      emEl.dataset.populated = '1';
     }
   }
 
@@ -190,7 +224,11 @@ const UsuariosMod = (function () {
     set('usuConselhoTipo',u.conselho_tipo);
     set('usuConselhoNum', u.conselho_numero);
     set('usuConselhoUF',  u.conselho_uf);
+    set('usuEspMedica',   u.especialidade_medica);
+    set('usuRqeNum',      u.rqe_numero);
+    set('usuRqeUF',       u.rqe_uf);
     onRoleChange();
+    onEspChange(); /* mostra RQE se for médico */
     sid('usuModalUsuario').style.display = 'flex';
   }
 
@@ -201,13 +239,16 @@ const UsuariosMod = (function () {
   }
 
   function _limparModal () {
-    ['usuNome','usuTelefone','usuSenha','usuConselhoNum'].forEach(function(id2){
+    ['usuNome','usuTelefone','usuSenha','usuConselhoNum','usuRqeNum'].forEach(function(id2){
       var el=sid(id2); if(el) el.value='';
     });
     var r=sid('usuRole');    if(r) r.value='recepcionista';
     var e=sid('usuEsp');     if(e) e.value='';
     var ct=sid('usuConselhoTipo'); if(ct) ct.value='';
     var uf=sid('usuConselhoUF');   if(uf) uf.value='';
+    var em=sid('usuEspMedica');    if(em) em.value='';
+    var ru=sid('usuRqeUF');        if(ru) ru.value='';
+    var rw=sid('usuRqeWrap');      if(rw) rw.style.display='none';
     onRoleChange();
   }
 
@@ -221,12 +262,22 @@ const UsuariosMod = (function () {
     var ctipo = (sid('usuConselhoTipo').value||'').trim().toUpperCase();
     var cnum  = (sid('usuConselhoNum').value||'').trim();
     var cuf   = sid('usuConselhoUF').value;
+    var espMedica = (sid('usuEspMedica')||{}).value || '';
+    var rqeNum    = ((sid('usuRqeNum')||{}).value||'').trim();
+    var rqeUF     = (sid('usuRqeUF')||{}).value || '';
     var senha = _editId ? '' : ((sid('usuSenha')||{}).value||'');
 
     if (!nome)  { toast('Informe o nome completo.','error'); return; }
     if (!email) { toast('Informe o e-mail.','error'); return; }
     if (!_editId && senha.length < 6) {
       toast('Senha deve ter no mínimo 6 caracteres.','error'); return;
+    }
+
+    /* Campos obrigatórios para profissional de saúde */
+    if (role === 'profissional_saude') {
+      if (!ctipo) { toast('Informe o Conselho (CRM, CREFITO, CRO...).','error'); return; }
+      if (!cnum)  { toast('Informe o Número do Registro no conselho.','error');  return; }
+      if (!cuf)   { toast('Informe a UF do conselho.','error');                   return; }
     }
 
     var btn = sid('usuBtnSalvar');
@@ -245,6 +296,9 @@ const UsuariosMod = (function () {
       conselho_tipo: ctipo||null,
       conselho_numero: cnum||null,
       conselho_uf: cuf||null,
+      especialidade_medica: espMedica||null,
+      rqe_numero: rqeNum||null,
+      rqe_uf: rqeUF||null,
       ativo: true
     };
     if (senhaProvis !== undefined) payload.senha_provisoria = senhaProvis;
@@ -312,17 +366,25 @@ const UsuariosMod = (function () {
     var role = (sid('usuRole')||{}).value || '';
     var w = sid('usuProfWrap');
     if (w) w.style.display = role === 'profissional_saude' ? 'block' : 'none';
+    if (role !== 'profissional_saude') {
+      var rw = sid('usuRqeWrap');
+      if (rw) rw.style.display = 'none';
+    }
   }
 
-  /* ── Auto-preencher conselho ao selecionar especialidade ── */
+  /* ── Auto-preencher conselho + mostrar RQE se médico ── */
   function onEspChange () {
     var espEl = sid('usuEsp');
-    if (!espEl || !espEl.value) return;
-    var esp = ESPECIALIDADES.find(function(e){ return e.val === espEl.value; });
+    if (!espEl) return;
+    var esp = espEl.value
+      ? ESPECIALIDADES.find(function(e){ return e.val === espEl.value; })
+      : null;
     if (esp && esp.conselho) {
       var ct = sid('usuConselhoTipo');
       if (ct) ct.value = esp.conselho;
     }
+    var rw = sid('usuRqeWrap');
+    if (rw) rw.style.display = (espEl.value === 'medico') ? 'block' : 'none';
   }
 
   /* ── Render painel de controle ── */

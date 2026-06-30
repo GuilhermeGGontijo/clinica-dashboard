@@ -1416,6 +1416,10 @@ body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
 @media(max-width:600px){.ctrlRow{grid-template-columns:1fr auto;gap:8px}
   .ctrlRowBadge{display:none}}
 
+/* Marcadores required / opcional nos labels */
+.usuReq{color:var(--r6);font-weight:800;font-size:.85em}
+.usuOpc{color:var(--s4);font-weight:400;font-size:.85em;font-style:italic}
+
 /* Checkbox row no modal de usuários */
 .usuCheckRow{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--s6);cursor:pointer;
   background:var(--b0);border:1px solid var(--b2);border-radius:var(--Rs);padding:8px 12px}

@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260630d">
+  <link rel="stylesheet" href="css/style.css?v=20260630e">
 </head>
 <body>
 
@@ -1492,33 +1492,61 @@
     <!-- Seção: Dados Profissionais (condicional) -->
     <div id="usuProfWrap" style="display:none">
       <div class="usuModalSec" style="margin-top:14px">Conselho Profissional</div>
+
       <div class="patFG" style="margin-bottom:10px">
-        <label class="afLabel">Especialidade</label>
+        <label class="afLabel">Especialidade <span class="usuOpc">(opcional)</span></label>
         <select id="usuEsp" class="afInp" onchange="UsuariosMod.onEspChange()">
           <option value="">Selecione a especialidade...</option>
         </select>
       </div>
+
       <div style="display:grid;grid-template-columns:1fr 1.4fr 80px;gap:10px;margin-bottom:4px">
         <div class="patFG">
-          <label class="afLabel">Conselho</label>
+          <label class="afLabel">Conselho <span class="usuReq">*</span></label>
           <select id="usuConselhoTipo" class="afInp">
             <option value="">Selecione...</option>
           </select>
         </div>
         <div class="patFG">
-          <label class="afLabel">Número do Registro</label>
+          <label class="afLabel">Número do Registro <span class="usuReq">*</span></label>
           <input type="text" id="usuConselhoNum" class="afInp" placeholder="Ex: 123456"/>
         </div>
         <div class="patFG">
-          <label class="afLabel">UF</label>
+          <label class="afLabel">UF <span class="usuReq">*</span></label>
           <select id="usuConselhoUF" class="afInp">
             <option value="">UF</option>
           </select>
         </div>
       </div>
-      <small style="color:var(--s4);font-size:.71rem;display:block;margin-bottom:10px">
-        Ex: CRM 12345/SP — identifica o profissional e sua habilitação para atuação clínica.
+      <small style="color:var(--s4);font-size:.71rem;display:block;margin-bottom:12px">
+        Ex: CRM 12345/SP — obrigatório para identificação do profissional habilitado.
       </small>
+
+      <!-- Seção RQE — aparece apenas para Médico(a) -->
+      <div id="usuRqeWrap" style="display:none">
+        <div class="usuModalSec" style="margin-top:4px">Especialidade Médica (RQE)</div>
+        <div class="patFG" style="margin-bottom:10px">
+          <label class="afLabel">Especialidade Médica <span class="usuOpc">(opcional)</span></label>
+          <select id="usuEspMedica" class="afInp">
+            <option value="">Selecione a especialidade médica...</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 80px;gap:10px;margin-bottom:4px">
+          <div class="patFG">
+            <label class="afLabel">Número do RQE <span class="usuOpc">(opcional)</span></label>
+            <input type="text" id="usuRqeNum" class="afInp" placeholder="Ex: 12345"/>
+          </div>
+          <div class="patFG">
+            <label class="afLabel">UF</label>
+            <select id="usuRqeUF" class="afInp">
+              <option value="">UF</option>
+            </select>
+          </div>
+        </div>
+        <small style="color:var(--s4);font-size:.71rem;display:block;margin-bottom:4px">
+          O RQE (Registro de Qualificação de Especialista) identifica a especialidade médica além da formação geral.
+        </small>
+      </div>
     </div>
 
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--s2)">
@@ -1589,7 +1617,7 @@
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260630a"></script>
-<script src="js/modules/usuarios.js?v=20260630d"></script>
+<script src="js/modules/usuarios.js?v=20260630e"></script>
 <script src="js/core/main.js?v=20260630d"></script>
 <script>
 window.addEventListener('load', function() {
