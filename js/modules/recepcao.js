@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
    PAINEL DE CONTROLE CLÍNICO — js/modules/recepcao.js
-   RecepMod: Recepção do dia — fila de pacientes e status de atendimento
+   RecepMod: Recepção do dia — 4 status selecionáveis por card
    Depende de: supabase.js (_sb), main.js (sid, esc, toast, CU)
 ═══════════════════════════════════════════════════════════════════════ */
 
@@ -10,19 +10,11 @@ const RecepMod = (function () {
   var _itens = [];
   var _timer = null;
 
-  /* ─── Definição dos status ─── */
   var STATUS = {
-    agendado:       { emoji: '⏳', label: 'Aguardando' },
-    chegou:         { emoji: '🟡', label: 'Na Unidade'      },
-    em_atendimento: { emoji: '🩺', label: 'Em Atendimento'  },
-    finalizado:     { emoji: '✅', label: 'Finalizado'       }
-  };
-
-  var PROXIMO = {
-    agendado:       { status: 'chegou',         btn: '🟡 Chegou na Unidade'       },
-    chegou:         { status: 'em_atendimento', btn: '🩺 Chamar para Atendimento'  },
-    em_atendimento: { status: 'finalizado',     btn: '✅ Finalizar Atendimento'    },
-    finalizado:     null
+    agendado:       { emoji: '⏳', label: 'Aguardando',     cls: 'stAguardando' },
+    em_atendimento: { emoji: '🩺', label: 'Em Atendimento', cls: 'stAtendimento' },
+    finalizado:     { emoji: '✅', label: 'Finalizado',      cls: 'stFinalizado'  },
+    faltou:         { emoji: '❌', label: 'Faltou',          cls: 'stFaltou'      }
   };
 
   /* ── Init ── */
@@ -34,16 +26,16 @@ const RecepMod = (function () {
     _startTimer();
   }
 
-  /* ── Label com data de hoje ── */
   function _setDataLabel () {
     var el = sid('rcpDataLabel');
     if (!el) return;
     el.textContent = new Date().toLocaleDateString('pt-BR', {
       weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
     });
+    /* Capitaliza primeira letra */
+    el.textContent = el.textContent.charAt(0).toUpperCase() + el.textContent.slice(1);
   }
 
-  /* ── Hoje em formato YYYY-MM-DD ── */
   function _hoje () {
     var d = new Date();
     return d.getFullYear() + '-'
@@ -51,7 +43,7 @@ const RecepMod = (function () {
       + String(d.getDate()).padStart(2, '0');
   }
 
-  /* ── Carregar agendamentos de hoje desta unidade ── */
+  /* ── Carregar agendamentos de hoje ── */
   async function _carregar () {
     var r = await _sb.from('agendamentos')
       .select([
@@ -62,6 +54,7 @@ const RecepMod = (function () {
       ].join(','))
       .eq('data_agendamento', _hoje())
       .eq('unidade_id', CU)
+      .neq('status', 'Cancelado')
       .order('hora_inicio');
 
     if (r.error) {
@@ -83,12 +76,13 @@ const RecepMod = (function () {
       return;
     }
 
-    /* Ordem de exibição: prioritários primeiro */
+    /* Ordem de exibição por prioridade */
+    var ordem = ['em_atendimento', 'agendado', 'finalizado', 'faltou'];
     var grupos = [
-      { key: 'chegou',         titulo: '🟡 Na Unidade — Aguardando Atendimento' },
-      { key: 'em_atendimento', titulo: '🩺 Em Atendimento'                       },
-      { key: 'agendado',       titulo: '⏳ Agendados (ainda não chegaram)'        },
-      { key: 'finalizado',     titulo: '✅ Finalizados'                           }
+      { key: 'em_atendimento', titulo: '🩺 Em Atendimento'             },
+      { key: 'agendado',       titulo: '⏳ Aguardando'                  },
+      { key: 'finalizado',     titulo: '✅ Finalizados'                 },
+      { key: 'faltou',         titulo: '❌ Faltaram'                    }
     ];
 
     var html = '';
@@ -104,59 +98,57 @@ const RecepMod = (function () {
       html += '</div>';
     });
 
-    wrap.innerHTML = html;
+    wrap.innerHTML = html || '<div class="rcpVazio">📋 Nenhum agendamento para hoje nesta unidade.</div>';
   }
 
-  /* ── Atualizar contadores no topo ── */
+  /* ── Contadores KPI ── */
   function _atualizarStats () {
-    var c = { agendado: 0, chegou: 0, em_atendimento: 0, finalizado: 0 };
+    var c = { agendado: 0, em_atendimento: 0, finalizado: 0, faltou: 0 };
     _itens.forEach(function (a) {
       var s = a.status_recepcao || 'agendado';
       if (c[s] !== undefined) c[s]++;
     });
-    var map = {
-      rcpCntAgendado: c.agendado,
-      rcpCntChegou:   c.chegou,
-      rcpCntAtend:    c.em_atendimento,
-      rcpCntFinal:    c.finalizado
-    };
-    Object.keys(map).forEach(function (id) {
-      var el = sid(id); if (el) el.textContent = map[id];
-    });
+    var el;
+    el = sid('rcpCntAgendado'); if (el) el.textContent = c.agendado;
+    el = sid('rcpCntAtend');    if (el) el.textContent = c.em_atendimento;
+    el = sid('rcpCntFinal');    if (el) el.textContent = c.finalizado;
+    el = sid('rcpCntFaltou');   if (el) el.textContent = c.faltou;
   }
 
-  /* ── Renderizar card de um agendamento ── */
+  /* ── Renderizar card ── */
   function _renderCard (ag) {
     var st     = ag.status_recepcao || 'agendado';
-    var stInfo = STATUS[st];
-    var prox   = PROXIMO[st];
-    var pacNome  = (ag.pacientes  && ag.pacientes.nome_completo) || '—';
-    var profNome = (ag.profissional && ag.profissional.nome)     || '—';
-    var procNome = (ag.procedimento && ag.procedimento.nome)     || '—';
-    var hora  = (ag.hora_inicio || '').substring(0, 5);
-    var pacId = ag.paciente_id || (ag.pacientes && ag.pacientes.id);
+    var stInfo = STATUS[st] || STATUS.agendado;
+    var pacNome  = (ag.pacientes    && ag.pacientes.nome_completo) || '—';
+    var profNome = (ag.profissional && ag.profissional.nome)       || '—';
+    var procNome = (ag.procedimento && ag.procedimento.nome)       || '—';
+    var hora     = (ag.hora_inicio  || '').substring(0, 5);
+    var pacId    = ag.paciente_id || (ag.pacientes && ag.pacientes.id);
 
-    /* Timer de espera (visível quando chegou ou em_atendimento) */
+    /* Timer de espera */
     var timerHtml = '';
-    if ((st === 'chegou' || st === 'em_atendimento') && ag.hora_chegada) {
-      timerHtml = '<div class="rcpTimer" id="rcpTimer_' + ag.id + '" data-chegada="'
-        + ag.hora_chegada + '">⏱ ' + _fmtTempo(_calcMins(ag.hora_chegada)) + ' aguardando</div>';
+    if (st === 'em_atendimento' && ag.hora_chegada) {
+      timerHtml = '<div class="rcpTimer" id="rcpTimer_' + ag.id
+        + '" data-chegada="' + ag.hora_chegada + '">⏱ '
+        + _fmtTempo(_calcMins(ag.hora_chegada)) + ' em atendimento</div>';
     }
 
-    /* Botão de avançar status */
-    var btnProx = '';
-    if (prox) {
-      btnProx = '<button class="btn rcpBtnSt rcpBtnSt_' + prox.status + '" '
-        + 'onclick="RecepMod.avancarStatus(\'' + ag.id + '\',\'' + prox.status + '\')">'
-        + prox.btn + '</button>';
-    }
+    /* 4 botões de status */
+    var statusBtns = Object.keys(STATUS).map(function (key) {
+      var s   = STATUS[key];
+      var ativo = st === key;
+      return '<button class="rcpStBtn rcpStBtn_' + key + (ativo ? ' rcpStBtnAtivo' : '') + '"'
+        + ' onclick="RecepMod.setStatus(\'' + ag.id + '\',\'' + key + '\')">'
+        + s.emoji + ' ' + s.label
+        + '</button>';
+    }).join('');
 
     /* Botão prontuário */
     var btnPrn = pacId
       ? '<button class="btn rcpBtnPrn" onclick="RecepMod.abrirProntuario(\'' + pacId + '\')">📋 Prontuário</button>'
       : '';
 
-    return '<div class="rcpCard rcpCardSt_' + st + '" data-id="' + ag.id + '">'
+    return '<div class="rcpCard rcpCard_' + st + '" data-id="' + ag.id + '">'
       + '<div class="rcpCardLeft">'
       +   '<div class="rcpCardHora">' + hora + '</div>'
       +   '<div class="rcpCardEmoji">' + stInfo.emoji + '</div>'
@@ -165,54 +157,53 @@ const RecepMod = (function () {
       +   '<div class="rcpCardNome">' + esc(pacNome) + '</div>'
       +   '<div class="rcpCardMeta">' + esc(procNome) + ' · ' + esc(profNome) + '</div>'
       +   timerHtml
+      +   '<div class="rcpStatusBtns">' + statusBtns + '</div>'
       + '</div>'
-      + '<div class="rcpCardAcoes">'
-      +   btnProx
-      +   btnPrn
-      + '</div>'
+      + '<div class="rcpCardAcoes">' + btnPrn + '</div>'
       + '</div>';
   }
 
-  /* ── Avançar para próximo status ── */
-  async function avancarStatus (id, novoStatus) {
+  /* ── Definir status diretamente (qualquer um dos 4) ── */
+  async function setStatus (id, novoStatus) {
+    if (!STATUS[novoStatus]) return;
+
     var payload = { status_recepcao: novoStatus };
-    if (novoStatus === 'chegou') payload.hora_chegada = new Date().toISOString();
+    if (novoStatus === 'em_atendimento') payload.hora_chegada = new Date().toISOString();
 
     var r = await _sb.from('agendamentos').update(payload).eq('id', id);
     if (r.error) { toast('Erro: ' + r.error.message, 'error'); return; }
 
-    /* Atualiza estado local sem precisar recarregar do servidor */
+    /* Atualiza local e re-renderiza */
     var ag = _itens.find(function (a) { return a.id === id; });
     if (ag) {
       ag.status_recepcao = novoStatus;
-      if (novoStatus === 'chegou') ag.hora_chegada = payload.hora_chegada;
+      if (payload.hora_chegada) ag.hora_chegada = payload.hora_chegada;
     }
     _render();
     toast(STATUS[novoStatus].emoji + ' ' + STATUS[novoStatus].label, 'success');
   }
 
-  /* ── Abrir prontuário do paciente ── */
+  /* ── Abrir prontuário ── */
   function abrirProntuario (pacienteId) {
     window._prnPacienteId = pacienteId;
     switchSidebar('prontuario');
   }
 
-  /* ── Atualizar lista (botão refresh) ── */
+  /* ── Refresh ── */
   async function atualizar () {
     await _carregar();
     _render();
     toast('Lista atualizada', 'info');
   }
 
-  /* ── Timer de espera: atualiza a cada 30s ── */
+  /* ── Timer de espera ── */
   function _startTimer () {
     if (_timer) clearInterval(_timer);
     _timer = setInterval(function () {
       _itens.forEach(function (ag) {
-        var st = ag.status_recepcao || 'agendado';
-        if ((st === 'chegou' || st === 'em_atendimento') && ag.hora_chegada) {
+        if ((ag.status_recepcao || '') === 'em_atendimento' && ag.hora_chegada) {
           var el = sid('rcpTimer_' + ag.id);
-          if (el) el.textContent = '⏱ ' + _fmtTempo(_calcMins(ag.hora_chegada)) + ' aguardando';
+          if (el) el.textContent = '⏱ ' + _fmtTempo(_calcMins(ag.hora_chegada)) + ' em atendimento';
         }
       });
     }, 30000);
@@ -222,7 +213,6 @@ const RecepMod = (function () {
     if (_timer) { clearInterval(_timer); _timer = null; }
   }
 
-  /* ── Helpers ── */
   function _calcMins (ts) {
     return Math.max(0, Math.floor((Date.now() - new Date(ts).getTime()) / 60000));
   }
@@ -235,5 +225,8 @@ const RecepMod = (function () {
     return h + 'h' + String(m).padStart(2, '0') + 'min';
   }
 
-  return { init, avancarStatus, abrirProntuario, atualizar, destruir };
+  /* Manter compatibilidade com código antigo que chama avancarStatus */
+  function avancarStatus (id, novoStatus) { setStatus(id, novoStatus); }
+
+  return { init, setStatus, avancarStatus, abrirProntuario, atualizar, destruir };
 })();

@@ -1188,11 +1188,12 @@ body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
 
 /* Stats */
 .rcpStats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
+@media(max-width:640px){.rcpStats{grid-template-columns:repeat(2,1fr);}}
 .rcpStatCard{background:var(--w);border:1px solid var(--s2);border-radius:14px;padding:18px 16px;text-align:center;box-shadow:var(--sh);}
 .rcpStatSt0{border-top:3px solid var(--s4);}
-.rcpStatSt1{border-top:3px solid var(--a5);}
 .rcpStatSt2{border-top:3px solid var(--b5);}
 .rcpStatSt3{border-top:3px solid var(--g5);}
+.rcpStatSt4{border-top:3px solid var(--r6);}
 .rcpStatEmoji{font-size:1.7rem;line-height:1;margin-bottom:6px;}
 .rcpStatNum{font-size:2.1rem;font-weight:800;color:var(--s9);line-height:1;}
 .rcpStatLabel{font-size:.72rem;color:var(--s4);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:4px;}
@@ -1204,31 +1205,47 @@ body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
 .rcpGrupoCnt{font-weight:400;}
 
 /* Cards */
-.rcpCard{display:flex;align-items:center;gap:16px;background:var(--w);border:1px solid var(--s2);border-radius:12px;padding:14px 18px;margin-bottom:9px;transition:box-shadow .15s;}
+.rcpCard{display:flex;align-items:flex-start;gap:16px;background:var(--w);border:1px solid var(--s2);
+  border-left:4px solid var(--s3);border-radius:12px;padding:14px 18px;margin-bottom:9px;transition:box-shadow .15s;}
 .rcpCard:hover{box-shadow:var(--sh);}
-.rcpCardSt_chegou{background:var(--a0);border-color:var(--a3);border-left:4px solid var(--a5);}
-.rcpCardSt_em_atendimento{background:var(--b0);border-color:var(--b3);border-left:4px solid var(--b5);}
-.rcpCardSt_finalizado{background:var(--g0);border-color:var(--g1);border-left:4px solid var(--g5);opacity:.75;}
+.rcpCard_agendado      {border-left-color:var(--s4); background:var(--s0);}
+.rcpCard_em_atendimento{border-left-color:var(--b5); background:var(--b0);}
+.rcpCard_finalizado    {border-left-color:var(--g5); background:var(--g0); opacity:.8;}
+.rcpCard_faltou        {border-left-color:var(--r6); background:var(--r1); opacity:.75;}
 
-.rcpCardLeft{text-align:center;min-width:50px;}
+.rcpCardLeft{text-align:center;min-width:50px;flex-shrink:0;padding-top:2px;}
 .rcpCardHora{font-size:.78rem;font-weight:800;color:var(--s5);margin-bottom:2px;}
 .rcpCardEmoji{font-size:1.8rem;line-height:1;}
 
 .rcpCardBody{flex:1;min-width:0;}
 .rcpCardNome{font-size:1rem;font-weight:700;color:var(--s9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rcpCardMeta{font-size:.78rem;color:var(--s5);margin-top:3px;}
-.rcpTimer{display:inline-block;margin-top:7px;font-size:.78rem;font-weight:700;color:var(--a6);background:var(--a1);border-radius:20px;padding:3px 12px;border:1px solid var(--a3);}
-.rcpCardSt_em_atendimento .rcpTimer{color:var(--b6);background:var(--b1);border-color:var(--b3);}
+.rcpCardMeta{font-size:.78rem;color:var(--s5);margin-top:3px;margin-bottom:10px;}
 
-.rcpCardAcoes{display:flex;flex-direction:column;gap:7px;min-width:200px;align-items:stretch;}
-.rcpBtnSt{font-size:.82rem;font-weight:700;padding:8px 14px;border-radius:9px;cursor:pointer;border:none;transition:all .15s;text-align:center;}
-.rcpBtnSt_chegou{background:var(--a1);color:var(--a8);border:1px solid var(--a3);}
-.rcpBtnSt_chegou:hover{background:var(--a3);}
-.rcpBtnSt_em_atendimento{background:var(--b5);color:#fff;}
-.rcpBtnSt_em_atendimento:hover{background:var(--b6);}
-.rcpBtnSt_finalizado{background:var(--g5);color:#fff;}
-.rcpBtnSt_finalizado:hover{background:var(--g6);}
-.rcpBtnPrn{font-size:.82rem;font-weight:600;padding:8px 14px;background:var(--s1);color:var(--s7);border:1px solid var(--s2);border-radius:9px;cursor:pointer;transition:all .15s;}
+.rcpTimer{display:inline-block;margin-bottom:8px;font-size:.76rem;font-weight:700;
+  color:var(--b6);background:var(--b1);border-radius:20px;padding:3px 12px;border:1px solid var(--b3);}
+
+/* 4 botões de status por card */
+.rcpStatusBtns{display:flex;flex-wrap:wrap;gap:6px;}
+.rcpStBtn{font-size:.76rem;font-weight:600;padding:5px 12px;border-radius:99px;
+  cursor:pointer;border:1.5px solid var(--s3);background:var(--w);color:var(--s5);
+  transition:all .15s;white-space:nowrap;}
+.rcpStBtn:hover{filter:brightness(.95);}
+/* Aguardando */
+.rcpStBtn_agendado{border-color:var(--s4);color:var(--s6);}
+.rcpStBtn_agendado.rcpStBtnAtivo{background:var(--s2);color:var(--s8);border-color:var(--s5);font-weight:700;}
+/* Em Atendimento */
+.rcpStBtn_em_atendimento{border-color:var(--b4);color:var(--b6);}
+.rcpStBtn_em_atendimento.rcpStBtnAtivo{background:var(--b5);color:#fff;border-color:var(--b5);font-weight:700;}
+/* Finalizado */
+.rcpStBtn_finalizado{border-color:var(--g5);color:var(--g7);}
+.rcpStBtn_finalizado.rcpStBtnAtivo{background:var(--g6);color:#fff;border-color:var(--g6);font-weight:700;}
+/* Faltou */
+.rcpStBtn_faltou{border-color:var(--r6);color:var(--r7);}
+.rcpStBtn_faltou.rcpStBtnAtivo{background:var(--r6);color:#fff;border-color:var(--r6);font-weight:700;}
+
+.rcpCardAcoes{display:flex;flex-direction:column;gap:7px;flex-shrink:0;align-items:stretch;}
+.rcpBtnPrn{font-size:.8rem;font-weight:600;padding:7px 14px;background:var(--s1);color:var(--s7);
+  border:1px solid var(--s2);border-radius:9px;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .rcpBtnPrn:hover{background:var(--s2);color:var(--s9);}
 
 .rcpVazio{text-align:center;padding:60px 20px;color:var(--s4);font-size:.95rem;}
