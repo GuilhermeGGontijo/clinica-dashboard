@@ -460,7 +460,8 @@ body.sb-active main>*{display:none!important}
 body.sb-home #secHome{display:block!important}
 body.sb-pacientes #modulePacientes{display:block!important}
 body.sb-agenda #secAgenda{display:flex!important;flex-direction:column}
-body.sb-prontuario #secProntuario{display:flex!important;flex-direction:column}
+body.sb-prontuario main{padding:0!important;overflow:hidden;height:calc(100vh - 86px)}
+body.sb-prontuario #secProntuario{display:flex!important;flex-direction:column;height:100%!important}
 body.sb-relatorios #secRelatorios{display:block!important}
 body.sb-admin-cadastro #secAdminCadastro{display:block!important}
 body.sb-admin-controle #secAdminControle{display:block!important}
@@ -823,10 +824,10 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   padding: 18px 22px 16px;
   overflow-y: auto;
   flex: 1;
-  flex: 1;
+  min-height: 0;
   display: none;
 }
-.prnAbaContent.ativa { display: block; }
+.prnAbaContent.ativa { display: flex; flex-direction: column; }
 
 .prnAbaLabel {
   display: block;
@@ -861,7 +862,8 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 }
 #prnEvolucaoTxt, #prnExamesTxt {
   width: 100%;
-  min-height: 360px;
+  flex: 1;
+  min-height: 200px;
   resize: vertical;
   resize: vertical;
   font-family: 'Courier New', Courier, monospace;
