@@ -91,6 +91,14 @@ var USER_PROFILE = null;
    SIDEBAR NAVIGATION
 ══════════════════════════════════════ */
 function switchSidebar(mod){
+  // Proteção de acesso por perfil
+  if(USER_ROLE && USER_ROLE!=='administrador' && typeof UsuariosMod!=='undefined'){
+    if(!UsuariosMod.canAccess(mod)){
+      toast('⚠️ Módulo restrito ao seu perfil de acesso.','error');
+      return;
+    }
+  }
+
   // Atualiza classes do body
   var keep = document.body.className.split(' ')
     .filter(function(c){ return c && !c.startsWith('sb-') && c!=='mode-gestao' && c!=='mode-pacientes'; });
@@ -132,7 +140,9 @@ function switchSidebar(mod){
   },50); }
   if(mod==='admin-recepcao'){ setTimeout(function(){ RecepMod.init(); },50); }
   if(mod==='admin-convenios'){ setTimeout(function(){ ConveniosMod.init(); },50); }
-  if(mod==='recebimentos'){ setTimeout(function(){ RecebMod.init(); },50); }
+  if(mod==='recebimentos'){   setTimeout(function(){ RecebMod.init();     },50); }
+  if(mod==='admin-cadastro'){ setTimeout(function(){ UsuariosMod.init();         },50); }
+  if(mod==='admin-controle'){ setTimeout(function(){ UsuariosMod.initControle(); },50); }
 }
 
 function toggleSbGroup(el,grpId){
@@ -188,6 +198,13 @@ async function loadUserProfile(){
 function applyRoleVisibility(){
   document.body.classList.remove('role-administrador','role-faturamento','role-profissional_saude','role-recepcionista');
   if(USER_ROLE) document.body.classList.add('role-'+USER_ROLE);
+
+  // Ocultar itens de gestão de usuários para não-administradores
+  ['admin-cadastro','admin-controle'].forEach(function(mod){
+    var el=document.querySelector('.sbSubItem[data-mod="'+mod+'"]');
+    if(el) el.style.display=(USER_ROLE==='administrador'||!USER_ROLE)?'':'none';
+  });
+
   renderModuleTabs();
 }
 

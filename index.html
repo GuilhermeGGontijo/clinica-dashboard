@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260630b">
+  <link rel="stylesheet" href="css/style.css?v=20260630c">
 </head>
 <body>
 
@@ -458,27 +458,62 @@
 </div>
 
 <div id="secAdminCadastro">
-  <div class="proWrap">
-    <div class="proIco">👤</div>
-    <div class="proTitle">Cadastro de Usuários</div>
-    <div class="proDesc">
-      Criação e edição de usuários do sistema com definição de perfil de acesso,
-      unidades vinculadas e especialidade profissional.
+  <div class="secModHdr">
+    <div>
+      <div class="secModTitle">👤 Cadastro de Usuários</div>
+      <div class="secModSub">Crie e gerencie todos os usuários que acessam o sistema</div>
     </div>
-    <div class="proBadge">🔧 Em desenvolvimento</div>
+    <button class="btn bG" onclick="UsuariosMod.abrirNovo()">+ Novo Usuário</button>
   </div>
+  <div id="usuListWrap"></div>
 </div>
 
 <div id="secAdminControle">
-  <div class="proWrap">
-    <div class="proIco">🔐</div>
-    <div class="proTitle">Controle de Usuário</div>
-    <div class="proDesc">
-      Gerenciamento de permissões, ativação/desativação de contas e auditoria
-      de acessos por usuário e unidade.
+  <div class="secModHdr">
+    <div>
+      <div class="secModTitle">🔐 Controle de Acesso</div>
+      <div class="secModSub">Defina quais módulos cada usuário pode acessar conforme a LGPD</div>
     </div>
-    <div class="proBadge">🔧 Em desenvolvimento</div>
   </div>
+
+  <!-- Matriz de permissões -->
+  <div class="ctrlPermMatrix">
+    <div class="ctrlPermTitle">📊 Matriz de Permissões por Perfil</div>
+    <div class="ctrlPermTableWrap">
+      <table class="ctrlPermTable">
+        <thead>
+          <tr>
+            <th class="ctrlPermModule">Módulo / Funcionalidade</th>
+            <th class="ctrlPermRole ctrlRoleAdmin">Administrador</th>
+            <th class="ctrlPermRole ctrlRoleProf">Profissional de Saúde</th>
+            <th class="ctrlPermRole ctrlRoleRecep">Recepcionista</th>
+            <th class="ctrlPermRole ctrlRoleFat">Faturamento</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>🏠 Tela Inicial</td>           <td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td>👥 Cadastro de Pacientes</td>   <td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+          <tr><td>📅 Agenda</td>                  <td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td>🏥 Recepção</td>                <td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+          <tr><td>📋 Prontuário Eletrônico</td>   <td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+          <tr><td>📊 Relatórios</td>              <td>✅</td><td>✅</td><td>❌</td><td>✅</td></tr>
+          <tr><td>💰 Financeiro</td>              <td>✅</td><td>✅</td><td>❌</td><td>✅</td></tr>
+          <tr><td>🏢 Administrativo</td>          <td>✅</td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><td>👤 Cadastro de Usuários</td>    <td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ctrlPermLgpd">
+      🔒 <strong>LGPD:</strong> O acesso ao Prontuário Eletrônico é restrito a profissionais de saúde habilitados,
+      garantindo o sigilo profissional e a privacidade dos dados sensíveis dos pacientes.
+    </div>
+  </div>
+
+  <!-- Lista de usuários com seletor de role -->
+  <div class="secModHdr" style="margin-top:28px;margin-bottom:14px">
+    <div class="secModTitle">👥 Usuários e Perfis de Acesso</div>
+  </div>
+  <div id="ctrlListWrap"></div>
 </div>
 
 <div id="secAdminUnidades">
@@ -1369,6 +1404,93 @@
   </div>
 </div>
 
+<!-- MODAL: Cadastro / Edição de Usuário -->
+<div id="usuModalUsuario" class="ovl" style="display:none;align-items:flex-start;padding-top:40px"
+     onclick="if(event.target===this)UsuariosMod.fecharModal()">
+  <div class="mBox" style="max-width:580px;width:96%;padding:26px 24px;max-height:90vh;overflow-y:auto">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h3 id="usuModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">+ Novo Usuário</h3>
+      <button class="bDel" onclick="UsuariosMod.fecharModal()" style="font-size:1.1rem;padding:2px 7px">✕</button>
+    </div>
+
+    <!-- Seção: Dados Básicos -->
+    <div class="usuModalSec">Dados Básicos</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">Nome Completo *</label>
+        <input type="text" id="usuNome" class="afInp" placeholder="Nome completo"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">E-mail *</label>
+        <input type="email" id="usuEmail" class="afInp" placeholder="email@clinica.com.br"/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">Telefone</label>
+        <input type="tel" id="usuTelefone" class="afInp" placeholder="(00) 00000-0000"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Perfil de Acesso *</label>
+        <select id="usuRole" class="afInp" onchange="UsuariosMod.onRoleChange()">
+          <option value="recepcionista">Recepcionista</option>
+          <option value="profissional_saude">Profissional de Saúde</option>
+          <option value="faturamento">Faturamento</option>
+          <option value="administrador">Administrador</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Senha (apenas criação) -->
+    <div id="usuSenhaWrap" class="patFG" style="margin-bottom:10px">
+      <label class="afLabel">Senha Provisória *</label>
+      <input type="password" id="usuSenha" class="afInp" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+      <small style="color:var(--s4);font-size:.71rem;margin-top:4px;display:block">
+        O usuário poderá alterar a senha no primeiro acesso.
+      </small>
+    </div>
+
+    <!-- Seção: Dados Profissionais (condicional) -->
+    <div id="usuProfWrap" style="display:none">
+      <div class="usuModalSec" style="margin-top:14px">Conselho Profissional</div>
+      <div class="patFG" style="margin-bottom:10px">
+        <label class="afLabel">Especialidade</label>
+        <select id="usuEsp" class="afInp" onchange="UsuariosMod.onEspChange()">
+          <option value="">Selecione a especialidade...</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1.4fr 80px;gap:10px;margin-bottom:4px">
+        <div class="patFG">
+          <label class="afLabel">Conselho</label>
+          <select id="usuConselhoTipo" class="afInp">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+        <div class="patFG">
+          <label class="afLabel">Número do Registro</label>
+          <input type="text" id="usuConselhoNum" class="afInp" placeholder="Ex: 123456"/>
+        </div>
+        <div class="patFG">
+          <label class="afLabel">UF</label>
+          <select id="usuConselhoUF" class="afInp">
+            <option value="">UF</option>
+          </select>
+        </div>
+      </div>
+      <small style="color:var(--s4);font-size:.71rem;display:block;margin-bottom:10px">
+        Ex: CRM 12345/SP — identifica o profissional e sua habilitação para atuação clínica.
+      </small>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--s2)">
+      <button class="btn bGh bSm" onclick="UsuariosMod.fecharModal()">Cancelar</button>
+      <button class="btn bG  bSm" id="usuBtnSalvar" onclick="UsuariosMod.salvar()">Criar Usuário</button>
+    </div>
+
+  </div>
+</div>
+
 <!-- PRONTUÁRIO: Modal Salvar Modelo -->
 <div id="modalSalvarModelo" class="ovl"
      onclick="if(event.target===this)ProntuarioMod.fecharSalvarModelo()">
@@ -1429,7 +1551,8 @@
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260630a"></script>
-<script src="js/core/main.js?v=20260630a"></script>
+<script src="js/modules/usuarios.js?v=20260630c"></script>
+<script src="js/core/main.js?v=20260630c"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');
