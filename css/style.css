@@ -587,7 +587,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   padding: 0;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 78px);
   min-height: 500px;
   gap: 0;
 }
@@ -696,7 +696,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 
 /* ─── Timeline lateral ─── */
 .prnTimeline {
-  width: 210px;
+  width: 250px;
   flex-shrink: 0;
   background: var(--w);
   border: 1px solid var(--s2);
@@ -814,8 +814,9 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 
 /* ─── Conteúdo das abas ─── */
 .prnAbaContent {
-  padding: 16px 18px 12px;
+  padding: 18px 22px 16px;
   overflow-y: auto;
+  flex: 1;
   flex: 1;
   display: none;
 }
@@ -854,7 +855,8 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 }
 #prnEvolucaoTxt, #prnExamesTxt {
   width: 100%;
-  min-height: 220px;
+  min-height: 360px;
+  resize: vertical;
   resize: vertical;
   font-family: 'Courier New', Courier, monospace;
   font-size: .84rem;

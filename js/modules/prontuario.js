@@ -334,16 +334,14 @@ const ProntuarioMod = (function () {
   }
 
   function abrirSalvarModelo() {
-    var txt = sid('prnEvolucaoTxt');
-    if (!txt || !txt.value.trim()) { toast('Digite o texto da evolução antes de salvar como modelo', 'warn'); return; }
     var el = sid('prnModeloTitulo'); if (el) el.value = '';
     var modal = sid('modalSalvarModelo');
-    if (modal) { modal.style.display = 'flex'; setTimeout(function() { var t = sid('prnModeloTitulo'); if(t) t.focus(); }, 50); }
+    if (modal) { modal.classList.add('open'); setTimeout(function() { var t = sid('prnModeloTitulo'); if(t) t.focus(); }, 50); }
   }
 
   function fecharSalvarModelo() {
     var modal = sid('modalSalvarModelo');
-    if (modal) modal.style.display = 'none';
+    if (modal) modal.classList.remove('open');
   }
 
   async function confirmarSalvarModelo() {
