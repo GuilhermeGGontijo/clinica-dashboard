@@ -668,7 +668,8 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 #prnMain {
   display: none;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   gap: 10px;
 }
 
@@ -784,7 +785,8 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 #prnAtendimento {
   display: none;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -821,7 +823,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 
 /* ─── Conteúdo das abas ─── */
 .prnAbaContent {
-  padding: 18px 22px 16px;
+  padding: 12px 18px 10px;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
@@ -834,16 +836,18 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   font-size: .74rem;
   font-weight: 700;
   color: var(--s5);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: .04em;
+  flex-shrink: 0;
 }
 .prnAbaActions {
   display: flex;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 8px;
   justify-content: flex-end;
   align-items: center;
+  flex-shrink: 0;
 }
 
 /* ─── Evolução: barra de modelo + textarea ─── */
@@ -851,8 +855,9 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   display: flex;
   gap: 8px;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 .prnModeloSel {
   flex: 1;
