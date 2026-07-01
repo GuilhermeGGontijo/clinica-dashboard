@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260701c">
+  <link rel="stylesheet" href="css/style.css?v=20260701d">
 </head>
 <body>
 
@@ -464,16 +464,99 @@
 
 
 <div id="secRelatorios">
-  <div class="proWrap">
-    <div class="proIco">📊</div>
-    <div class="proTitle">Relatórios</div>
-    <div class="proDesc">
-      Central de relatórios gerenciais: produção por profissional, ocupação de agenda,
-      histórico de atendimentos e indicadores de desempenho clínico.
+  <div class="secModHdr">
+    <div>
+      <div class="secModTitle">📊 Relatórios</div>
+      <div class="secModSub">Indicadores individuais, calculados a partir dos dados reais do sistema — defina o período de cada um e exporte separadamente.</div>
     </div>
-    <div class="proBadge">🔧 Em desenvolvimento</div>
+  </div>
+
+  <div class="relGrid">
+
+    <!-- RELATÓRIO: ABSENTEÍSMO -->
+    <div class="relCard" id="relCard_abs">
+      <div class="relCardHdr">
+        <div class="relCardIco r">🚫</div>
+        <div>
+          <div class="relCardTitle">Taxa de Absenteísmo</div>
+          <div class="relCardDesc">Percentual de pacientes agendados que não compareceram (status "Falta") no período, em relação ao total de agendamentos da unidade.</div>
+        </div>
+      </div>
+      <div class="relCardFm">Taxa = (Faltas ÷ Total de Agendamentos) × 100</div>
+      <div class="relPeriodoRow">
+        <label>Período:</label>
+        <input type="date" id="relAbsIni" class="afInp"/>
+        <span>até</span>
+        <input type="date" id="relAbsFim" class="afInp"/>
+        <button class="btn bSm" onclick="RelatoriosMod.carregarAbsenteismo()">🔄 Atualizar</button>
+      </div>
+      <div class="relResultados" id="relAbsResultados">
+        <div class="relResVazio">Selecione um período e clique em Atualizar.</div>
+      </div>
+      <div class="relCardAcoes">
+        <button class="btn bGh bSm" onclick="RelatoriosMod.exportar('abs','Taxa de Absenteísmo')">🖨️ Exportar PDF</button>
+      </div>
+    </div>
+
+    <!-- RELATÓRIO: PACIENTES E TICKET MÉDIO -->
+    <div class="relCard" id="relCard_tick">
+      <div class="relCardHdr">
+        <div class="relCardIco g">🎟️</div>
+        <div>
+          <div class="relCardTitle">Pacientes Atendidos e Ticket Médio</div>
+          <div class="relCardDesc">Quantidade de pacientes únicos com atendimentos finalizados no período, faturamento bruto cobrado e receita média por paciente.</div>
+        </div>
+      </div>
+      <div class="relCardFm">Ticket Médio = Faturamento Bruto ÷ Pacientes Únicos Atendidos</div>
+      <div class="relPeriodoRow">
+        <label>Período:</label>
+        <input type="date" id="relTickIni" class="afInp"/>
+        <span>até</span>
+        <input type="date" id="relTickFim" class="afInp"/>
+        <button class="btn bSm" onclick="RelatoriosMod.carregarTicketMedio()">🔄 Atualizar</button>
+      </div>
+      <div class="relResultados" id="relTickResultados">
+        <div class="relResVazio">Selecione um período e clique em Atualizar.</div>
+      </div>
+      <div class="relCardAcoes">
+        <button class="btn bGh bSm" onclick="RelatoriosMod.exportar('tick','Pacientes Atendidos e Ticket Médio')">🖨️ Exportar PDF</button>
+      </div>
+    </div>
+
+    <!-- RELATÓRIO: FATURAMENTO E REPASSES -->
+    <div class="relCard" id="relCard_fat">
+      <div class="relCardHdr">
+        <div class="relCardIco g">💰</div>
+        <div>
+          <div class="relCardTitle">Faturamento e Repasses</div>
+          <div class="relCardDesc">Faturamento bruto cobrado em atendimentos finalizados no período, total repassado aos profissionais (conforme cadastro de cada procedimento) e receita líquida da clínica.</div>
+        </div>
+      </div>
+      <div class="relCardFm">Receita Líquida = Faturamento Bruto − Total Repassado</div>
+      <div class="relPeriodoRow">
+        <label>Período:</label>
+        <input type="date" id="relFatIni" class="afInp"/>
+        <span>até</span>
+        <input type="date" id="relFatFim" class="afInp"/>
+        <button class="btn bSm" onclick="RelatoriosMod.carregarFaturamento()">🔄 Atualizar</button>
+      </div>
+      <div class="relResultados" id="relFatResultados">
+        <div class="relResVazio">Selecione um período e clique em Atualizar.</div>
+      </div>
+      <div class="relCardAcoes">
+        <button class="btn bGh bSm" onclick="RelatoriosMod.exportar('fat','Faturamento e Repasses')">🖨️ Exportar PDF</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="relEmBreve">
+    🔧 <strong>Em breve:</strong> Representatividade entre unidades e Capacidade/Ociosidade de agenda — dependem de dados adicionais (config. de salas e horários) que ainda serão modelados.
   </div>
 </div>
+
+<!-- RELATÓRIOS: Documento de Impressão isolado -->
+<div id="relDocImpressao"></div>
 
 <div id="secAdminCadastro">
   <div class="secModHdr">
@@ -1632,7 +1715,8 @@
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260630a"></script>
 <script src="js/modules/usuarios.js?v=20260701a"></script>
-<script src="js/core/main.js?v=20260630d"></script>
+<script src="js/modules/relatorios.js?v=20260701a"></script>
+<script src="js/core/main.js?v=20260701a"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');

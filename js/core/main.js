@@ -143,6 +143,7 @@ function switchSidebar(mod){
   if(mod==='recebimentos'){   setTimeout(function(){ RecebMod.init();     },50); }
   if(mod==='admin-cadastro'){ setTimeout(function(){ UsuariosMod.init();         },50); }
   if(mod==='admin-controle'){ setTimeout(function(){ UsuariosMod.initControle(); },50); }
+  if(mod==='relatorios'){ setTimeout(function(){ RelatoriosMod.init(); },50); }
 }
 
 function toggleSbGroup(el,grpId){

@@ -572,6 +572,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 .agCard{position:absolute;left:3px;right:3px;border-radius:6px;padding:3px 7px 3px 8px;font-size:.71rem;line-height:1.3;cursor:pointer;z-index:3;box-shadow:0 1px 5px rgba(0,0,0,.18);overflow:hidden;transition:filter .12s,transform .1s;border-left:4px solid rgba(0,0,0,.25);border-top:1px solid rgba(255,255,255,.25)}
 .agCard:hover{filter:brightness(.88);transform:translateY(-1px);z-index:4}
 .agCardNome{font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:14px}
+.agCardRetorno{font-size:.72em;filter:drop-shadow(0 0 1px rgba(0,0,0,.6))}
 .agCardProc,.agCardSala{font-size:.64rem;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .agCardHora{font-size:.62rem;color:rgba(255,255,255,.75)}
 .agCardStatusDot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55)}
@@ -1517,4 +1518,44 @@ body.role-faturamento [data-mod="prontuario"]{display:none!important}
 /* Profissional de Saúde: sem administrativo */
 body.role-profissional_saude [data-mod="administrativo"],
 body.role-profissional_saude #sbGrpAdmin{display:none!important}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   RELATÓRIOS INDIVIDUAIS
+   ══════════════════════════════════════════════════════════════════════════════ */
+.relGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;margin-top:14px}
+.relCard{background:var(--w);border:1px solid var(--s2);border-radius:var(--Rm,12px);padding:16px;display:flex;flex-direction:column;gap:10px}
+.relCardHdr{display:flex;gap:12px;align-items:flex-start}
+.relCardIco{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--s1)}
+.relCardIco.r{background:var(--r1,#fee2e2)}
+.relCardIco.g{background:var(--g1)}
+.relCardTitle{font-weight:800;color:var(--s9);font-size:.95rem}
+.relCardDesc{font-size:.78rem;color:var(--s5);margin-top:2px;line-height:1.45}
+.relCardFm{font-size:.72rem;color:var(--s5);background:var(--s1);border-radius:6px;padding:6px 9px;font-family:'Courier New',monospace}
+.relPeriodoRow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.78rem;color:var(--s6)}
+.relPeriodoRow .afInp{padding:6px 8px;font-size:.78rem;width:auto}
+.relResultados{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:10px 0;border-top:1px dashed var(--s2);border-bottom:1px dashed var(--s2)}
+.relResVazio{grid-column:1/-1;text-align:center;color:var(--s4);font-size:.8rem;padding:8px}
+.relResItem{text-align:center}
+.relResLabel{font-size:.68rem;color:var(--s5);text-transform:uppercase;letter-spacing:.03em}
+.relResVal{font-size:1.15rem;font-weight:800;color:var(--s9);margin-top:2px}
+.relCardAcoes{display:flex;justify-content:flex-end}
+.relEmBreve{margin-top:16px;padding:12px 16px;background:var(--s1);border-radius:var(--Rs);color:var(--s6);font-size:.82rem}
+
+/* ─── Impressão isolada de cada relatório ─── */
+#relDocImpressao{display:none}
+@media print{
+  body.rel-imprimindo *{visibility:hidden!important}
+  body.rel-imprimindo #relDocImpressao,
+  body.rel-imprimindo #relDocImpressao *{visibility:visible!important}
+  body.rel-imprimindo #relDocImpressao{
+    display:block!important;position:absolute;left:0;top:0;width:100%;
+  }
+  .relImpTitulo{font-size:16pt;font-weight:800;margin-bottom:4pt}
+  .relImpPeriodo{font-size:10pt;color:#444;margin-bottom:16pt}
+  .relImpGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14pt;margin-bottom:16pt}
+  .relImpItem{border:1px solid #ccc;border-radius:6pt;padding:10pt;text-align:center}
+  .relImpLabel{font-size:8.5pt;color:#555;text-transform:uppercase}
+  .relImpVal{font-size:14pt;font-weight:800;margin-top:4pt}
+  .relImpRodape{margin-top:24pt;font-size:9pt;color:#666}
+}
 </style>
