@@ -1202,6 +1202,10 @@
       <div class="patFG">
         <label class="afLabel">Valor Cobrado (R$)</label>
         <input type="number" id="agValorCob" class="afInp" placeholder="0,00" min="0" step="0.01"/>
+        <label class="usuCheckRow" style="margin-top:6px">
+          <input type="checkbox" id="agRetorno" onchange="AgendaMod.onRetornoChange()"/>
+          <span>↩️ Retorno (consulta sem cobrança)</span>
+        </label>
       </div>
     </div>
     <div id="agConvenioWrap" style="display:none;margin-bottom:10px">
@@ -1708,7 +1712,7 @@
 <script src="js/modules/financeiro.js?v=20260629d"></script>
 <script src="js/modules/salas.js?v=20260629d"></script>
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
-<script src="js/modules/agenda.js?v=20260701a"></script>
+<script src="js/modules/agenda.js?v=20260701b"></script>
 <script src="js/modules/prontuario.js?v=20260701c"></script>
 <script src="js/modules/recepcao.js?v=20260630b"></script>
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
