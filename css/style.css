@@ -874,11 +874,10 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   padding: 6px 8px;
   min-width: 160px;
 }
-#prnEvolucaoTxt, #prnExamesTxt {
+#prnExamesTxt {
   width: 100%;
   flex: 1;
   min-height: 200px;
-  resize: vertical;
   resize: vertical;
   font-family: 'Courier New', Courier, monospace;
   font-size: .84rem;
@@ -891,11 +890,81 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   box-sizing: border-box;
   transition: border-color .15s, background .15s;
 }
-#prnEvolucaoTxt:focus, #prnExamesTxt:focus {
+#prnExamesTxt:focus {
   border-color: var(--g5);
   outline: none;
   background: var(--w);
   box-shadow: 0 0 0 3px rgba(22,163,74,.1);
+}
+
+/* ─── Evolução: barra de ferramentas de formatação ─── */
+.prnRtb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 6px;
+  padding: 6px;
+  background: var(--s1);
+  border: 1px solid var(--s2);
+  border-radius: var(--Rs);
+  flex-shrink: 0;
+}
+.prnRtbBtn {
+  font-size: .76rem;
+  font-weight: 600;
+  padding: 5px 9px;
+  border: 1px solid var(--s2);
+  border-radius: 6px;
+  background: var(--w);
+  color: var(--s7);
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.prnRtbBtn:hover { background: var(--s2); }
+.prnRtbBtn#prnBtnCodigoFonte { margin-left: auto; }
+.prnRtbBtn.ativo { background: var(--g5); color: #fff; border-color: var(--g5); }
+.prnRtbSep {
+  width: 1px;
+  align-self: stretch;
+  background: var(--s2);
+  margin: 0 2px;
+}
+
+/* ─── Evolução: editor rico (contenteditable) ─── */
+.prnRichEditor, .prnRichEditorSrc {
+  width: 100%;
+  flex: 1;
+  min-height: 200px;
+  font-size: .88rem;
+  line-height: 1.65;
+  padding: 10px 12px;
+  border: 1.5px solid var(--s2);
+  border-radius: var(--Rs);
+  color: var(--s9);
+  background: #fafbfc;
+  box-sizing: border-box;
+  transition: border-color .15s, background .15s;
+  overflow-y: auto;
+}
+.prnRichEditor:focus, .prnRichEditorSrc:focus {
+  border-color: var(--g5);
+  outline: none;
+  background: var(--w);
+  box-shadow: 0 0 0 3px rgba(22,163,74,.1);
+}
+.prnRichEditor:empty:before {
+  content: attr(data-placeholder);
+  color: var(--s5);
+  white-space: pre-line;
+}
+.prnRichEditor ul, .prnRichEditor ol { padding-left: 22px; margin: 6px 0; }
+.prnRichEditor hr { border: none; border-top: 2px solid var(--s3); margin: 10px 0; }
+.prnRichEditorSrc {
+  resize: vertical;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: .8rem;
+  white-space: pre;
 }
 
 /* ─── Receituário: itens de medicamento ─── */

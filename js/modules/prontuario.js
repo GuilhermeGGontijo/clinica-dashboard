@@ -220,9 +220,13 @@ const ProntuarioMod = (function () {
 
     // Limpa estado das abas
     _meds = [];
-    var campos = ['prnEvolucaoTxt','prnExamesTxt','prnAtestadoObs','prnAtestadoDias','prnAtestadoCid',
+    var campos = ['prnExamesTxt','prnAtestadoObs','prnAtestadoDias','prnAtestadoCid',
                   'trgPaSis','trgPaDia','trgFc','trgFr','trgTemp','trgSpo2','trgAltura','trgPeso','trgObs'];
     campos.forEach(function(id) { var el = sid(id); if (el) el.value = ''; });
+    var evEl = sid('prnEvolucaoTxt'); if (evEl) { evEl.innerHTML = ''; evEl.style.display = ''; }
+    var evSrc = sid('prnEvolucaoSrc'); if (evSrc) { evSrc.value = ''; evSrc.style.display = 'none'; }
+    var evBtn = sid('prnBtnCodigoFonte'); if (evBtn) evBtn.classList.remove('ativo');
+    _emCodigoFonte = false;
     var tipoSel = sid('prnAtestadoTipo'); if (tipoSel) tipoSel.value = 'MEDICO';
     var imcEl = sid('trgImcVal'); if (imcEl) imcEl.value = '';
     document.querySelectorAll('.prnImcRow').forEach(function(r) {
@@ -260,14 +264,20 @@ const ProntuarioMod = (function () {
     if (!_atd) return;
     var r = await _sb.from('evolucoes').select('texto_evolucao').eq('atendimento_id', _atd.id).maybeSingle();
     var el = sid('prnEvolucaoTxt');
-    if (el && r.data) el.value = r.data.texto_evolucao || '';
+    if (el && r.data) {
+      var conteudo = r.data.texto_evolucao || '';
+      // Compatibilidade com evoluções antigas salvas como texto puro (sem HTML)
+      if (conteudo && conteudo.indexOf('<') === -1) conteudo = esc(conteudo).replace(/\n/g, '<br>');
+      el.innerHTML = conteudo;
+    }
   }
 
   async function salvarEvolucao() {
     if (!_atd) { toast('Abra um atendimento primeiro', 'warn'); return; }
+    _sincronizarCodigoFonte();
     var el = sid('prnEvolucaoTxt');
     if (!el) return;
-    var txt = el.value;
+    var txt = el.innerHTML;
 
     var check = await _sb.from('evolucoes').select('id').eq('atendimento_id', _atd.id).maybeSingle();
     var r;
@@ -325,19 +335,74 @@ const ProntuarioMod = (function () {
     if (!sel || !sel.value) return;
     var modelo = _modelos.find(function (m) { return m.id === sel.value; });
     if (!modelo) return;
-    var txt = sid('prnEvolucaoTxt');
-    if (!txt) { sel.value = ''; return; }
+    var editor = sid('prnEvolucaoTxt');
+    if (!editor) { sel.value = ''; return; }
+    _sairCodigoFonte();
 
-    var inicio = txt.selectionStart || txt.value.length;
-    var fim    = txt.selectionEnd   || txt.value.length;
-    var antes  = txt.value.substring(0, inicio);
-    var depois = txt.value.substring(fim);
-    // Separa com quebra de linha se houver conteúdo
-    var sep = (antes && !antes.endsWith('\n')) ? '\n' : '';
-    txt.value = antes + sep + modelo.conteudo + depois;
-    txt.focus();
+    editor.focus();
+    var sel2 = window.getSelection();
+    var dentroDoEditor = sel2.rangeCount && editor.contains(sel2.getRangeAt(0).commonAncestorContainer);
+    if (!dentroDoEditor) {
+      // Sem cursor posicionado dentro do editor: insere ao final
+      var range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      sel2.removeAllRanges();
+      sel2.addRange(range);
+    }
+    var conteudo = modelo.conteudo || '';
+    // Compatibilidade com modelos antigos salvos como texto puro (sem HTML)
+    if (conteudo && conteudo.indexOf('<') === -1) conteudo = esc(conteudo).replace(/\n/g, '<br>');
+    document.execCommand('insertHTML', false, conteudo);
     sel.value = '';
     toast('Modelo inserido', 'info');
+  }
+
+  /* ── Barra de formatação (negrito, listas, linha, etc.) ── */
+  var _emCodigoFonte = false;
+
+  function formatarTexto(cmd) {
+    if (_emCodigoFonte) return;
+    var editor = sid('prnEvolucaoTxt');
+    if (!editor) return;
+    editor.focus();
+    document.execCommand(cmd, false, null);
+  }
+
+  /* ── Alternar entre visão formatada e código-fonte HTML (também usado para importar modelo pronto) ── */
+  function alternarCodigoFonte() {
+    var editor = sid('prnEvolucaoTxt');
+    var src    = sid('prnEvolucaoSrc');
+    var btn    = sid('prnBtnCodigoFonte');
+    if (!editor || !src) return;
+
+    if (!_emCodigoFonte) {
+      src.value = editor.innerHTML;
+      editor.style.display = 'none';
+      src.style.display = '';
+      src.focus();
+      if (btn) btn.classList.add('ativo');
+      _emCodigoFonte = true;
+    } else {
+      _sairCodigoFonte();
+    }
+  }
+
+  function _sairCodigoFonte() {
+    if (!_emCodigoFonte) return;
+    var editor = sid('prnEvolucaoTxt');
+    var src    = sid('prnEvolucaoSrc');
+    var btn    = sid('prnBtnCodigoFonte');
+    if (editor && src) editor.innerHTML = src.value;
+    if (editor) editor.style.display = '';
+    if (src) src.style.display = 'none';
+    if (btn) btn.classList.remove('ativo');
+    _emCodigoFonte = false;
+  }
+
+  /* Garante que o HTML colado no código-fonte seja aplicado antes de salvar */
+  function _sincronizarCodigoFonte() {
+    if (_emCodigoFonte) _sairCodigoFonte();
   }
 
   function abrirSalvarModelo() {
@@ -360,7 +425,8 @@ const ProntuarioMod = (function () {
       toast('Apenas administradores podem criar modelos compartilhados', 'warn'); return;
     }
 
-    var txt = (sid('prnEvolucaoTxt') || {}).value || '';
+    _sincronizarCodigoFonte();
+    var txt = (sid('prnEvolucaoTxt') || {}).innerHTML || '';
     var payload = {
       titulo:      titulo.trim(),
       conteudo:    txt,
@@ -608,7 +674,7 @@ const ProntuarioMod = (function () {
     var dataFmt = d.toLocaleDateString('pt-BR',  { day: '2-digit', month: 'long', year: 'numeric' });
     var horaFmt = d.toLocaleTimeString('pt-BR',  { hour: '2-digit', minute: '2-digit' });
 
-    var evolucao  = ((sid('prnEvolucaoTxt') || {}).value  || '').trim();
+    var evolucao  = ((sid('prnEvolucaoTxt') || {}).innerHTML || '').trim();
     var exames    = ((sid('prnExamesTxt')   || {}).value  || '').trim();
     var atTipo    = ((sid('prnAtestadoTipo')|| {}).value  || '');
     var atDias    = ((sid('prnAtestadoDias')|| {}).value  || '');
@@ -651,7 +717,7 @@ const ProntuarioMod = (function () {
     if (evolucao) {
       html += '<div class="prnImpSecao">'
         + '<div class="prnImpSecaoTitulo">Evolução Clínica</div>'
-        + '<div class="prnImpTexto">' + evolucao.replace(/\n/g, '<br>') + '</div>'
+        + '<div class="prnImpTexto">' + evolucao + '</div>'
         + '</div>'
         + '<hr class="prnImpDivisor">';
     }
@@ -764,6 +830,8 @@ const ProntuarioMod = (function () {
     mudarAba,
     salvarEvolucao,
     injetarModelo,
+    formatarTexto,
+    alternarCodigoFonte,
     abrirSalvarModelo,
     fecharSalvarModelo,
     confirmarSalvarModelo,
