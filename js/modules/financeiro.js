@@ -96,6 +96,8 @@ function syncMod3Auto(t){const eF=sid('i_fat'),eR=sid('i_rep');eF.value=t.fat>0?
 ══════════════════════════════════════ */
 function onMonthChange(){
   const m=getMonth();
+  const bigLbl=sid('mLabelBig');
+  if(bigLbl) bigLbl.textContent=m?fmt(m):'Selecione o mês';
   const st=sid('mStatus');
   if(!m){st.className='';return;}
 

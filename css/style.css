@@ -105,15 +105,16 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
 .gTable .eRow td{text-align:center;color:var(--s4);padding:24px;border-bottom:none}
 /* Painel flutuante do mês: fica fixo na tela e acompanha a rolagem */
 .lancHead{
-  position:fixed;left:16px;top:180px;z-index:250;width:196px;
+  position:fixed;left:16px;top:180px;z-index:250;width:228px;
   padding:12px;display:flex;flex-direction:column;align-items:stretch;gap:8px;
   background:var(--w);border:1.5px solid var(--s2);border-radius:var(--Rm,12px);
   box-shadow:var(--sh);
 }
-#mNavRow{display:flex;align-items:center;gap:6px}
-.mPick{border:1.5px solid var(--s2);border-radius:var(--Rs);padding:6px 8px;font-size:.82rem;color:var(--s9);background:var(--s0);outline:none;cursor:pointer;transition:border-color .2s,box-shadow .2s;flex:1;min-width:0}
+#mLabelBig{font-size:1.05rem;font-weight:900;color:var(--g8);text-align:center;letter-spacing:.02em}
+#mNavRow{display:flex;align-items:center;gap:4px}
+.mPick{border:1.5px solid var(--s2);border-radius:var(--Rs);padding:6px 4px;font-size:.78rem;color:var(--s9);background:var(--s0);outline:none;cursor:pointer;transition:border-color .2s,box-shadow .2s;flex:1;min-width:0}
 .mPick:focus{border-color:var(--g6);box-shadow:0 0 0 3px rgba(22,163,74,.14)}
-.mNavBtn{background:var(--g1);border:1.5px solid var(--g3);border-radius:var(--Rs);color:var(--g8);font-size:1rem;font-weight:900;padding:4px 10px;cursor:pointer;line-height:1;transition:background .15s;flex-shrink:0}
+.mNavBtn{background:var(--g1);border:1.5px solid var(--g3);border-radius:var(--Rs);color:var(--g8);font-size:1rem;font-weight:900;padding:4px 8px;cursor:pointer;line-height:1;transition:background .15s;flex-shrink:0}
 .mNavBtn:hover{background:var(--g2)}
 #mStatus{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;display:none;text-align:center}
 #mStatus.saved{display:block;background:var(--g1);color:var(--g7)}
