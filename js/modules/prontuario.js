@@ -674,7 +674,6 @@ const ProntuarioMod = (function () {
     var dataFmt = d.toLocaleDateString('pt-BR',  { day: '2-digit', month: 'long', year: 'numeric' });
     var horaFmt = d.toLocaleTimeString('pt-BR',  { hour: '2-digit', minute: '2-digit' });
 
-    var evolucao  = ((sid('prnEvolucaoTxt') || {}).innerHTML || '').trim();
     var exames    = ((sid('prnExamesTxt')   || {}).value  || '').trim();
     var atTipo    = ((sid('prnAtestadoTipo')|| {}).value  || '');
     var atDias    = ((sid('prnAtestadoDias')|| {}).value  || '');
@@ -686,62 +685,67 @@ const ProntuarioMod = (function () {
     var uf               = prof.uf_conselho     || '';
     var numCons          = prof.numero_conselho || '';
 
-    var html = '';
-
-    /* ── Cabeçalho ── */
-    html += '<div class="prnImpHdr">'
-      + '<div class="prnImpLogoWrap">'
-      +   '<div class="prnImpLogoNome">Clínica da Família</div>'
-      +   '<div class="prnImpLogoSub">Prontuário Eletrônico</div>'
-      + '</div>'
-      + '<div class="prnImpHdrRight">'
-      +   '<div class="prnImpHdrData">' + dataFmt + '</div>'
-      +   '<div>às ' + horaFmt + '</div>'
-      + '</div>'
-      + '</div>';
-
-    /* ── Dados do paciente ── */
-    var idadeStr = (_pac && _pac.data_nascimento) ? calcularIdadeExata(_pac.data_nascimento) : '—';
-    html += '<div class="prnImpPacFaixa">'
-      + '<span class="prnImpPacLabel">Paciente:</span> ' + esc((_pac && _pac.nome_completo) || '—')
-      + '&nbsp;&nbsp;&nbsp;'
-      + '<span class="prnImpPacLabel">CPF:</span> ' + esc((_pac && _pac.cpf) || '—')
-      + '&nbsp;&nbsp;&nbsp;'
-      + '<span class="prnImpPacLabel">Idade:</span> ' + idadeStr;
-    if (_pac && _pac.telefone) {
-      html += '&nbsp;&nbsp;&nbsp;<span class="prnImpPacLabel">Tel:</span> ' + esc(_pac.telefone);
-    }
-    html += '</div>';
-
-    /* ── Evolução ── */
-    if (evolucao) {
-      html += '<div class="prnImpSecao">'
-        + '<div class="prnImpSecaoTitulo">Evolução Clínica</div>'
-        + '<div class="prnImpTexto">' + evolucao + '</div>'
+    /* ── Cabeçalho (repetido em cada página) ── */
+    function _montarCabecalho() {
+      var idadeStr = (_pac && _pac.data_nascimento) ? calcularIdadeExata(_pac.data_nascimento) : '—';
+      var h = '<div class="prnImpHdr">'
+        + '<div class="prnImpLogoWrap">'
+        +   '<div class="prnImpLogoNome">Clínica da Família</div>'
+        +   '<div class="prnImpLogoSub">Prontuário Eletrônico</div>'
         + '</div>'
-        + '<hr class="prnImpDivisor">';
+        + '<div class="prnImpHdrRight">'
+        +   '<div class="prnImpHdrData">' + dataFmt + '</div>'
+        +   '<div>às ' + horaFmt + '</div>'
+        + '</div>'
+        + '</div>';
+      h += '<div class="prnImpPacFaixa">'
+        + '<span class="prnImpPacLabel">Paciente:</span> ' + esc((_pac && _pac.nome_completo) || '—')
+        + '&nbsp;&nbsp;&nbsp;'
+        + '<span class="prnImpPacLabel">CPF:</span> ' + esc((_pac && _pac.cpf) || '—')
+        + '&nbsp;&nbsp;&nbsp;'
+        + '<span class="prnImpPacLabel">Idade:</span> ' + idadeStr;
+      if (_pac && _pac.telefone) {
+        h += '&nbsp;&nbsp;&nbsp;<span class="prnImpPacLabel">Tel:</span> ' + esc(_pac.telefone);
+      }
+      h += '</div>';
+      return h;
     }
+
+    /* ── Rodapé legal (repetido em cada página) ── */
+    function _montarRodape() {
+      return '<div class="prnImpRodape">'
+        + '<div class="prnImpAssinaturaLinha"></div>'
+        + '<div class="prnImpProfNome">' + esc(nomeProfissional) + '</div>'
+        + '<div class="prnImpProfConselho">' + conselho + (uf ? '-' + uf : '') + (numCons ? ' nº ' + numCons : '') + '</div>'
+        + '<div class="prnImpLocalData">Data: ' + dataFmt + '</div>'
+        + '</div>';
+    }
+
+    /* Cada documento vira uma página de impressão independente (cabeçalho + conteúdo + assinatura) */
+    var paginas = [];
 
     /* ── Exames ── */
     if (exames) {
-      html += '<div class="prnImpSecao">'
-        + '<div class="prnImpSecaoTitulo">Solicitação de Exames / Procedimentos</div>'
-        + '<div class="prnImpTexto">' + exames.replace(/\n/g, '<br>') + '</div>'
+      paginas.push(
+        '<div class="prnImpSecao">'
+          + '<div class="prnImpSecaoTitulo">Solicitação de Exames / Procedimentos</div>'
+          + '<div class="prnImpTexto">' + exames.replace(/\n/g, '<br>') + '</div>'
         + '</div>'
-        + '<hr class="prnImpDivisor">';
+      );
     }
 
     /* ── Receituário ── */
     if (_meds && _meds.length) {
-      html += '<div class="prnImpSecao">'
+      var corpoMeds = '<div class="prnImpSecao">'
         + '<div class="prnImpSecaoTitulo">Receituário Médico</div>';
       _meds.forEach(function (m, i) {
-        html += '<div class="prnImpMed">'
+        corpoMeds += '<div class="prnImpMed">'
           + '<div class="prnImpMedNome">' + (i + 1) + '. ' + esc(m.apresentacao || '—') + (m.quantidade ? ' — ' + esc(m.quantidade) : '') + '</div>'
           + (m.posologia ? '<div class="prnImpMedPos">' + esc(m.posologia) + (m.dias ? ', por ' + esc(m.dias) + ' dia(s)' : '') + '</div>' : '')
           + '</div>';
       });
-      html += '</div><hr class="prnImpDivisor">';
+      corpoMeds += '</div>';
+      paginas.push(corpoMeds);
     }
 
     /* ── Atestado ── */
@@ -751,32 +755,30 @@ const ProntuarioMod = (function () {
         ACOMPANHAMENTO: 'Atestado de Acompanhamento',
         COMPARECIMENTO: 'Declaração de Comparecimento'
       };
-      html += '<div class="prnImpSecao">'
+      var corpoAtestado = '<div class="prnImpSecao">'
         + '<div class="prnImpSecaoTitulo">' + (labelTipo[atTipo] || 'Atestado') + '</div>'
         + '<div class="prnImpTexto">';
 
-      html += 'Atesto que o(a) paciente <strong>' + esc((_pac && _pac.nome_completo) || '—') + '</strong>';
+      corpoAtestado += 'Atesto que o(a) paciente <strong>' + esc((_pac && _pac.nome_completo) || '—') + '</strong>';
       if (atTipo === 'MEDICO') {
-        html += ' necessita de afastamento de suas atividades por '
+        corpoAtestado += ' necessita de afastamento de suas atividades por '
           + '<strong>' + (atDias || '___') + ' dia(s)</strong>';
       } else if (atTipo === 'ACOMPANHAMENTO') {
-        html += ' necessita de acompanhante por <strong>' + (atDias || '___') + ' dia(s)</strong>';
+        corpoAtestado += ' necessita de acompanhante por <strong>' + (atDias || '___') + ' dia(s)</strong>';
       } else if (atTipo === 'COMPARECIMENTO') {
-        html += ' compareceu a esta unidade de saúde na data acima';
+        corpoAtestado += ' compareceu a esta unidade de saúde na data acima';
       }
-      if (atCid)  html += ' (CID-10: <strong>' + esc(atCid) + '</strong>)';
-      html += '.';
-      if (atObs)  html += ' ' + esc(atObs);
-      html += '</div></div>';
+      if (atCid)  corpoAtestado += ' (CID-10: <strong>' + esc(atCid) + '</strong>)';
+      corpoAtestado += '.';
+      if (atObs)  corpoAtestado += ' ' + esc(atObs);
+      corpoAtestado += '</div></div>';
+      paginas.push(corpoAtestado);
     }
 
-    /* ── Rodapé legal ── */
-    html += '<div class="prnImpRodape">'
-      + '<div class="prnImpAssinaturaLinha"></div>'
-      + '<div class="prnImpProfNome">' + esc(nomeProfissional) + '</div>'
-      + '<div class="prnImpProfConselho">' + conselho + (uf ? '-' + uf : '') + (numCons ? ' nº ' + numCons : '') + '</div>'
-      + '<div class="prnImpLocalData">Data: ' + dataFmt + '</div>'
-      + '</div>';
+    var html = paginas.map(function (corpo, i) {
+      var classePagina = 'prnImpPagina' + (i > 0 ? ' prnImpPB' : '');
+      return '<div class="' + classePagina + '">' + _montarCabecalho() + corpo + _montarRodape() + '</div>';
+    }).join('');
 
     doc.innerHTML = html;
   }
