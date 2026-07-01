@@ -148,6 +148,33 @@ function saveMonth(){
 }
 
 /* ══════════════════════════════════════
+   SALVAMENTO AUTOMÁTICO (a cada 30s)
+   Não interrompe o usuário: sem toast, sem re-render de gráficos.
+══════════════════════════════════════ */
+function autoSaveMonth(){
+  const month=getMonth();
+  if(!month) return;
+  const lanc=readQtyInputs();
+  const d=getInputs();
+  const kpiData={agend:d.agend,faltas:d.faltas,exC:d.exC,exR:d.exR,cus:d.cus,pac:d.pac,sal:d.sal,hd:d.hd,du:d.du,tm:d.tm};
+  if(!Object.values(lanc).some(v=>v>0)&&!Object.values(kpiData).some(v=>v>0)) return;
+  setLancM(month,lanc);
+  const data=ldD();data[month]=kpiData;
+  if(svD(data)){
+    const st=sid('mStatus');
+    if(st){st.textContent='✅ Mês com dados';st.className='saved';}
+    const tag=sid('mAutoSaveTag');
+    if(tag){
+      const original=tag.textContent;
+      tag.textContent='💾 Salvo automaticamente às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      clearTimeout(autoSaveMonth._tagTimer);
+      autoSaveMonth._tagTimer=setTimeout(()=>{tag.textContent='⏱️ Salvamento automático a cada 30s';},4000);
+    }
+  }
+}
+setInterval(autoSaveMonth,30000);
+
+/* ══════════════════════════════════════
    INPUTS & CÁLCULOS
 ══════════════════════════════════════ */
 function getInputs(){
