@@ -1467,13 +1467,13 @@
         <input type="tel" id="usuTelefone" class="afInp" placeholder="(00) 00000-0000"/>
       </div>
       <div class="patFG">
-        <label class="afLabel">Perfil de Acesso *</label>
-        <select id="usuRole" class="afInp" onchange="UsuariosMod.onRoleChange()">
-          <option value="recepcionista">Recepcionista</option>
-          <option value="profissional_saude">Profissional de Saúde</option>
-          <option value="faturamento">Faturamento</option>
-          <option value="administrador">Administrador</option>
-        </select>
+        <label class="afLabel">Perfis de Acesso * <small style="font-weight:400;color:var(--s6)">(pode marcar mais de um)</small></label>
+        <div id="usuRolesWrap" style="display:flex;flex-wrap:wrap;gap:10px;padding-top:4px">
+          <label class="usuCheckRow"><input type="checkbox" class="usuRoleChk" value="administrador" onchange="UsuariosMod.onRoleChange()"/><span>Administrador</span></label>
+          <label class="usuCheckRow"><input type="checkbox" class="usuRoleChk" value="profissional_saude" onchange="UsuariosMod.onRoleChange()"/><span>Profissional de Saúde</span></label>
+          <label class="usuCheckRow"><input type="checkbox" class="usuRoleChk" value="recepcionista" onchange="UsuariosMod.onRoleChange()"/><span>Recepcionista</span></label>
+          <label class="usuCheckRow"><input type="checkbox" class="usuRoleChk" value="faturamento" onchange="UsuariosMod.onRoleChange()"/><span>Faturamento</span></label>
+        </div>
       </div>
     </div>
 
@@ -1617,7 +1617,7 @@
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260630a"></script>
-<script src="js/modules/usuarios.js?v=20260630f"></script>
+<script src="js/modules/usuarios.js?v=20260701a"></script>
 <script src="js/core/main.js?v=20260630d"></script>
 <script>
 window.addEventListener('load', function() {
