@@ -979,7 +979,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   background: #fafbfc;
   transition: border-color .15s;
 }
-.prnMedItem:hover { border-color: var(--s3); }
+.prnMedItem:hover { border-color: var(--s4); }
 .prnMedNum {
   width: 24px;
   height: 24px;
@@ -995,7 +995,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   margin-top: 5px;
 }
 .prnMedFields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-.prnMedGrid3  { display: grid; grid-template-columns: 1fr 1fr 90px; gap: 6px; }
+.prnMedGrid2  { display: grid; grid-template-columns: 1fr 130px; gap: 6px; }
 .prnMedRemove {
   background: none;
   border: none;
@@ -1009,7 +1009,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   transition: background .1s;
 }
 .prnMedRemove:hover { background: var(--r1, #fee2e2); }
-.prnMedVazio        { color: var(--s3); font-size: .83rem; text-align: center; padding: 20px; }
+.prnMedVazio        { color: var(--s4); font-size: .83rem; text-align: center; padding: 20px; }
 .prnBtnAddMed {
   display: flex;
   align-items: center;
