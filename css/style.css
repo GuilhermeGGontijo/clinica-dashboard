@@ -295,6 +295,10 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
 .compNoData{padding:20px 0;text-align:center;color:var(--s4);font-size:.76rem;font-style:italic}
 @media(max-width:900px){.compGrid{grid-template-columns:1fr 1fr!important}.compUnit{border-bottom:1px solid var(--s2)}}
 
+.compGeral{border-top:3px solid var(--g6)!important;background:linear-gradient(180deg,var(--g0) 0%,var(--w) 60%)}
+.compGeralGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:4px 20px}
+@media(max-width:700px){.compGeralGrid{grid-template-columns:1fr 1fr}}
+
 /* ══ GCAL AGENDA ══ */
 .gcWrap{background:var(--w);border:1px solid var(--s2);border-radius:var(--R);box-shadow:var(--sh);overflow:hidden}
 .gcCtrl{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;background:var(--g0);border-bottom:2px solid var(--g1);flex-wrap:wrap}

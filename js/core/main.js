@@ -569,10 +569,51 @@ function renderComparativo(){
       html+='<div class="compRow"><span class="compLabel">🎟️ Ticket Médio</span><span class="compVal'+(x.k.ticket!=null?' green':'')+'">'+( x.k.ticket!=null?'R$&nbsp;'+brl(x.k.ticket):'—')+'</span></div>';
       var oc=x.occPct!=null?(x.occPct>=60?' green':x.occPct>=30?' amber':' red'):'';
       html+='<div class="compRow"><span class="compLabel">🚪 Ocup. Agenda</span><span class="compVal'+oc+'">'+( x.occPct!=null?x.occPct.toFixed(1)+'%':'—')+'</span></div>';
+      html+='<div class="compRow"><span class="compLabel">👥 Pacientes Atendidos</span><span class="compVal">'+( x.d.pac>0?x.d.pac:'—')+'</span></div>';
+      html+='<div class="compRow"><span class="compLabel">🚫 Pacientes Faltantes</span><span class="compVal'+(x.d.faltas>0?' red':'')+'">'+( x.d.faltas>0?x.d.faltas:'—')+'</span></div>';
+      html+='<div class="compRow"><span class="compLabel">🔬 Exames Realizados</span><span class="compVal">'+( x.d.exC>0?x.d.exC:'—')+'</span></div>';
     }
     html+='</div>';
   });
   grid.innerHTML=html;
+
+  renderComparativoGeral(unitsData);
+}
+
+function renderComparativoGeral(unitsData){
+  var wrap=sid('compGeralWrap');
+  var gGrid=sid('compGeralGrid');
+  if(!wrap||!gGrid) return;
+  var comData=unitsData.filter(function(x){return x.hasData;});
+  if(!comData.length){ wrap.style.display='none'; return; }
+
+  var somaFat=0,somaLucro=0,somaAgend=0,somaFaltas=0,somaExC=0,somaPac=0,somaOcc=0,nOcc=0,nLucro=0;
+  comData.forEach(function(x){
+    somaFat+=x.d.fat||0;
+    if(x.k.lucro!=null){ somaLucro+=x.k.lucro; nLucro++; }
+    somaAgend+=x.d.agend||0; somaFaltas+=x.d.faltas||0;
+    somaExC+=x.d.exC||0; somaPac+=x.d.pac||0;
+    if(x.occPct!=null){ somaOcc+=x.occPct; nOcc++; }
+  });
+  var absGeral=somaAgend>0?(somaFaltas/somaAgend)*100:null;
+  var ticketGeral=somaPac>0?somaFat/somaPac:null;
+  var occGeral=nOcc>0?somaOcc/nOcc:null;
+  var meta=getMetaAbs();
+
+  var itens=[
+    {ico:'💰',lbl:'Faturamento Total',val:somaFat>0?'R$&nbsp;'+brl(somaFat):'—',cls:somaFat>0?'green':''},
+    {ico:'📈',lbl:'Lucro Líquido Total',val:nLucro>0?'R$&nbsp;'+brl(somaLucro):'—',cls:nLucro>0?(somaLucro>=0?'green':'red'):''},
+    {ico:'🚫',lbl:'Absenteísmo Geral',val:absGeral!=null?absGeral.toFixed(1)+'%':'—',cls:absGeral!=null?(absGeral<=meta?'green':absGeral<=meta*2?'amber':'red'):''},
+    {ico:'🎟️',lbl:'Ticket Médio Geral',val:ticketGeral!=null?'R$&nbsp;'+brl(ticketGeral):'—',cls:ticketGeral!=null?'green':''},
+    {ico:'🚪',lbl:'Ocup. Agenda Média',val:occGeral!=null?occGeral.toFixed(1)+'%':'—',cls:occGeral!=null?(occGeral>=60?'green':occGeral>=30?'amber':'red'):''},
+    {ico:'👥',lbl:'Pacientes Atendidos',val:somaPac>0?somaPac:'—',cls:''},
+    {ico:'🚫',lbl:'Pacientes Faltantes',val:somaFaltas>0?somaFaltas:'—',cls:somaFaltas>0?'red':''},
+    {ico:'🔬',lbl:'Exames Realizados',val:somaExC>0?somaExC:'—',cls:''}
+  ];
+  gGrid.innerHTML=itens.map(function(it){
+    return '<div class="compRow"><span class="compLabel">'+it.ico+' '+it.lbl+'</span><span class="compVal'+(it.cls?' '+it.cls:'')+'">'+it.val+'</span></div>';
+  }).join('');
+  wrap.style.display='block';
 }
 
 /* ══════════════════════════════════════
