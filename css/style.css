@@ -959,7 +959,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   white-space: pre-line;
 }
 .prnRichEditor ul, .prnRichEditor ol { padding-left: 22px; margin: 6px 0; }
-.prnRichEditor hr { border: none; border-top: 2px solid var(--s3); margin: 10px 0; }
+.prnRichEditor hr { border: none; border-top: 2px solid #000; margin: 14px 0; }
 .prnRichEditorSrc {
   resize: vertical;
   font-family: 'Courier New', Courier, monospace;
