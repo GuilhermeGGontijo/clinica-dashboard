@@ -1541,6 +1541,16 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .relCardAcoes{display:flex;justify-content:flex-end}
 .relEmBreve{margin-top:16px;padding:12px 16px;background:var(--s1);border-radius:var(--Rs);color:var(--s6);font-size:.82rem}
 
+.relCardWide{grid-column:1/-1}
+.relTabelaWrap{max-height:340px;overflow-y:auto;border:1px solid var(--s2);border-radius:var(--Rs)}
+.relTabela{width:100%;border-collapse:collapse;font-size:.78rem}
+.relTabela thead th{position:sticky;top:0;background:var(--s1);color:var(--s6);text-align:left;padding:7px 10px;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--s2)}
+.relTabela tbody td{padding:6px 10px;border-bottom:1px solid var(--s1);color:var(--s7)}
+.relTabela tbody tr:last-child td{border-bottom:none}
+.relResumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding-top:8px}
+.relResumo:empty{display:none}
+.relResumo .relResItem{background:var(--s1);border-radius:var(--Rs);padding:8px}
+
 /* ─── Impressão isolada de cada relatório ─── */
 #relDocImpressao{display:none}
 @media print{
@@ -1557,5 +1567,8 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
   .relImpLabel{font-size:8.5pt;color:#555;text-transform:uppercase}
   .relImpVal{font-size:14pt;font-weight:800;margin-top:4pt}
   .relImpRodape{margin-top:24pt;font-size:9pt;color:#666}
+  .relImpTabela{width:100%;border-collapse:collapse;margin-bottom:16pt;font-size:9pt}
+  .relImpTabela th{text-align:left;background:#f1f5f9;padding:5pt 7pt;font-size:8pt;text-transform:uppercase;border-bottom:1px solid #ccc}
+  .relImpTabela td{padding:4pt 7pt;border-bottom:1px solid #eee}
 }
 </style>
