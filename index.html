@@ -1108,9 +1108,40 @@
       <label class="afLabel">Nome Fantasia *</label>
       <input type="text" id="uniNomeFantasia" class="afInp" placeholder="Nome exibido no sistema"/>
     </div>
-    <div class="patFG" style="margin-bottom:18px">
-      <label class="afLabel">Endereço</label>
-      <input type="text" id="uniEndereco" class="afInp" placeholder="Rua, número, bairro, cidade - UF"/>
+    <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">CEP</label>
+        <input type="text" id="uniCep" class="afInp" placeholder="00000-000" maxlength="9"
+               oninput="UnidadesMod.onCepInput(this)" onblur="UnidadesMod.buscarCep()"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Rua <span id="uniCepStatus" style="font-weight:400;color:var(--s5)"></span></label>
+        <input type="text" id="uniRua" class="afInp" placeholder="Rua / Av."/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:110px 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">Número</label>
+        <input type="text" id="uniNumero" class="afInp" placeholder="Ex: 123"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Complemento</label>
+        <input type="text" id="uniComplemento" class="afInp" placeholder="Sala, bloco, referência (opcional)"/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 70px;gap:10px;margin-bottom:18px">
+      <div class="patFG">
+        <label class="afLabel">Bairro</label>
+        <input type="text" id="uniBairro" class="afInp" placeholder="Bairro"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Cidade</label>
+        <input type="text" id="uniCidade" class="afInp" placeholder="Cidade"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">UF</label>
+        <input type="text" id="uniUf" class="afInp" placeholder="UF" maxlength="2" style="text-transform:uppercase"/>
+      </div>
     </div>
 
     <div style="display:flex;justify-content:flex-end;gap:8px">
@@ -1755,7 +1786,7 @@
 <script src="js/modules/recebimentos.js?v=20260630a"></script>
 <script src="js/modules/usuarios.js?v=20260701a"></script>
 <script src="js/modules/relatorios.js?v=20260701b"></script>
-<script src="js/modules/unidades.js?v=20260701a"></script>
+<script src="js/modules/unidades.js?v=20260701b"></script>
 <script src="js/core/main.js?v=20260701c"></script>
 <script>
 window.addEventListener('load', function() {

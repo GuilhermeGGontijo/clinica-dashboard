@@ -53,7 +53,7 @@ const UnidadesMod = (function () {
     if (!wrap) return;
     wrap.innerHTML = UNITS.map(function (est) {
       var u = _lista[est.id] || { id: est.id };
-      var completo = u.cnpj && u.razao_social && u.endereco && u.telefone;
+      var completo = u.cnpj && u.razao_social && u.telefone && u.rua && u.numero && u.bairro && u.cidade && u.uf;
       return '<div class="uniCard">'
         + '<div class="uniCardLogo">' + (u.logo_url ? '<img src="' + u.logo_url + '" alt="Logo"/>' : '🏥') + '</div>'
         + '<div class="uniCardInfo">'
@@ -81,8 +81,15 @@ const UnidadesMod = (function () {
     set('uniCnpj', u.cnpj);
     set('uniRazaoSocial', u.razao_social);
     set('uniNomeFantasia', u.nome_fantasia);
-    set('uniEndereco', u.endereco);
     set('uniTelefone', u.telefone);
+    set('uniCep', u.cep);
+    set('uniRua', u.rua);
+    set('uniNumero', u.numero);
+    set('uniComplemento', u.complemento);
+    set('uniBairro', u.bairro);
+    set('uniCidade', u.cidade);
+    set('uniUf', u.uf);
+    var cepStatus = sid('uniCepStatus'); if (cepStatus) cepStatus.textContent = '';
 
     var prev = sid('uniLogoPreview');
     if (prev) {
@@ -99,6 +106,40 @@ const UnidadesMod = (function () {
     if (m) m.style.display = 'none';
     _editId = null;
     _logoPendente = null;
+  }
+
+  /* ── CEP: máscara enquanto digita ── */
+  function onCepInput (input) {
+    var digitos = (input.value || '').replace(/\D/g, '').slice(0, 8);
+    input.value = digitos.length > 5 ? digitos.slice(0, 5) + '-' + digitos.slice(5) : digitos;
+  }
+
+  /* ── CEP: busca endereço automaticamente via ViaCEP ── */
+  async function buscarCep () {
+    var cepEl = sid('uniCep');
+    var statusEl = sid('uniCepStatus');
+    if (!cepEl) return;
+    var digitos = (cepEl.value || '').replace(/\D/g, '');
+    if (digitos.length !== 8) { if (statusEl) statusEl.textContent = ''; return; }
+
+    if (statusEl) { statusEl.textContent = '🔎 buscando...'; statusEl.style.color = 'var(--s5)'; }
+    try {
+      var resp = await fetch('https://viacep.com.br/ws/' + digitos + '/json/');
+      var dados = await resp.json();
+      if (dados.erro) {
+        if (statusEl) { statusEl.textContent = '❌ CEP não encontrado'; statusEl.style.color = 'var(--r6)'; }
+        return;
+      }
+      var set = function (elId, val) { var el = sid(elId); if (el && val) el.value = val; };
+      set('uniRua', dados.logradouro);
+      set('uniBairro', dados.bairro);
+      set('uniCidade', dados.localidade);
+      set('uniUf', dados.uf);
+      if (statusEl) { statusEl.textContent = '✅ endereço encontrado'; statusEl.style.color = 'var(--g6)'; }
+      var numEl = sid('uniNumero'); if (numEl && !numEl.value) numEl.focus();
+    } catch (e) {
+      if (statusEl) { statusEl.textContent = '⚠️ falha ao buscar CEP'; statusEl.style.color = 'var(--amb)'; }
+    }
   }
 
   /* ── Seleção de logo: converte para base64 e mostra prévia ── */
@@ -127,8 +168,14 @@ const UnidadesMod = (function () {
     var cnpj = (sid('uniCnpj').value || '').trim();
     var razao = (sid('uniRazaoSocial').value || '').trim();
     var fantasia = (sid('uniNomeFantasia').value || '').trim();
-    var endereco = (sid('uniEndereco').value || '').trim();
     var telefone = (sid('uniTelefone').value || '').trim();
+    var cep = (sid('uniCep').value || '').trim();
+    var rua = (sid('uniRua').value || '').trim();
+    var numero = (sid('uniNumero').value || '').trim();
+    var complemento = (sid('uniComplemento').value || '').trim();
+    var bairro = (sid('uniBairro').value || '').trim();
+    var cidade = (sid('uniCidade').value || '').trim();
+    var uf = (sid('uniUf').value || '').trim().toUpperCase();
 
     if (!fantasia) { toast('Informe o Nome Fantasia.', 'error'); return; }
 
@@ -136,8 +183,14 @@ const UnidadesMod = (function () {
       cnpj: cnpj || null,
       razao_social: razao || null,
       nome_fantasia: fantasia,
-      endereco: endereco || null,
       telefone: telefone || null,
+      cep: cep || null,
+      rua: rua || null,
+      numero: numero || null,
+      complemento: complemento || null,
+      bairro: bairro || null,
+      cidade: cidade || null,
+      uf: uf || null,
       atualizado_em: new Date().toISOString()
     };
     if (_logoPendente) payload.logo_url = _logoPendente;
@@ -158,5 +211,5 @@ const UnidadesMod = (function () {
     toast('✅ Unidade atualizada com sucesso!', 'success');
   }
 
-  return { init, initSilencioso, getNome, abrirEditar, fecharModal, onLogoFile, salvar };
+  return { init, initSilencioso, getNome, abrirEditar, fecharModal, onLogoFile, onCepInput, buscarCep, salvar };
 })();
