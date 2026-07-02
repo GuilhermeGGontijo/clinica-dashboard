@@ -198,7 +198,11 @@ const UsuariosMod = (function () {
     var sw = sid('usuSenhaWrap');
     if (sw) sw.style.display = '';
     var em = sid('usuEmail');
-    if (em) em.readOnly = false;
+    if (em) { em.readOnly = false; em.value = ''; }
+    /* Garantir que seção profissional está oculta ao abrir */
+    var pw = sid('usuProfWrap');
+    if (pw) pw.style.display = 'none';
+    _atualizarDescRole();
     sid('usuModalUsuario').style.display = 'flex';
   }
 
@@ -273,7 +277,7 @@ const UsuariosMod = (function () {
       toast('Senha deve ter no mínimo 6 caracteres.','error'); return;
     }
 
-    /* Campos obrigatórios para profissional de saúde */
+    /* Campos obrigatórios apenas para profissional de saúde */
     if (role === 'profissional_saude') {
       if (!ctipo) { toast('Informe o Conselho (CRM, CREFITO, CRO...).','error'); return; }
       if (!cnum)  { toast('Informe o Número do Registro no conselho.','error');  return; }
@@ -305,37 +309,93 @@ const UsuariosMod = (function () {
 
     try {
       if (_editId) {
+        /* ── Edição ── */
         var r = await _sb.from('perfis_usuarios').update(payload).eq('id', _editId);
         if (r.error) throw r.error;
         toast('✅ Usuário atualizado com sucesso!', 'success');
-      } else {
-        /* Salvar sessão do admin antes de criar novo usuário */
-        var adminSess = (await _sb.auth.getSession()).data.session;
 
+      } else {
+        /* ── Criação ─────────────────────────────────────────────────
+           1. Verificar se já existe perfil com esse email
+           2. signUp() para criar conta no Auth
+           3. Se email já existe no Auth: tentar signIn para recuperar UID
+           4. Restaurar sessão do admin
+           5. Upsert no perfis_usuarios
+        ─────────────────────────────────────────────────────────── */
+
+        /* 1. Checar se perfil já existe */
+        var profExist = await _sb.from('perfis_usuarios').select('id,nome,ativo').eq('email', email).maybeSingle();
+        if (!profExist.error && profExist.data) {
+          var nomeExist = profExist.data.nome || email;
+          var situacao  = profExist.data.ativo === false ? ' (inativo)' : ' (ativo)';
+          throw new Error('Este e-mail já está cadastrado: ' + nomeExist + situacao
+            + '. Use "Editar" para alterar o perfil existente.');
+        }
+
+        /* 2. Salvar sessão do admin */
+        var adminSess = (await _sb.auth.getSession()).data.session;
+        var uid = null;
+
+        /* 3. Tentar criar usuário no Auth */
         var su = await _sb.auth.signUp({
           email: email,
           password: senha,
           options: { data: { nome: nome } }
         });
-        if (su.error) throw su.error;
 
-        var uid = su.data && su.data.user ? su.data.user.id : null;
-        if (!uid) throw new Error('UID não retornado. Verifique se o e-mail já existe.');
+        if (su.error) {
+          /* Email já existe no Auth mas SEM perfil (usuário órfão) */
+          var msgErr = (su.error.message || '').toLowerCase();
+          var isEmailConflict = msgErr.includes('already registered')
+            || msgErr.includes('already been registered')
+            || msgErr.includes('user already exists');
 
-        /* Restaurar sessão do admin caso tenha sido alterada */
-        var curSess = (await _sb.auth.getSession()).data.session;
-        if (adminSess && (!curSess || curSess.user.id !== adminSess.user.id)) {
-          await _sb.auth.setSession({
-            access_token: adminSess.access_token,
-            refresh_token: adminSess.refresh_token
-          });
+          if (!isEmailConflict) throw su.error;
+
+          /* Tentar signIn com a senha fornecida para recuperar o UID */
+          var loginAttempt = await _sb.auth.signInWithPassword({ email: email, password: senha });
+
+          if (loginAttempt.error || !loginAttempt.data || !loginAttempt.data.user) {
+            throw new Error(
+              'Este e-mail já existe no sistema de autenticação mas não possui perfil cadastrado. '
+              + 'A senha informada não confere com a existente. '
+              + 'Entre em contato com o suporte para sincronizar a conta.'
+            );
+          }
+
+          uid = loginAttempt.data.user.id;
+          toast('⚠️ Email já existia no Auth — perfil será criado agora.', 'warn');
+
+        } else {
+          uid = su.data && su.data.user ? su.data.user.id : null;
+          if (!uid) {
+            throw new Error(
+              'Não foi possível obter o ID do usuário. '
+              + 'Verifique se "Email Confirmations" está desativado no Supabase '
+              + 'ou aguarde o usuário confirmar o e-mail e tente novamente.'
+            );
+          }
         }
 
+        /* 4. Restaurar sessão do admin */
+        var curSess = (await _sb.auth.getSession()).data.session;
+        if (adminSess && (!curSess || curSess.user.id !== adminSess.user.id)) {
+          var restored = await _sb.auth.setSession({
+            access_token:  adminSess.access_token,
+            refresh_token: adminSess.refresh_token
+          });
+          /* Se o token expirou, tentar refresh */
+          if (restored.error) {
+            await _sb.auth.refreshSession({ refresh_token: adminSess.refresh_token });
+          }
+        }
+
+        /* 5. Upsert perfil */
         payload.id = uid;
         var rp = await _sb.from('perfis_usuarios').upsert(payload, { onConflict: 'id' });
         if (rp.error) throw rp.error;
 
-        toast('✅ Usuário criado! Um e-mail de confirmação será enviado.', 'success');
+        toast('✅ Usuário criado com sucesso!', 'success');
       }
     } catch (err) {
       toast('Erro: ' + err.message, 'error');
@@ -346,7 +406,6 @@ const UsuariosMod = (function () {
     fecharModal();
     await _carregar();
     _render();
-    /* Atualiza controle se estiver aberto */
     if (sid('ctrlListWrap') && sid('ctrlListWrap').children.length) _renderControle();
   }
 
@@ -374,6 +433,20 @@ const UsuariosMod = (function () {
       var rw = sid('usuRqeWrap');
       if (rw) rw.style.display = 'none';
     }
+    _atualizarDescRole();
+  }
+
+  var _ROLE_DESC = {
+    recepcionista:      'Acesso à Agenda, Pacientes, Recepção e Caixa do Dia.',
+    profissional_saude: 'Acesso a Prontuário, Agenda, Relatórios e Recebimentos. Requer registro no conselho profissional.',
+    faturamento:        'Acesso a Recebimentos, Auditoria Financeira e módulos administrativos.',
+    administrador:      'Acesso total ao sistema, incluindo Prontuário, Financeiro, Usuários e todas as configurações.'
+  };
+
+  function _atualizarDescRole () {
+    var role = (sid('usuRole')||{}).value || '';
+    var el = sid('usuRoleDesc');
+    if (el) el.textContent = _ROLE_DESC[role] || '';
   }
 
   /* ── Auto-preencher conselho + mostrar RQE se médico ── */
