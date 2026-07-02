@@ -331,33 +331,32 @@ const UsuariosMod = (function () {
         if (r.error) throw r.error;
         toast('✅ Usuário atualizado com sucesso!', 'success');
       } else {
-        /* Salvar sessão do admin antes de criar novo usuário */
-        var adminSess = (await _sb.auth.getSession()).data.session;
+        /* Criação via Edge Function (API admin) — não usa auth.signUp(),
+           então não sofre o limite de 60s entre cadastros nem troca a
+           sessão do administrador que está criando o usuário. */
+        var sess = (await _sb.auth.getSession()).data.session;
+        if (!sess) throw new Error('Sessão expirada. Faça login novamente.');
 
-        var su = await _sb.auth.signUp({
-          email: email,
-          password: senha,
-          options: { data: { nome: nome } }
+        var resp = await fetch(SUPA_URL + '/functions/v1/create-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPA_KEY,
+            'Authorization': 'Bearer ' + sess.access_token
+          },
+          body: JSON.stringify({ email: email, password: senha, nome: nome })
         });
-        if (su.error) throw su.error;
+        var criado = await resp.json();
+        if (!resp.ok) throw new Error(criado.error || 'Erro ao criar usuário.');
 
-        var uid = su.data && su.data.user ? su.data.user.id : null;
+        var uid = criado.id;
         if (!uid) throw new Error('UID não retornado. Verifique se o e-mail já existe.');
-
-        /* Restaurar sessão do admin caso tenha sido alterada */
-        var curSess = (await _sb.auth.getSession()).data.session;
-        if (adminSess && (!curSess || curSess.user.id !== adminSess.user.id)) {
-          await _sb.auth.setSession({
-            access_token: adminSess.access_token,
-            refresh_token: adminSess.refresh_token
-          });
-        }
 
         payload.id = uid;
         var rp = await _sb.from('perfis_usuarios').upsert(payload, { onConflict: 'id' });
         if (rp.error) throw rp.error;
 
-        toast('✅ Usuário criado! Um e-mail de confirmação será enviado.', 'success');
+        toast('✅ Usuário criado com sucesso! Já pode fazer login com a senha provisória.', 'success');
       }
     } catch (err) {
       toast('Erro: ' + err.message, 'error');
