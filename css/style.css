@@ -959,13 +959,19 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 .prnMedItem:hover { border-color: var(--s3); }
 /* Linha do cabeçalho: ① Nome ··· Qtd ✕ */
 .prnMedHeader {
-  display: grid;
-  grid-template-columns: 28px 1fr auto auto;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 8px 10px;
   border-bottom: 1px solid var(--s2);
   background: var(--w);
+}
+/* Linha pontilhada entre nome e quantidade */
+.prnMedSep {
+  flex: 1;
+  border-bottom: 2px dotted var(--s3);
+  margin: 0 4px;
+  align-self: center;
 }
 .prnMedNum {
   width: 24px;
@@ -980,9 +986,10 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   justify-content: center;
   flex-shrink: 0;
 }
-/* Apresentação ocupa toda a largura disponível */
+/* Nome do medicamento — cresce até onde o sep permitir */
 .prnMedApres {
-  width: 100%;
+  flex: 0 1 auto;
+  min-width: 120px;
   border: none;
   background: transparent;
   font-size: .88rem;
