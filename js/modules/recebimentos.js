@@ -27,9 +27,53 @@ const RecebMod = (function () {
     var wrap = sid('recebListWrap');
     if (wrap) wrap.innerHTML = '<div class="loadingState">Carregando recebimentos...</div>';
     _setupFiltros();
-    await Promise.all([_carregarConvenios(), _carregar()]);
+    await Promise.all([_carregarConvenios(), _carregar(), _carregarAlertaPendentes()]);
     _renderKpis();
     _renderTabela();
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     ALERTA DE PAGAMENTOS PENDENTES (pacientes sem recebimento)
+  ══════════════════════════════════════════════════════════════════ */
+  async function _carregarAlertaPendentes () {
+    var hoje = _fmtDate(new Date());
+    var r = await _sb.from('agendamentos')
+      .select('id, data_agendamento, hora_inicio, paciente:paciente_id(nome_completo), recebimentos(id,status)')
+      .eq('unidade_id', CU)
+      .neq('status', 'Cancelado')
+      .lte('data_agendamento', hoje)
+      .order('data_agendamento', { ascending: false })
+      .limit(100);
+
+    var wrap = sid('recebAlertaPend');
+    if (!wrap) return;
+    if (r.error || !r.data) { wrap.style.display = 'none'; return; }
+
+    var pendentes = r.data.filter(function (ag) {
+      return !ag.recebimentos || !ag.recebimentos.length ||
+             ag.recebimentos.every(function (rb) { return rb.status !== 'RECEBIDO'; });
+    });
+
+    if (!pendentes.length) { wrap.style.display = 'none'; return; }
+
+    var lista = pendentes.slice(0, 8).map(function (ag) {
+      var nome = (ag.paciente && ag.paciente.nome_completo) || '—';
+      var d = new Date(ag.data_agendamento + 'T00:00:00');
+      var dt = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      var hr = (ag.hora_inicio || '').substring(0, 5);
+      return '<span class="recebPendItem">' + esc(nome) + ' <small>' + dt + ' ' + hr + '</small>'
+        + '<button class="recebPendBtnBaixa" onclick="RecebMod.abrirBaixa(\'' + ag.id + '\')" title="Dar baixa">💰</button>'
+        + '</span>';
+    }).join('');
+
+    var mais = pendentes.length > 8 ? '<span class="recebPendMais">+' + (pendentes.length - 8) + ' mais</span>' : '';
+
+    wrap.style.display = 'flex';
+    wrap.innerHTML = '<div class="recebAlertaIcon">⚠️</div>'
+      + '<div class="recebAlertaBody">'
+      + '<strong>' + pendentes.length + ' paciente' + (pendentes.length > 1 ? 's' : '') + ' com pagamento pendente</strong>'
+      + '<div class="recebPendLista">' + lista + mais + '</div>'
+      + '</div>';
   }
 
   async function _carregarConvenios() {
@@ -85,7 +129,7 @@ const RecebMod = (function () {
   async function filtrar() {
     var wrap = sid('recebListWrap');
     if (wrap) wrap.innerHTML = '<div class="loadingState">Filtrando...</div>';
-    await _carregar();
+    await Promise.all([_carregar(), _carregarAlertaPendentes()]);
     _renderKpis();
     _renderTabela();
   }

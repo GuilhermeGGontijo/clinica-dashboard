@@ -9,6 +9,7 @@ const RecepMod = (function () {
 
   var _itens = [];
   var _timer = null;
+  var _pagModalAgId = null;
 
   var STATUS = {
     agendado:       { emoji: '⏳', label: 'Aguardando',     cls: 'stAguardando' },
@@ -49,10 +50,11 @@ const RecepMod = (function () {
   async function _carregar () {
     var r = await _sb.from('agendamentos')
       .select([
-        'id', 'hora_inicio', 'status_recepcao', 'hora_chegada', 'paciente_id',
+        'id', 'hora_inicio', 'status_recepcao', 'hora_chegada', 'paciente_id', 'valor_cobrado',
         'pacientes(id,nome_completo)',
         'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
-        'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome)'
+        'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor)',
+        'recebimentos(id,status,forma_pagamento,valor)'
       ].join(','))
       .eq('data_agendamento', _hoje())
       .eq('unidade_id', CU)
@@ -65,6 +67,17 @@ const RecepMod = (function () {
     } else {
       _itens = r.data || [];
     }
+  }
+
+  /* ── Checar se agendamento tem pagamento confirmado ── */
+  function _pagamentoConfirmado (ag) {
+    return !!(ag.recebimentos && ag.recebimentos.length &&
+      ag.recebimentos.some(function (r) { return r.status === 'RECEBIDO'; }));
+  }
+
+  function _valorPadrao (ag) {
+    return parseFloat(ag.valor_cobrado) ||
+           parseFloat((ag.procedimento && ag.procedimento.valor) || 0) || 0;
   }
 
   /* ── Render principal ── */
@@ -126,6 +139,7 @@ const RecepMod = (function () {
     var procNome = (ag.procedimento && ag.procedimento.nome)       || '—';
     var hora     = (ag.hora_inicio  || '').substring(0, 5);
     var pacId    = ag.paciente_id || (ag.pacientes && ag.pacientes.id);
+    var pago     = _pagamentoConfirmado(ag);
 
     /* Timer de espera */
     var timerHtml = '';
@@ -150,6 +164,18 @@ const RecepMod = (function () {
       ? '<button class="btn rcpBtnPrn" onclick="RecepMod.abrirProntuario(\'' + pacId + '\')">📋 Prontuário</button>'
       : '';
 
+    /* Badge + botão de pagamento */
+    var pagBadge = pago
+      ? '<span class="rcpPagBadge rcpPagBadgePago">✅ Pago</span>'
+      : '<span class="rcpPagBadge rcpPagBadgePend">⏳ Aguardando Pagamento</span>';
+
+    var btnPag = '';
+    if (!pago && st !== 'faltou') {
+      btnPag = '<button class="btn rcpBtnPag" onclick="RecepMod.abrirPagamento(\'' + ag.id + '\')">'
+        + '💰 Confirmar Pagamento'
+        + '</button>';
+    }
+
     return '<div class="rcpCard rcpCard_' + st + '" data-id="' + ag.id + '">'
       + '<div class="rcpCardLeft">'
       +   '<div class="rcpCardHora">' + hora + '</div>'
@@ -160,6 +186,7 @@ const RecepMod = (function () {
       +   '<div class="rcpCardMeta">' + esc(procNome) + ' · ' + esc(profNome) + '</div>'
       +   timerHtml
       +   '<div class="rcpStatusBtns">' + statusBtns + '</div>'
+      +   '<div class="rcpPagRow">' + pagBadge + btnPag + '</div>'
       + '</div>'
       + '<div class="rcpCardAcoes">' + btnPrn + '</div>'
       + '</div>';
@@ -230,5 +257,91 @@ const RecepMod = (function () {
   /* Manter compatibilidade com código antigo que chama avancarStatus */
   function avancarStatus (id, novoStatus) { setStatus(id, novoStatus); }
 
-  return { init, setStatus, avancarStatus, abrirProntuario, atualizar, destruir };
+  /* ══════════════════════════════════════════════════════════════════
+     MODAL CONFIRMAR PAGAMENTO
+  ══════════════════════════════════════════════════════════════════ */
+  function abrirPagamento (agId) {
+    var ag = _itens.find(function (a) { return a.id === agId; });
+    if (!ag) return;
+    _pagModalAgId = agId;
+
+    var valor = _valorPadrao(ag);
+    var elValor = sid('rcpPagValor');
+    var elForma = sid('rcpPagForma');
+    var elInfo  = sid('rcpPagInfo');
+
+    if (elValor) elValor.value = valor > 0 ? valor.toFixed(2) : '';
+    if (elForma) elForma.value = 'DINHEIRO';
+    if (elInfo) {
+      var pacNome = (ag.pacientes && ag.pacientes.nome_completo) || '—';
+      var procNome = (ag.procedimento && ag.procedimento.nome) || '—';
+      elInfo.textContent = pacNome + ' — ' + procNome;
+    }
+
+    var m = sid('rcpModalPag'); if (m) m.style.display = 'flex';
+  }
+
+  function fecharPagamento () {
+    var m = sid('rcpModalPag'); if (m) m.style.display = 'none';
+    _pagModalAgId = null;
+  }
+
+  async function confirmarPagamento () {
+    if (!_pagModalAgId) return;
+
+    var forma = ((sid('rcpPagForma') || {}).value || '').trim();
+    var valor = parseFloat((sid('rcpPagValor') || {}).value);
+    if (!forma)                     { toast('Selecione a forma de pagamento', 'warn'); return; }
+    if (isNaN(valor) || valor <= 0) { toast('Informe um valor válido', 'warn'); return; }
+
+    var btn = sid('rcpPagBtnConfirmar');
+    if (btn) { btn.disabled = true; btn.textContent = 'Registrando...'; }
+
+    try {
+      var su = await _sb.auth.getUser();
+      var userId = su.data && su.data.user ? su.data.user.id : null;
+
+      var payload = {
+        agendamento_id:   _pagModalAgId,
+        unidade_id:       CU,
+        forma_pagamento:  forma,
+        valor:            valor,
+        data_recebimento: _hoje(),
+        status:           'RECEBIDO',
+        criado_por:       userId
+      };
+
+      var r = await _sb.from('recebimentos').insert(payload);
+      if (r.error) throw r.error;
+
+      toast('✅ Pagamento confirmado!', 'success');
+      fecharPagamento();
+      await _carregar();
+      _render();
+    } catch (err) {
+      toast('Erro ao confirmar: ' + err.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '✅ Confirmar Pagamento'; }
+    }
+  }
+
+  /* ── Verificação de pendência para bloqueio na Agenda ── */
+  async function verificarPendenciaPaciente (pacienteId) {
+    var r = await _sb.from('agendamentos')
+      .select('id, data_agendamento, recebimentos(id,status)')
+      .eq('paciente_id', pacienteId)
+      .eq('unidade_id', CU)
+      .neq('status', 'Cancelado')
+      .lt('data_agendamento', _hoje())
+      .order('data_agendamento', { ascending: false })
+      .limit(30);
+
+    if (r.error || !r.data) return false;
+    return r.data.some(function (ag) {
+      return !ag.recebimentos || !ag.recebimentos.length;
+    });
+  }
+
+  return { init, setStatus, avancarStatus, abrirProntuario, atualizar, destruir,
+           abrirPagamento, fecharPagamento, confirmarPagamento, verificarPendenciaPaciente };
 })();

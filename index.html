@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260703b">
+  <link rel="stylesheet" href="css/style.css?v=20260703c">
 </head>
 <body>
 
@@ -792,6 +792,9 @@
       <div class="recebKpiVal" id="recebKpiValor">R$ 0,00</div>
     </div>
   </div>
+
+  <!-- Alerta de pagamentos pendentes -->
+  <div id="recebAlertaPend" class="recebAlertaPend" style="display:none"></div>
 
   <div class="recebFiltros">
     <div>
@@ -1845,6 +1848,35 @@
   <!-- Conteúdo preenchido dinamicamente por ProntuarioMod.imprimir() -->
 </div>
 
+<!-- ════ MODAL: RECEPÇÃO — CONFIRMAR PAGAMENTO ════ -->
+<div id="rcpModalPag" class="ovl" style="display:none;align-items:center" onclick="if(event.target===this)RecepMod.fecharPagamento()">
+  <div class="mBox" style="max-width:420px;width:96%;padding:24px 22px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3 style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">💰 Confirmar Pagamento</h3>
+      <button class="bDel" onclick="RecepMod.fecharPagamento()" style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
+    </div>
+    <div id="rcpPagInfo" style="font-size:.85rem;color:var(--s6);margin-bottom:16px;padding:10px 12px;background:var(--s1);border-radius:8px;border-left:3px solid var(--g5)"></div>
+    <div class="patFG" style="margin-bottom:14px">
+      <label class="afLabel">Forma de Pagamento *</label>
+      <select id="rcpPagForma" class="afInp">
+        <option value="DINHEIRO">Dinheiro</option>
+        <option value="PIX">PIX</option>
+        <option value="CREDITO">Cartão de Crédito</option>
+        <option value="DEBITO">Cartão de Débito</option>
+        <option value="CONVENIO">Convênio</option>
+      </select>
+    </div>
+    <div class="patFG" style="margin-bottom:20px">
+      <label class="afLabel">Valor (R$) *</label>
+      <input type="number" id="rcpPagValor" class="afInp" step="0.01" min="0" placeholder="0,00"/>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn bGh bSm" onclick="RecepMod.fecharPagamento()">Cancelar</button>
+      <button class="btn bG bSm" id="rcpPagBtnConfirmar" onclick="RecepMod.confirmarPagamento()">✅ Confirmar Pagamento</button>
+    </div>
+  </div>
+</div>
+
 <!-- ════ MODAL: CAIXA — PROCESSAR PAGAMENTO ════ -->
 <div id="caixaModalPag" class="ovl" onclick="if(event.target===this)CaixaMod.fecharModal()">
   <div class="mBox" style="max-width:420px;width:96%;padding:24px 22px">
@@ -1891,12 +1923,12 @@
 <script src="js/modules/financeiro.js?v=20260629d"></script>
 <script src="js/modules/salas.js?v=20260702b"></script>
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
-<script src="js/modules/agenda.js?v=20260702b"></script>
+<script src="js/modules/agenda.js?v=20260702c"></script>
 <script src="js/modules/prontuario.js?v=20260703b"></script>
-<script src="js/modules/recepcao.js?v=20260702b"></script>
+<script src="js/modules/recepcao.js?v=20260702c"></script>
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
-<script src="js/modules/recebimentos.js?v=20260702b"></script>
+<script src="js/modules/recebimentos.js?v=20260702c"></script>
 <script src="js/modules/odontograma.js?v=20260702e"></script>
 <script src="js/modules/caixa.js?v=20260703a"></script>
 <script src="js/modules/auditoria.js?v=20260703a"></script>

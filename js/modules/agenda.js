@@ -773,6 +773,32 @@ const AgendaMod = (function () {
       error = r1.error;
     } else {
       payload.paciente_id = pacId || null;
+
+      /* Verificar pendência de pagamento antes de inserir */
+      if (pacId) {
+        var hoje2 = (function () {
+          var d = new Date();
+          return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        })();
+        var chkPend = await _sb.from('agendamentos')
+          .select('id, recebimentos(id,status)')
+          .eq('paciente_id', pacId)
+          .eq('unidade_id', CU)
+          .neq('status', 'Cancelado')
+          .lt('data_agendamento', hoje2)
+          .limit(30);
+        if (!chkPend.error && chkPend.data) {
+          var temPend = chkPend.data.some(function (ag) {
+            return !ag.recebimentos || !ag.recebimentos.length ||
+                   ag.recebimentos.every(function (r) { return r.status !== 'RECEBIDO'; });
+          });
+          if (temPend) {
+            alert('⚠️ Paciente com pagamento pendente!\n\nEste paciente possui consultas anteriores sem pagamento confirmado.\nConfirme o pagamento na Recepção ou no módulo de Recebimentos antes de agendar.');
+            return;
+          }
+        }
+      }
+
       var su = await _sb.auth.getUser();
       payload.criado_por = su.data && su.data.user ? su.data.user.id : null;
       var r2 = await _sb.from('agendamentos').insert([payload]);
