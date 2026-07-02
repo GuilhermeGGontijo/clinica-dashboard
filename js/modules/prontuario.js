@@ -379,7 +379,7 @@ const ProntuarioMod = (function () {
     if (!_emCodigoFonte) {
       src.value = editor.innerHTML;
       editor.style.display = 'none';
-      src.style.display = '';
+      src.style.display = 'block';
       src.focus();
       if (btn) btn.classList.add('ativo');
       _emCodigoFonte = true;
