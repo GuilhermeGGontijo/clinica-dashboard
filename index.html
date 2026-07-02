@@ -500,6 +500,30 @@
     </div>
     <button class="btn bG" onclick="UsuariosMod.abrirNovo()">+ Novo Usuário</button>
   </div>
+
+  <!-- Aviso de configuração do Supabase (aparece só quando necessário) -->
+  <div id="usuAvisoEmail" style="display:none;align-items:flex-start;gap:14px;background:#fef2f2;border:1.5px solid #f87171;border-radius:12px;padding:16px 20px;margin-bottom:16px;">
+    <div style="font-size:1.6rem;line-height:1;flex-shrink:0">⚙️</div>
+    <div style="flex:1">
+      <div style="font-weight:800;color:#991b1b;font-size:.9rem;margin-bottom:6px">Configuração necessária no Supabase — "Email Confirmations"</div>
+      <div style="font-size:.8rem;color:#7f1d1d;line-height:1.6">
+        O Supabase está tentando enviar e-mail de confirmação a cada novo cadastro, o que consome o limite rapidamente.<br>
+        Para corrigir <strong>de uma vez por todas</strong>, siga os passos abaixo:
+      </div>
+      <ol style="font-size:.8rem;color:#7f1d1d;line-height:2;margin:8px 0 0 18px;padding:0">
+        <li>Acesse o painel do Supabase: <strong>supabase.com → seu projeto</strong></li>
+        <li>No menu lateral, clique em <strong>Authentication</strong></li>
+        <li>Clique em <strong>Providers</strong> → seção <strong>Email</strong></li>
+        <li><strong>Desative</strong> a opção <em>"Enable email confirmations"</em></li>
+        <li>Clique em <strong>Save</strong> e tente cadastrar novamente</li>
+      </ol>
+      <div style="font-size:.75rem;color:#9a3412;margin-top:8px">
+        💡 Em um sistema interno de clínica, a confirmação de e-mail é desnecessária — o administrador já controla quem tem acesso.
+      </div>
+    </div>
+    <button onclick="sid('usuAvisoEmail').style.display='none'" style="background:none;border:none;cursor:pointer;color:#991b1b;font-size:1.1rem;line-height:1;padding:0 4px;flex-shrink:0">✕</button>
+  </div>
+
   <div id="usuListWrap"></div>
 </div>
 
@@ -1933,7 +1957,7 @@
 <script src="js/modules/odontograma.js?v=20260702e"></script>
 <script src="js/modules/caixa.js?v=20260703a"></script>
 <script src="js/modules/auditoria.js?v=20260703a"></script>
-<script src="js/modules/usuarios.js?v=20260702d"></script>
+<script src="js/modules/usuarios.js?v=20260702e"></script>
 <script src="js/core/main.js?v=20260703a"></script>
 <script>
 window.addEventListener('load', function() {

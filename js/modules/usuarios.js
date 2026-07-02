@@ -344,8 +344,16 @@ const UsuariosMod = (function () {
         });
 
         if (su.error) {
-          /* Email já existe no Auth mas SEM perfil (usuário órfão) */
           var msgErr = (su.error.message || '').toLowerCase();
+
+          /* Rate limit — confirmação de e-mail está ativada no Supabase */
+          if (msgErr.includes('rate limit') || msgErr.includes('over_email_send_rate_limit')
+              || msgErr.includes('email rate')) {
+            _mostrarAvisoEmailConfig();
+            throw new Error('Limite de e-mails do Supabase atingido. Veja o aviso abaixo para corrigir.');
+          }
+
+          /* Email já existe no Auth mas SEM perfil (usuário órfão) */
           var isEmailConflict = msgErr.includes('already registered')
             || msgErr.includes('already been registered')
             || msgErr.includes('user already exists');
@@ -434,6 +442,12 @@ const UsuariosMod = (function () {
       if (rw) rw.style.display = 'none';
     }
     _atualizarDescRole();
+  }
+
+  /* ── Aviso de configuração de e-mail do Supabase ── */
+  function _mostrarAvisoEmailConfig () {
+    var w = sid('usuAvisoEmail');
+    if (w) { w.style.display = 'flex'; }
   }
 
   var _ROLE_DESC = {
