@@ -608,51 +608,6 @@
   <div id="unidadesListWrap"></div>
 </div>
 
-<!-- MODAL: Editar Unidade -->
-<div id="uniModal" class="ovl" style="display:none;align-items:flex-start;padding-top:40px"
-     onclick="if(event.target===this)UnidadesMod.fecharModal()">
-  <div class="mBox" style="max-width:520px;width:96%;padding:26px 24px;max-height:90vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <h3 id="uniModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">Editar Unidade</h3>
-      <button class="bDel" onclick="UnidadesMod.fecharModal()" style="font-size:1.1rem;padding:2px 7px">✕</button>
-    </div>
-
-    <div class="patFG" style="margin-bottom:12px;align-items:center;display:flex;flex-direction:column;gap:8px">
-      <label class="afLabel" style="align-self:flex-start">Logo (recomendado 400×400px, até 800KB)</label>
-      <img id="uniLogoPreview" style="display:none;max-width:140px;max-height:140px;border-radius:10px;border:1px solid var(--s2);object-fit:contain;background:var(--s0)"/>
-      <input type="file" accept="image/*" id="uniLogoFile" class="afInp" onchange="UnidadesMod.onLogoFile(this)"/>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div class="patFG">
-        <label class="afLabel">CNPJ</label>
-        <input type="text" id="uniCnpj" class="afInp" placeholder="00.000.000/0000-00"/>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Telefone</label>
-        <input type="tel" id="uniTelefone" class="afInp" placeholder="(00) 00000-0000"/>
-      </div>
-    </div>
-    <div class="patFG" style="margin-bottom:10px">
-      <label class="afLabel">Razão Social</label>
-      <input type="text" id="uniRazaoSocial" class="afInp" placeholder="Razão social completa"/>
-    </div>
-    <div class="patFG" style="margin-bottom:10px">
-      <label class="afLabel">Nome Fantasia *</label>
-      <input type="text" id="uniNomeFantasia" class="afInp" placeholder="Nome exibido no sistema"/>
-    </div>
-    <div class="patFG" style="margin-bottom:18px">
-      <label class="afLabel">Endereço</label>
-      <input type="text" id="uniEndereco" class="afInp" placeholder="Rua, número, bairro, cidade - UF"/>
-    </div>
-
-    <div style="display:flex;justify-content:flex-end;gap:8px">
-      <button class="btn bGh" onclick="UnidadesMod.fecharModal()">Cancelar</button>
-      <button class="btn bG" id="uniBtnSalvar" onclick="UnidadesMod.salvar()">💾 Salvar</button>
-    </div>
-  </div>
-</div>
-
 <div id="secAdminSalas">
   <div class="salasHdr">
     <div>
@@ -1119,6 +1074,51 @@
 </div>
 
 </main>
+
+<!-- MODAL: Editar Unidade -->
+<div id="uniModal" class="ovl" style="display:none;align-items:flex-start;padding-top:40px"
+     onclick="if(event.target===this)UnidadesMod.fecharModal()">
+  <div class="mBox" style="max-width:520px;width:96%;padding:26px 24px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h3 id="uniModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">Editar Unidade</h3>
+      <button class="bDel" onclick="UnidadesMod.fecharModal()" style="font-size:1.1rem;padding:2px 7px">✕</button>
+    </div>
+
+    <div class="patFG" style="margin-bottom:12px;align-items:center;display:flex;flex-direction:column;gap:8px">
+      <label class="afLabel" style="align-self:flex-start">Logo (recomendado 400×400px, até 800KB)</label>
+      <img id="uniLogoPreview" style="display:none;max-width:140px;max-height:140px;border-radius:10px;border:1px solid var(--s2);object-fit:contain;background:var(--s0)"/>
+      <input type="file" accept="image/*" id="uniLogoFile" class="afInp" onchange="UnidadesMod.onLogoFile(this)"/>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG">
+        <label class="afLabel">CNPJ</label>
+        <input type="text" id="uniCnpj" class="afInp" placeholder="00.000.000/0000-00"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Telefone</label>
+        <input type="tel" id="uniTelefone" class="afInp" placeholder="(00) 00000-0000"/>
+      </div>
+    </div>
+    <div class="patFG" style="margin-bottom:10px">
+      <label class="afLabel">Razão Social</label>
+      <input type="text" id="uniRazaoSocial" class="afInp" placeholder="Razão social completa"/>
+    </div>
+    <div class="patFG" style="margin-bottom:10px">
+      <label class="afLabel">Nome Fantasia *</label>
+      <input type="text" id="uniNomeFantasia" class="afInp" placeholder="Nome exibido no sistema"/>
+    </div>
+    <div class="patFG" style="margin-bottom:18px">
+      <label class="afLabel">Endereço</label>
+      <input type="text" id="uniEndereco" class="afInp" placeholder="Rua, número, bairro, cidade - UF"/>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn bGh" onclick="UnidadesMod.fecharModal()">Cancelar</button>
+      <button class="btn bG" id="uniBtnSalvar" onclick="UnidadesMod.salvar()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════ MODAL: ATENDIMENTO ════ -->
 <div id="modalAtend" class="ovl" onclick="if(event.target===this)AtendMod.fecharModal()">
