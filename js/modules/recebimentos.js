@@ -24,6 +24,8 @@ const RecebMod = (function () {
   ══════════════════════════════════════════════════════════════════ */
   async function init() {
     if (!_sb) return;
+    var wrap = sid('recebListWrap');
+    if (wrap) wrap.innerHTML = '<div class="loadingState">Carregando recebimentos...</div>';
     _setupFiltros();
     await Promise.all([_carregarConvenios(), _carregar()]);
     _renderKpis();
@@ -81,6 +83,8 @@ const RecebMod = (function () {
   }
 
   async function filtrar() {
+    var wrap = sid('recebListWrap');
+    if (wrap) wrap.innerHTML = '<div class="loadingState">Filtrando...</div>';
     await _carregar();
     _renderKpis();
     _renderTabela();
@@ -225,32 +229,41 @@ const RecebMod = (function () {
     var data   = ((sid('recebData')       || {}).value) || _fmtDate(new Date());
     var obs    = ((sid('recebObs')        || {}).value || '').trim();
 
-    if (!forma)                    { toast('Selecione a forma de pagamento', 'warn'); return; }
-    if (isNaN(valor) || valor <= 0) { toast('Informe um valor válido',         'warn'); return; }
+    if (!forma)                     { toast('Selecione a forma de pagamento', 'warn'); return; }
+    if (isNaN(valor) || valor <= 0) { toast('Informe um valor válido', 'warn'); return; }
 
-    var su      = await _sb.auth.getUser();
-    var userId  = su.data && su.data.user ? su.data.user.id : null;
+    var btn = document.querySelector('[onclick="RecebMod.salvarBaixa()"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Registrando...'; }
 
-    var payload = {
-      agendamento_id:   _editAgId,
-      unidade_id:       CU,
-      forma_pagamento:  forma,
-      convenio_id:      convId ? parseInt(convId) : null,
-      valor:            valor,
-      data_recebimento: data,
-      status:           'RECEBIDO',
-      observacoes:      obs || null,
-      criado_por:       userId
-    };
+    try {
+      var su     = await _sb.auth.getUser();
+      var userId = su.data && su.data.user ? su.data.user.id : null;
 
-    var r = await _sb.from('recebimentos').insert(payload);
-    if (r.error) { toast('Erro ao registrar: ' + r.error.message, 'error'); return; }
+      var payload = {
+        agendamento_id:   _editAgId,
+        unidade_id:       CU,
+        forma_pagamento:  forma,
+        convenio_id:      convId ? parseInt(convId) : null,
+        valor:            valor,
+        data_recebimento: data,
+        status:           'RECEBIDO',
+        observacoes:      obs || null,
+        criado_por:       userId
+      };
 
-    toast('Pagamento registrado com sucesso!', 'success');
-    fecharModal();
-    await _carregar();
-    _renderKpis();
-    _renderTabela();
+      var r = await _sb.from('recebimentos').insert(payload);
+      if (r.error) throw r.error;
+
+      toast('✅ Pagamento registrado com sucesso!', 'success');
+      fecharModal();
+      await _carregar();
+      _renderKpis();
+      _renderTabela();
+    } catch (err) {
+      toast('Erro ao registrar: ' + err.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '✅ Confirmar Recebimento'; }
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════════

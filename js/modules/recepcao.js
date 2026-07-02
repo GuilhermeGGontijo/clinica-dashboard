@@ -20,6 +20,8 @@ const RecepMod = (function () {
   /* ── Init ── */
   async function init () {
     if (!_sb) return;
+    var wrap = sid('rcpListWrap');
+    if (wrap) wrap.innerHTML = '<div class="loadingState">Carregando atendimentos do dia...</div>';
     _setDataLabel();
     await _carregar();
     _render();

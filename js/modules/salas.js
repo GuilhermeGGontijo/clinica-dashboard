@@ -13,6 +13,8 @@ const SalasMod = (function () {
   /* ── Init ── */
   async function init () {
     if (!_sb) return;
+    var wrap = sid('salasListWrap');
+    if (wrap) wrap.innerHTML = '<div class="loadingState">Carregando salas...</div>';
     await _carregar();
     _render();
   }
@@ -103,19 +105,26 @@ const SalasMod = (function () {
 
     if (!nome) { toast('Digite o nome da sala', 'warn'); sid('salasNomeInp').focus(); return; }
 
-    var r;
-    if (_editId) {
-      r = await _sb.from('salas').update({ nome: nome, cor_hex: cor }).eq('id', _editId);
-    } else {
-      r = await _sb.from('salas').insert({ unidade_id: CU, nome: nome, cor_hex: cor });
+    var btn = document.querySelector('[onclick="SalasMod.salvar()"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+
+    try {
+      var r;
+      if (_editId) {
+        r = await _sb.from('salas').update({ nome: nome, cor_hex: cor }).eq('id', _editId);
+      } else {
+        r = await _sb.from('salas').insert({ unidade_id: CU, nome: nome, cor_hex: cor });
+      }
+      if (r.error) throw r.error;
+      fecharModal();
+      await _carregar();
+      _render();
+      toast(_editId ? 'Sala atualizada!' : 'Sala "' + nome + '" cadastrada!', 'success');
+    } catch (err) {
+      toast('Erro: ' + err.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '💾 Salvar Sala'; }
     }
-
-    if (r.error) { toast('Erro: ' + r.error.message, 'error'); return; }
-
-    fecharModal();
-    await _carregar();
-    _render();
-    toast(_editId ? 'Sala atualizada!' : 'Sala "' + nome + '" cadastrada!', 'success');
   }
 
   /* ── Ativar / Desativar ── */

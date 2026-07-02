@@ -22,22 +22,11 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 #unitBar{background:var(--g9);border-bottom:2px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:400}
 .ubIn{max-width:1440px;margin:0 auto;padding:7px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ubLabel{font-size:.7rem;font-weight:800;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.09em;white-space:nowrap}
-.unitSelect{padding:7px 14px;border-radius:var(--Rs);font-size:.86rem;font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,.22);background:var(--w);color:var(--g9);transition:all .15s;max-width:240px}
-.unitSelect:hover{border-color:var(--w)}
-.unitSelect:focus{outline:none;box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+#unitTabs{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.unitTab{padding:6px 18px;border-radius:var(--Rs);font-size:.85rem;font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap}
+.unitTab:hover{background:rgba(255,255,255,.18);color:var(--w)}
+.unitTab.active{background:var(--w);color:var(--g9);border-color:var(--w);font-weight:800;box-shadow:0 2px 10px rgba(0,0,0,.2)}
 .ubSep{width:1px;height:18px;background:rgba(255,255,255,.2);margin:0 2px}
-
-/* ─── Cadastro de Unidades ─── */
-.uniCard{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--w);border:1px solid var(--s2);border-radius:var(--Rm,12px);margin-bottom:10px}
-.uniCardLogo{width:52px;height:52px;border-radius:10px;background:var(--s1);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;overflow:hidden}
-.uniCardLogo img{width:100%;height:100%;object-fit:contain}
-.uniCardInfo{flex:1;min-width:0}
-.uniCardNome{font-weight:800;color:var(--s9);font-size:.92rem}
-.uniCardMeta{font-size:.76rem;color:var(--s5);margin-top:2px}
-.uniCardVazio{color:var(--s4);font-style:italic}
-.uniCardBadge{font-size:.68rem;font-weight:800;padding:3px 9px;border-radius:20px;white-space:nowrap}
-.uniCardBadge.ok{background:var(--g1);color:var(--g7)}
-.uniCardBadge.pend{background:var(--s1);color:var(--s5)}
 .ubActions{display:flex;gap:6px;margin-left:auto}
 .ubBtn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--Rs);
   font-size:.76rem;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.25);
@@ -114,34 +103,14 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
 .gTable td{padding:7px 12px;border-bottom:1px solid var(--s1);white-space:nowrap}
 .gTable tr:hover td{background:var(--g0)}
 .gTable .eRow td{text-align:center;color:var(--s4);padding:24px;border-bottom:none}
-/* Painel flutuante do mês: fica fixo na tela e acompanha a rolagem */
-.lancHead{
-  position:fixed;left:16px;top:180px;z-index:250;width:228px;
-  padding:12px;display:flex;flex-direction:column;align-items:stretch;gap:8px;
-  background:var(--w);border:1.5px solid var(--s2);border-radius:var(--Rm,12px);
-  box-shadow:var(--sh);
-}
-#mLabelBig{font-size:1.05rem;font-weight:900;color:var(--g8);text-align:center;letter-spacing:.02em}
-#mNavRow{display:flex;align-items:center;gap:4px}
-.mPick{border:1.5px solid var(--s2);border-radius:var(--Rs);padding:6px 4px;font-size:.78rem;color:var(--s9);background:var(--s0);outline:none;cursor:pointer;transition:border-color .2s,box-shadow .2s;flex:1;min-width:0}
+.lancHead{padding:10px 18px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--s2)}
+.mPick{border:1.5px solid var(--s2);border-radius:var(--Rs);padding:6px 10px;font-size:.86rem;color:var(--s9);background:var(--s0);outline:none;cursor:pointer;transition:border-color .2s,box-shadow .2s}
 .mPick:focus{border-color:var(--g6);box-shadow:0 0 0 3px rgba(22,163,74,.14)}
-.mNavBtn{background:var(--g1);border:1.5px solid var(--g3);border-radius:var(--Rs);color:var(--g8);font-size:1rem;font-weight:900;padding:4px 8px;cursor:pointer;line-height:1;transition:background .15s;flex-shrink:0}
+.mNavBtn{background:var(--g1);border:1.5px solid var(--g3);border-radius:var(--Rs);color:var(--g8);font-size:1rem;font-weight:900;padding:4px 10px;cursor:pointer;line-height:1;transition:background .15s}
 .mNavBtn:hover{background:var(--g2)}
-#mStatus{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;display:none;text-align:center}
-#mStatus.saved{display:block;background:var(--g1);color:var(--g7)}
-#mStatus.unsaved{display:block;background:var(--s1);color:var(--s5)}
-.lancHead .btn{width:100%;margin-left:0!important}
-#mAutoSaveTag{font-size:.64rem;color:var(--s4);text-align:center}
-
-@media (max-width:900px){
-  .lancHead{
-    left:8px;right:8px;top:auto;bottom:8px;width:auto;
-    flex-direction:row;flex-wrap:wrap;align-items:center;
-  }
-  #mNavRow{flex:1;min-width:160px}
-  .lancHead .btn{width:auto;flex-shrink:0}
-  #mAutoSaveTag{display:none}
-}
+#mStatus{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;display:none}
+#mStatus.saved{display:inline;background:var(--g1);color:var(--g7)}
+#mStatus.unsaved{display:inline;background:var(--s1);color:var(--s5)}
 .lancList{flex:1;overflow-y:auto;max-height:220px}
 .lancRow{display:flex;align-items:center;gap:10px;padding:7px 18px;border-bottom:1px solid var(--s1);transition:background .15s}
 .lancRow:hover{background:var(--g0)}
@@ -277,6 +246,18 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
 .ovl.open{display:flex}
 .mBox{background:var(--w);border-radius:var(--R);padding:28px 24px;max-width:380px;width:92%;box-shadow:0 10px 38px rgba(0,0,0,.26);animation:pop .2s ease;max-height:90vh;overflow-y:auto}
 @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Estado de carregamento global ── */
+.loadingState{
+  display:flex;align-items:center;justify-content:center;
+  gap:12px;padding:48px 20px;color:var(--s5);font-size:.88rem;
+}
+.loadingState::before{
+  content:'';flex-shrink:0;width:22px;height:22px;
+  border:3px solid var(--s2);border-top-color:var(--g6);
+  border-radius:50%;animation:spin .75s linear infinite;
+}
 .mBox h3{font-size:1.02rem;color:var(--r7);margin-bottom:9px}
 .mBox p{font-size:.84rem;color:var(--s5);line-height:1.55;margin-bottom:20px}
 .mActs{display:flex;gap:9px;justify-content:flex-end}
@@ -325,10 +306,6 @@ main{max-width:1440px;margin:0 auto;padding:22px 18px 70px}
 .compBadge{font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:20px;white-space:nowrap}
 .compNoData{padding:20px 0;text-align:center;color:var(--s4);font-size:.76rem;font-style:italic}
 @media(max-width:900px){.compGrid{grid-template-columns:1fr 1fr!important}.compUnit{border-bottom:1px solid var(--s2)}}
-
-.compGeral{border-top:3px solid var(--g6)!important;background:linear-gradient(180deg,var(--g0) 0%,var(--w) 60%)}
-.compGeralGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:4px 20px}
-@media(max-width:700px){.compGeralGrid{grid-template-columns:1fr 1fr}}
 
 /* ══ GCAL AGENDA ══ */
 .gcWrap{background:var(--w);border:1px solid var(--s2);border-radius:var(--R);box-shadow:var(--sh);overflow:hidden}
@@ -607,7 +584,6 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 .agCard{position:absolute;left:3px;right:3px;border-radius:6px;padding:3px 7px 3px 8px;font-size:.71rem;line-height:1.3;cursor:pointer;z-index:3;box-shadow:0 1px 5px rgba(0,0,0,.18);overflow:hidden;transition:filter .12s,transform .1s;border-left:4px solid rgba(0,0,0,.25);border-top:1px solid rgba(255,255,255,.25)}
 .agCard:hover{filter:brightness(.88);transform:translateY(-1px);z-index:4}
 .agCardNome{font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:14px}
-.agCardRetorno{font-size:.72em;filter:drop-shadow(0 0 1px rgba(0,0,0,.6))}
 .agCardProc,.agCardSala{font-size:.64rem;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .agCardHora{font-size:.62rem;color:rgba(255,255,255,.75)}
 .agCardStatusDot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55)}
@@ -910,10 +886,11 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   padding: 6px 8px;
   min-width: 160px;
 }
-#prnExamesTxt {
+#prnEvolucaoTxt, #prnExamesTxt {
   width: 100%;
   flex: 1;
   min-height: 200px;
+  resize: vertical;
   resize: vertical;
   font-family: 'Courier New', Courier, monospace;
   font-size: .84rem;
@@ -926,81 +903,11 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   box-sizing: border-box;
   transition: border-color .15s, background .15s;
 }
-#prnExamesTxt:focus {
+#prnEvolucaoTxt:focus, #prnExamesTxt:focus {
   border-color: var(--g5);
   outline: none;
   background: var(--w);
   box-shadow: 0 0 0 3px rgba(22,163,74,.1);
-}
-
-/* ─── Evolução: barra de ferramentas de formatação ─── */
-.prnRtb {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
-  margin-bottom: 6px;
-  padding: 6px;
-  background: var(--s1);
-  border: 1px solid var(--s2);
-  border-radius: var(--Rs);
-  flex-shrink: 0;
-}
-.prnRtbBtn {
-  font-size: .76rem;
-  font-weight: 600;
-  padding: 5px 9px;
-  border: 1px solid var(--s2);
-  border-radius: 6px;
-  background: var(--w);
-  color: var(--s7);
-  cursor: pointer;
-  transition: background .12s, border-color .12s;
-}
-.prnRtbBtn:hover { background: var(--s2); }
-.prnRtbBtn#prnBtnCodigoFonte { margin-left: auto; }
-.prnRtbBtn.ativo { background: var(--g5); color: #fff; border-color: var(--g5); }
-.prnRtbSep {
-  width: 1px;
-  align-self: stretch;
-  background: var(--s2);
-  margin: 0 2px;
-}
-
-/* ─── Evolução: editor rico (contenteditable) ─── */
-.prnRichEditor, .prnRichEditorSrc {
-  width: 100%;
-  flex: 1;
-  min-height: 200px;
-  font-size: .88rem;
-  line-height: 1.65;
-  padding: 10px 12px;
-  border: 1.5px solid var(--s2);
-  border-radius: var(--Rs);
-  color: var(--s9);
-  background: #fafbfc;
-  box-sizing: border-box;
-  transition: border-color .15s, background .15s;
-  overflow-y: auto;
-}
-.prnRichEditor:focus, .prnRichEditorSrc:focus {
-  border-color: var(--g5);
-  outline: none;
-  background: var(--w);
-  box-shadow: 0 0 0 3px rgba(22,163,74,.1);
-}
-.prnRichEditor:empty:before {
-  content: attr(data-placeholder);
-  color: var(--s5);
-  white-space: pre-line;
-}
-.prnRichEditor ul, .prnRichEditor ol { padding-left: 22px; margin: 6px 0; }
-.prnRichEditor hr { border: none; border-top: 2px solid #000; margin: 14px 0; }
-.prnRichEditorSrc {
-  resize: vertical;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: .8rem;
-  white-space: pre;
 }
 
 /* ─── Receituário: itens de medicamento ─── */
@@ -1015,7 +922,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   background: #fafbfc;
   transition: border-color .15s;
 }
-.prnMedItem:hover { border-color: var(--s4); }
+.prnMedItem:hover { border-color: var(--s3); }
 .prnMedNum {
   width: 24px;
   height: 24px;
@@ -1031,7 +938,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   margin-top: 5px;
 }
 .prnMedFields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-.prnMedGrid2  { display: grid; grid-template-columns: 1fr 130px; gap: 6px; }
+.prnMedGrid3  { display: grid; grid-template-columns: 1fr 1fr 90px; gap: 6px; }
 .prnMedRemove {
   background: none;
   border: none;
@@ -1045,7 +952,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   transition: background .1s;
 }
 .prnMedRemove:hover { background: var(--r1, #fee2e2); }
-.prnMedVazio        { color: var(--s4); font-size: .83rem; text-align: center; padding: 20px; }
+.prnMedVazio        { color: var(--s3); font-size: .83rem; text-align: center; padding: 20px; }
 .prnBtnAddMed {
   display: flex;
   align-items: center;
@@ -1553,57 +1460,4 @@ body.role-faturamento [data-mod="prontuario"]{display:none!important}
 /* Profissional de Saúde: sem administrativo */
 body.role-profissional_saude [data-mod="administrativo"],
 body.role-profissional_saude #sbGrpAdmin{display:none!important}
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   RELATÓRIOS INDIVIDUAIS
-   ══════════════════════════════════════════════════════════════════════════════ */
-.relGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;margin-top:14px}
-.relCard{background:var(--w);border:1px solid var(--s2);border-radius:var(--Rm,12px);padding:16px;display:flex;flex-direction:column;gap:10px}
-.relCardHdr{display:flex;gap:12px;align-items:flex-start}
-.relCardIco{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--s1)}
-.relCardIco.r{background:var(--r1,#fee2e2)}
-.relCardIco.g{background:var(--g1)}
-.relCardTitle{font-weight:800;color:var(--s9);font-size:.95rem}
-.relCardDesc{font-size:.78rem;color:var(--s5);margin-top:2px;line-height:1.45}
-.relCardFm{font-size:.72rem;color:var(--s5);background:var(--s1);border-radius:6px;padding:6px 9px;font-family:'Courier New',monospace}
-.relPeriodoRow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.78rem;color:var(--s6)}
-.relPeriodoRow .afInp{padding:6px 8px;font-size:.78rem;width:auto}
-.relResultados{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:10px 0;border-top:1px dashed var(--s2);border-bottom:1px dashed var(--s2)}
-.relResVazio{grid-column:1/-1;text-align:center;color:var(--s4);font-size:.8rem;padding:8px}
-.relResItem{text-align:center}
-.relResLabel{font-size:.68rem;color:var(--s5);text-transform:uppercase;letter-spacing:.03em}
-.relResVal{font-size:1.15rem;font-weight:800;color:var(--s9);margin-top:2px}
-.relCardAcoes{display:flex;justify-content:flex-end}
-.relEmBreve{margin-top:16px;padding:12px 16px;background:var(--s1);border-radius:var(--Rs);color:var(--s6);font-size:.82rem}
-
-.relCardWide{grid-column:1/-1}
-.relTabelaWrap{max-height:340px;overflow-y:auto;border:1px solid var(--s2);border-radius:var(--Rs)}
-.relTabela{width:100%;border-collapse:collapse;font-size:.78rem}
-.relTabela thead th{position:sticky;top:0;background:var(--s1);color:var(--s6);text-align:left;padding:7px 10px;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--s2)}
-.relTabela tbody td{padding:6px 10px;border-bottom:1px solid var(--s1);color:var(--s7)}
-.relTabela tbody tr:last-child td{border-bottom:none}
-.relResumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding-top:8px}
-.relResumo:empty{display:none}
-.relResumo .relResItem{background:var(--s1);border-radius:var(--Rs);padding:8px}
-
-/* ─── Impressão isolada de cada relatório ─── */
-#relDocImpressao{display:none}
-@media print{
-  body.rel-imprimindo *{visibility:hidden!important}
-  body.rel-imprimindo #relDocImpressao,
-  body.rel-imprimindo #relDocImpressao *{visibility:visible!important}
-  body.rel-imprimindo #relDocImpressao{
-    display:block!important;position:absolute;left:0;top:0;width:100%;
-  }
-  .relImpTitulo{font-size:16pt;font-weight:800;margin-bottom:4pt}
-  .relImpPeriodo{font-size:10pt;color:#444;margin-bottom:16pt}
-  .relImpGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14pt;margin-bottom:16pt}
-  .relImpItem{border:1px solid #ccc;border-radius:6pt;padding:10pt;text-align:center}
-  .relImpLabel{font-size:8.5pt;color:#555;text-transform:uppercase}
-  .relImpVal{font-size:14pt;font-weight:800;margin-top:4pt}
-  .relImpRodape{margin-top:24pt;font-size:9pt;color:#666}
-  .relImpTabela{width:100%;border-collapse:collapse;margin-bottom:16pt;font-size:9pt}
-  .relImpTabela th{text-align:left;background:#f1f5f9;padding:5pt 7pt;font-size:8pt;text-transform:uppercase;border-bottom:1px solid #ccc}
-  .relImpTabela td{padding:4pt 7pt;border-bottom:1px solid #eee}
-}
 </style>

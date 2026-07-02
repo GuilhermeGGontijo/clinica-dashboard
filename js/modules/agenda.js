@@ -227,7 +227,7 @@ const AgendaMod = (function () {
 
   /* ── Supabase ── */
   async function _carregarSalas () {
-    var r = await _sb.from('salas').select('*').eq('ativa', true).order('nome');
+    var r = await _sb.from('salas').select('*').eq('ativa', true).eq('unidade_id', CU).order('nome');
     _salas = r.data || [];
   }
   async function _carregarProcedimentos () {
@@ -274,10 +274,11 @@ const AgendaMod = (function () {
     }
     var r = await _sb.from('agendamentos')
       .select(`*, pacientes(nome_completo,cpf), profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome,especialidade), sala:salas!agendamentos_sala_id_fkey(nome), procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,cor_hex,duracao_min)`)
+      .eq('unidade_id', CU)   /* Isolamento multi-tenant */
       .gte('data_agendamento', ini).lte('data_agendamento', fim).order('hora_inicio');
     if (r.error) {
       console.warn('[AgendaMod] join falhou, tentando select simples:', r.error.message);
-      var r2 = await _sb.from('agendamentos').select('*').gte('data_agendamento', ini).lte('data_agendamento', fim).order('hora_inicio');
+      var r2 = await _sb.from('agendamentos').select('*').eq('unidade_id', CU).gte('data_agendamento', ini).lte('data_agendamento', fim).order('hora_inicio');
       if (r2.error) { console.error('[AgendaMod] agendamentos error', r2.error); _agendamentos = []; return; }
       _agendamentos = r2.data || [];
       return;
@@ -548,7 +549,7 @@ const AgendaMod = (function () {
       ' onclick="event.stopPropagation();AgendaMod.cardClick(this)"' +
       ' title="' + esc(nome) + ' | ' + esc(proc) + ' | ' + hi + '-' + hf + '">' +
       '<div class="agCardStatusDot" data-s="' + ag.status + '"></div>' +
-      '<div class="agCardNome">' + esc(nome) + (ag.retorno ? ' <span class="agCardRetorno" title="Retorno sem cobrança">↩️</span>' : '') + '</div>' +
+      '<div class="agCardNome">' + esc(nome) + '</div>' +
       (hgt > 40 ? '<div class="agCardProc">' + esc(proc) + '</div>' : '') +
       (hgt > 56 ? '<div class="agCardSala">' + esc(sala) + '</div>' : '') +
       (hgt > 70 ? '<div class="agCardHora">' + hi + ' – ' + hf + '</div>' : '') +
@@ -593,8 +594,6 @@ const AgendaMod = (function () {
     el = sid('agConvenioId'); if (el) el.value = '';
     el = sid('agNumGuia');    if (el) el.value = '';
     el = sid('agValorCob');   if (el) el.value = '';
-    el = sid('agRetorno');    if (el) el.checked = false;
-    _habilitarValorCob(true);
     onFormaPgtoChange();
     el = sid('modalAgendamento'); if (el) el.style.display = 'flex';
   }
@@ -627,10 +626,8 @@ const AgendaMod = (function () {
     el = sid('agConvenioId'); if (el) el.value = ag.convenio_id       || '';
     el = sid('agNumGuia');    if (el) el.value = ag.numero_guia       || '';
     el = sid('agValorCob');   if (el) el.value = ag.valor_cobrado     || '';
-    el = sid('agRetorno');    if (el) el.checked = !!ag.retorno;
-    _habilitarValorCob(!ag.retorno);
     onFormaPgtoChange();
-    if (!ag.retorno) aoSelecionarProcedimento(); /* auto-preenche valor se vazio */
+    aoSelecionarProcedimento(); /* auto-preenche valor se vazio */
     el = sid('modalAgendamento'); if (el) el.style.display = 'flex';
   }
 
@@ -702,34 +699,9 @@ const AgendaMod = (function () {
     if (!procEl || !procEl.value) return;
     var proc = _procedimentos.find(function (p) { return String(p.id) === String(procEl.value); });
     if (!proc) return;
-    var retornoEl = sid('agRetorno');
-    if (retornoEl && retornoEl.checked) return; /* retorno é sempre sem cobrança */
     var valEl = sid('agValorCob');
     if (valEl && (!valEl.value || parseFloat(valEl.value) === 0)) {
-      valEl.value = proc.valor_padrao != null ? parseFloat(proc.valor_padrao).toFixed(2) : '';
-    }
-  }
-
-  /* ── Retorno: consulta de acompanhamento sem cobrança ── */
-  var _valorAntesRetorno = '';
-
-  function _habilitarValorCob (habilitar) {
-    var valEl = sid('agValorCob');
-    if (valEl) valEl.disabled = !habilitar;
-  }
-
-  function onRetornoChange () {
-    var retornoEl = sid('agRetorno');
-    var valEl     = sid('agValorCob');
-    if (!retornoEl || !valEl) return;
-    if (retornoEl.checked) {
-      _valorAntesRetorno = valEl.value;
-      valEl.value = '0.00';
-      _habilitarValorCob(false);
-    } else {
-      _habilitarValorCob(true);
-      valEl.value = _valorAntesRetorno || '';
-      if (!valEl.value) aoSelecionarProcedimento();
+      valEl.value = proc.valor != null ? parseFloat(proc.valor).toFixed(2) : '';
     }
   }
 
@@ -779,8 +751,7 @@ const AgendaMod = (function () {
     var formaPgto = ((sid('agFormaPgto')  || {}).value || '').trim() || null;
     var convId    = ((sid('agConvenioId') || {}).value || '').trim() || null;
     var numGuia   = ((sid('agNumGuia')    || {}).value || '').trim() || null;
-    var retorno   = !!((sid('agRetorno')  || {}).checked);
-    var valorCob  = retorno ? 0 : (parseFloat((sid('agValorCob') || {}).value) || null);
+    var valorCob  = parseFloat((sid('agValorCob') || {}).value) || null;
 
     var payload = {
       unidade_id: CU, sala_id: salaId || null, profissional_id: profId || null,
@@ -790,8 +761,7 @@ const AgendaMod = (function () {
       forma_pagamento: formaPgto,
       convenio_id:     convId ? parseInt(convId) : null,
       numero_guia:     numGuia,
-      valor_cobrado:   valorCob,
-      retorno:         retorno
+      valor_cobrado:   valorCob
     };
 
     var error;
@@ -870,7 +840,7 @@ const AgendaMod = (function () {
   return { init, render, navData, irHoje, setView, filtrar, abrirModalNovo, abrirModalEditar,
            fecharModal, salvarAgendamento, excluirAgendamento, buscarPaciente, selecionarPaciente,
            pacItemClick, slotClick, cardClick, sugerirFim, aoSelecionarProcedimento, mesDiaClick,
-           onFormaPgtoChange, onRetornoChange };
+           onFormaPgtoChange };
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════════

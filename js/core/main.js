@@ -143,8 +143,6 @@ function switchSidebar(mod){
   if(mod==='recebimentos'){   setTimeout(function(){ RecebMod.init();     },50); }
   if(mod==='admin-cadastro'){ setTimeout(function(){ UsuariosMod.init();         },50); }
   if(mod==='admin-controle'){ setTimeout(function(){ UsuariosMod.initControle(); },50); }
-  if(mod==='relatorios'){ setTimeout(function(){ RelatoriosMod.init(); },50); }
-  if(mod==='admin-unidades'){ setTimeout(function(){ UnidadesMod.init(); },50); }
 }
 
 function toggleSbGroup(el,grpId){
@@ -183,16 +181,26 @@ async function loadUserProfile(){
   try {
     var sess = await _sb.auth.getUser();
     var uid = sess && sess.data && sess.data.user ? sess.data.user.id : null;
-    if(!uid){ USER_ROLE='administrador'; return; }
+    /* Sem sessão ativa — nega acesso */
+    if(!uid){ USER_ROLE=null; USER_PROFILE=null; return; }
     var res = await _sb.from('perfis_usuarios').select('*').eq('id',uid).single();
-    if(res.error || !res.data){
+    if(res.error){
+      /* Erro no banco: nega acesso. A proteção real está no RLS do Supabase. */
+      console.warn('[Auth] Erro ao carregar perfil:', res.error.message);
+      USER_ROLE=null; USER_PROFILE=null;
+      toast('⚠️ Não foi possível carregar seu perfil. Contate o administrador.','error');
+      return;
+    }
+    if(!res.data){
+      /* Usuário autenticado sem perfil configurado — assume admin apenas para bootstrap inicial */
       USER_ROLE='administrador'; USER_PROFILE=null;
+      console.warn('[Auth] Perfil não encontrado em perfis_usuarios para uid:', uid);
       return;
     }
     USER_ROLE = res.data.role;
     USER_PROFILE = res.data;
   } catch(e){
-    USER_ROLE='administrador'; USER_PROFILE=null;
+    USER_ROLE=null; USER_PROFILE=null;
     console.warn('loadUserProfile erro:',e);
   }
 }
@@ -284,8 +292,9 @@ function switchModule(mod){
     const ll=document.getElementById('loginLogo');
     if(ll){ll.style.fontSize='0';ll.innerHTML='<img src="'+LOGO_URL+'" alt="Logo" style="height:64px;width:auto;border-radius:8px;margin:0 auto;display:block;"/>';}
   }
-  /* Popula seletor de unidades (nomes reais vêm do Cadastro de Unidades) */
-  await UnidadesMod.initSilencioso();
+  /* Popula abas de unidades */
+  renderUnitTabs();
+  updateUnitDisplay();
 
   /* Popula selects de horário da agenda */
   const startSel=sid('agStart');
@@ -337,16 +346,17 @@ function switchModule(mod){
 /* ══════════════════════════════════════
    SELETOR DE UNIDADE
 ══════════════════════════════════════ */
-function unitName(id){
-  if(typeof UnidadesMod!=='undefined' && UnidadesMod.getNome) return UnidadesMod.getNome(id);
-  const u=UNITS.find(u2=>u2.id===id);
-  return u?u.name:id;
-}
 function renderUnitTabs(){
-  const sel=sid('unitSelect');
-  if(!sel) return;
-  sel.innerHTML=UNITS.map(u=>'<option value="'+u.id+'"'+(u.id===CU?' selected':'')+'>'+esc(unitName(u.id))+'</option>').join('');
-  sel.value=CU;
+  const container=sid('unitTabs');
+  if(!container) return;
+  container.innerHTML='';
+  UNITS.forEach(u=>{
+    const btn=document.createElement('button');
+    btn.className='unitTab'+(u.id===CU?' active':'');
+    btn.textContent=u.name;
+    btn.onclick=()=>onUnitChange(u.id);
+    container.appendChild(btn);
+  });
 }
 function onUnitChange(nu){
   if(nu===CU) return;
@@ -369,15 +379,15 @@ function onUnitChange(nu){
   renderAll();
   onMonthChange();
   loadMetaAbs();
-  toast('🏢 '+unitName(CU)+' carregada','');
+  toast('🏢 '+UNITS.find(u=>u.id===CU).name+' carregada','');
   renderComparativo();
 }
 function updateUnitDisplay(){
-  const nome=unitName(CU);
-  sid('hUnitName').textContent=nome;
-  const _pl=sid('patUnitLabel'); if(_pl) _pl.textContent=nome;
-  const _sl=sid('sbUnitLabel'); if(_sl) _sl.textContent=nome;
-  const _hl=sid('homeUnitLabel'); if(_hl) _hl.textContent=nome;
+  const u=UNITS.find(u=>u.id===CU)||UNITS[0];
+  sid('hUnitName').textContent=u.name;
+  const _pl=sid('patUnitLabel'); if(_pl) _pl.textContent=u.name;
+  const _sl=sid('sbUnitLabel'); if(_sl) _sl.textContent=u.name;
+  const _hl=sid('homeUnitLabel'); if(_hl) _hl.textContent=u.name;
 }
 
 /* ══════════════════════════════════════
@@ -568,51 +578,10 @@ function renderComparativo(){
       html+='<div class="compRow"><span class="compLabel">🎟️ Ticket Médio</span><span class="compVal'+(x.k.ticket!=null?' green':'')+'">'+( x.k.ticket!=null?'R$&nbsp;'+brl(x.k.ticket):'—')+'</span></div>';
       var oc=x.occPct!=null?(x.occPct>=60?' green':x.occPct>=30?' amber':' red'):'';
       html+='<div class="compRow"><span class="compLabel">🚪 Ocup. Agenda</span><span class="compVal'+oc+'">'+( x.occPct!=null?x.occPct.toFixed(1)+'%':'—')+'</span></div>';
-      html+='<div class="compRow"><span class="compLabel">👥 Pacientes Atendidos</span><span class="compVal">'+( x.d.pac>0?x.d.pac:'—')+'</span></div>';
-      html+='<div class="compRow"><span class="compLabel">🚫 Pacientes Faltantes</span><span class="compVal'+(x.d.faltas>0?' red':'')+'">'+( x.d.faltas>0?x.d.faltas:'—')+'</span></div>';
-      html+='<div class="compRow"><span class="compLabel">🔬 Exames Realizados</span><span class="compVal">'+( x.d.exC>0?x.d.exC:'—')+'</span></div>';
     }
     html+='</div>';
   });
   grid.innerHTML=html;
-
-  renderComparativoGeral(unitsData);
-}
-
-function renderComparativoGeral(unitsData){
-  var wrap=sid('compGeralWrap');
-  var gGrid=sid('compGeralGrid');
-  if(!wrap||!gGrid) return;
-  var comData=unitsData.filter(function(x){return x.hasData;});
-  if(!comData.length){ wrap.style.display='none'; return; }
-
-  var somaFat=0,somaLucro=0,somaAgend=0,somaFaltas=0,somaExC=0,somaPac=0,somaOcc=0,nOcc=0,nLucro=0;
-  comData.forEach(function(x){
-    somaFat+=x.d.fat||0;
-    if(x.k.lucro!=null){ somaLucro+=x.k.lucro; nLucro++; }
-    somaAgend+=x.d.agend||0; somaFaltas+=x.d.faltas||0;
-    somaExC+=x.d.exC||0; somaPac+=x.d.pac||0;
-    if(x.occPct!=null){ somaOcc+=x.occPct; nOcc++; }
-  });
-  var absGeral=somaAgend>0?(somaFaltas/somaAgend)*100:null;
-  var ticketGeral=somaPac>0?somaFat/somaPac:null;
-  var occGeral=nOcc>0?somaOcc/nOcc:null;
-  var meta=getMetaAbs();
-
-  var itens=[
-    {ico:'💰',lbl:'Faturamento Total',val:somaFat>0?'R$&nbsp;'+brl(somaFat):'—',cls:somaFat>0?'green':''},
-    {ico:'📈',lbl:'Lucro Líquido Total',val:nLucro>0?'R$&nbsp;'+brl(somaLucro):'—',cls:nLucro>0?(somaLucro>=0?'green':'red'):''},
-    {ico:'🚫',lbl:'Absenteísmo Geral',val:absGeral!=null?absGeral.toFixed(1)+'%':'—',cls:absGeral!=null?(absGeral<=meta?'green':absGeral<=meta*2?'amber':'red'):''},
-    {ico:'🎟️',lbl:'Ticket Médio Geral',val:ticketGeral!=null?'R$&nbsp;'+brl(ticketGeral):'—',cls:ticketGeral!=null?'green':''},
-    {ico:'🚪',lbl:'Ocup. Agenda Média',val:occGeral!=null?occGeral.toFixed(1)+'%':'—',cls:occGeral!=null?(occGeral>=60?'green':occGeral>=30?'amber':'red'):''},
-    {ico:'👥',lbl:'Pacientes Atendidos',val:somaPac>0?somaPac:'—',cls:''},
-    {ico:'🚫',lbl:'Pacientes Faltantes',val:somaFaltas>0?somaFaltas:'—',cls:somaFaltas>0?'red':''},
-    {ico:'🔬',lbl:'Exames Realizados',val:somaExC>0?somaExC:'—',cls:''}
-  ];
-  gGrid.innerHTML=itens.map(function(it){
-    return '<div class="compRow"><span class="compLabel">'+it.ico+' '+it.lbl+'</span><span class="compVal'+(it.cls?' '+it.cls:'')+'">'+it.val+'</span></div>';
-  }).join('');
-  wrap.style.display='block';
 }
 
 /* ══════════════════════════════════════

@@ -17,8 +17,8 @@ async function renderPacientes(){
     var q = _sb.from('pacientes')
       .select('id,nome_completo,cpf,celular,data_nascimento,sexo_biologico,unidade_id')
       .eq('ativo',true)
+      .eq('unidade_id',CU)   /* Isolamento multi-tenant: sempre filtra pela unidade ativa */
       .order('nome_completo');
-    if(USER_ROLE==='recepcionista'||USER_ROLE==='profissional_saude') q=q.eq('unidade_id',CU);
     if(_patSearch){
       if(/^\d/.test(_patSearch)) q=q.ilike('cpf','%'+_patSearch.replace(/\D/g,'')+'%');
       else q=q.ilike('nome_completo','%'+_patSearch+'%');

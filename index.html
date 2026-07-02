@@ -7,15 +7,15 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260701i">
+  <link rel="stylesheet" href="css/style.css?v=20260702a">
 </head>
 <body>
 
 <!-- ════ UNIT BAR (com botões de backup) ════ -->
 <div id="unitBar">
   <div class="ubIn">
-    <span class="ubLabel">🏢 Unidades:</span>
-    <select id="unitSelect" class="unitSelect" onchange="onUnitChange(this.value)"></select>
+    <span class="ubLabel">🏢 Unidade:</span>
+    <div id="unitTabs"></div>
     <div class="ubSep"></div>
     <div class="ubActions">
       <button class="ubBtn ubBtnExp" onclick="exportBackup()" title="Exportar todos os dados como arquivo JSON">📤 Exportar Backup</button>
@@ -342,22 +342,8 @@
               <button class="btn bSm" style="white-space:nowrap;background:var(--s1);color:var(--s7);border:1px solid var(--s2);flex-shrink:0"
                       onclick="ProntuarioMod.abrirSalvarModelo()">💾 Salvar modelo</button>
             </div>
-            <div class="prnRtb" id="prnEvolucaoToolbar">
-              <button type="button" class="prnRtbBtn" title="Negrito" onclick="ProntuarioMod.formatarTexto('bold')"><b>N</b></button>
-              <button type="button" class="prnRtbBtn" title="Itálico" onclick="ProntuarioMod.formatarTexto('italic')"><i>I</i></button>
-              <button type="button" class="prnRtbBtn" title="Sublinhado" onclick="ProntuarioMod.formatarTexto('underline')"><u>S</u></button>
-              <span class="prnRtbSep"></span>
-              <button type="button" class="prnRtbBtn" title="Lista com tópicos" onclick="ProntuarioMod.formatarTexto('insertUnorderedList')">• Lista</button>
-              <button type="button" class="prnRtbBtn" title="Lista numerada" onclick="ProntuarioMod.formatarTexto('insertOrderedList')">1. Lista</button>
-              <button type="button" class="prnRtbBtn" title="Inserir linha horizontal" onclick="ProntuarioMod.formatarTexto('insertHorizontalRule')">— Linha</button>
-              <span class="prnRtbSep"></span>
-              <button type="button" class="prnRtbBtn" title="Remover formatação" onclick="ProntuarioMod.formatarTexto('removeFormat')">Limpar</button>
-              <button type="button" class="prnRtbBtn" id="prnBtnCodigoFonte" title="Ver/editar código-fonte HTML (use para importar um modelo pronto)" onclick="ProntuarioMod.alternarCodigoFonte()">&lt;/&gt; Código-fonte</button>
-            </div>
-            <div id="prnEvolucaoTxt" class="prnRichEditor" contenteditable="true"
-                 data-placeholder="S (Subjetivo): queixa principal&#10;O (Objetivo): exame físico e sinais vitais&#10;A (Avaliação): hipótese diagnóstica&#10;P (Plano): condutas e encaminhamentos"></div>
-            <textarea id="prnEvolucaoSrc" class="prnRichEditorSrc" style="display:none"
-                      placeholder="Cole aqui o código HTML do modelo pronto e clique em &quot;Código-fonte&quot; novamente para aplicar."></textarea>
+            <textarea id="prnEvolucaoTxt"
+                      placeholder="S (Subjetivo): queixa principal&#10;O (Objetivo): exame físico e sinais vitais&#10;A (Avaliação): hipótese diagnóstica&#10;P (Plano): condutas e encaminhamentos"></textarea>
             <div class="prnAbaActions">
               <button class="btn bG bSm" onclick="ProntuarioMod.salvarEvolucao()">💾 Salvar Evolução</button>
             </div>
@@ -464,80 +450,16 @@
 
 
 <div id="secRelatorios">
-  <div class="secModHdr">
-    <div>
-      <div class="secModTitle">📊 Relatórios</div>
-      <div class="secModSub">Indicadores individuais, calculados a partir dos dados reais do sistema — defina o período de cada um e exporte separadamente.</div>
+  <div class="proWrap">
+    <div class="proIco">📊</div>
+    <div class="proTitle">Relatórios</div>
+    <div class="proDesc">
+      Central de relatórios gerenciais: produção por profissional, ocupação de agenda,
+      histórico de atendimentos e indicadores de desempenho clínico.
     </div>
-  </div>
-
-  <div class="relGrid">
-
-    <!-- RELATÓRIO: ABSENTEÍSMO -->
-    <div class="relCard relCardWide" id="relCard_abs">
-      <div class="relCardHdr">
-        <div class="relCardIco r">🚫</div>
-        <div>
-          <div class="relCardTitle">Faltas e Absenteísmo</div>
-          <div class="relCardDesc">Lista de agendamentos com status "Falta" no período, com data e profissional, além da taxa de absenteísmo em relação ao total agendado.</div>
-        </div>
-      </div>
-      <div class="relPeriodoRow">
-        <label>Período:</label>
-        <input type="date" id="relAbsIni" class="afInp"/>
-        <span>até</span>
-        <input type="date" id="relAbsFim" class="afInp"/>
-        <button class="btn bSm" onclick="RelatoriosMod.carregarAbsenteismo()">🔄 Atualizar</button>
-      </div>
-      <div class="relTabelaWrap">
-        <table class="relTabela" id="relAbsTabela">
-          <thead><tr><th>Data</th><th>Profissional</th><th>Paciente</th></tr></thead>
-          <tbody><tr><td colspan="3" class="relResVazio">Selecione um período e clique em Atualizar.</td></tr></tbody>
-        </table>
-      </div>
-      <div class="relResumo" id="relAbsResumo"></div>
-      <div class="relCardAcoes">
-        <button class="btn bGh bSm" onclick="RelatoriosMod.exportar('abs','Faltas e Absenteísmo')">🖨️ Exportar PDF</button>
-      </div>
-    </div>
-
-    <!-- RELATÓRIO: ATENDIMENTOS REALIZADOS -->
-    <div class="relCard relCardWide" id="relCard_atd">
-      <div class="relCardHdr">
-        <div class="relCardIco g">🩺</div>
-        <div>
-          <div class="relCardTitle">Atendimentos Realizados (Consultas, Procedimentos e Exames)</div>
-          <div class="relCardDesc">Todo atendimento finalizado no período, com data, profissional, paciente, tipo e valores — usado para conferir faturamento, repasses e volume de atendimentos por tipo.</div>
-        </div>
-      </div>
-      <div class="relPeriodoRow">
-        <label>Período:</label>
-        <input type="date" id="relAtdIni" class="afInp"/>
-        <span>até</span>
-        <input type="date" id="relAtdFim" class="afInp"/>
-        <button class="btn bSm" onclick="RelatoriosMod.carregarAtendimentos()">🔄 Atualizar</button>
-      </div>
-      <div class="relTabelaWrap">
-        <table class="relTabela" id="relAtdTabela">
-          <thead><tr><th>Data</th><th>Profissional</th><th>Paciente</th><th>Tipo</th><th>Procedimento</th><th>Valor Cobrado</th><th>Repassado</th></tr></thead>
-          <tbody><tr><td colspan="7" class="relResVazio">Selecione um período e clique em Atualizar.</td></tr></tbody>
-        </table>
-      </div>
-      <div class="relResumo" id="relAtdResumo"></div>
-      <div class="relCardAcoes">
-        <button class="btn bGh bSm" onclick="RelatoriosMod.exportar('atd','Atendimentos Realizados')">🖨️ Exportar PDF</button>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="relEmBreve">
-    🔧 <strong>Em breve:</strong> Representatividade entre unidades e Capacidade/Ociosidade de agenda — dependem de dados adicionais (config. de salas e horários) que ainda serão modelados.
+    <div class="proBadge">🔧 Em desenvolvimento</div>
   </div>
 </div>
-
-<!-- RELATÓRIOS: Documento de Impressão isolado -->
-<div id="relDocImpressao"></div>
 
 <div id="secAdminCadastro">
   <div class="secModHdr">
@@ -599,13 +521,15 @@
 </div>
 
 <div id="secAdminUnidades">
-  <div class="secModHdr">
-    <div>
-      <div class="secModTitle">🏥 Cadastro de Unidades</div>
-      <div class="secModSub">CNPJ, razão social, nome fantasia, endereço, telefone e logo de cada unidade da clínica.</div>
+  <div class="proWrap">
+    <div class="proIco">🏥</div>
+    <div class="proTitle">Cadastro de Unidades</div>
+    <div class="proDesc">
+      Cadastro e gestão das unidades da clínica: nome, endereço, contato,
+      logo e configurações específicas de cada unidade.
     </div>
+    <div class="proBadge">🔧 Em desenvolvimento</div>
   </div>
-  <div id="unidadesListWrap"></div>
 </div>
 
 <div id="secAdminSalas">
@@ -803,15 +727,11 @@
     </div>
     <div class="lancHead">
       <span style="font-size:.72rem;font-weight:800;color:var(--s6);text-transform:uppercase;letter-spacing:.05em">📅 Mês:</span>
-      <div id="mLabelBig">Selecione o mês</div>
-      <div id="mNavRow">
-        <button class="mNavBtn" onclick="shiftMonth(-1)" title="Mês anterior">‹</button>
-        <input type="month" class="mPick" id="mPicker" onchange="onMonthChange()" />
-        <button class="mNavBtn" onclick="shiftMonth(1)" title="Próximo mês">›</button>
-      </div>
+      <button class="mNavBtn" onclick="shiftMonth(-1)" title="Mês anterior">‹</button>
+      <input type="month" class="mPick" id="mPicker" onchange="onMonthChange()" />
+      <button class="mNavBtn" onclick="shiftMonth(1)" title="Próximo mês">›</button>
       <span id="mStatus"></span>
-      <button class="btn bG bSm" onclick="saveMonth()">💾 Salvar Mês</button>
-      <span id="mAutoSaveTag">⏱️ Salvamento automático a cada 30s</span>
+      <div style="margin-left:auto"><button class="btn bG bSm" onclick="saveMonth()">💾 Salvar Mês</button></div>
     </div>
     <div class="lancList" id="lancList"></div>
     <div class="lancFooter">
@@ -1047,13 +967,6 @@
   <div id="compGrid" style="display:none"></div>
 </div>
 
-<div id="compGeralWrap" class="compWrap" style="margin-top:16px;display:none">
-  <div class="compUnit compGeral" style="border-right:none">
-    <div class="compUnitName">🌐 Resumo Geral da Rede (todas as unidades)</div>
-    <div id="compGeralGrid" class="compGeralGrid"></div>
-  </div>
-</div>
-
 <!-- ════ MÓDULO: PACIENTES ════ -->
 <div id="modulePacientes">
   <div class="patHeader">
@@ -1074,82 +987,6 @@
 </div>
 
 </main>
-
-<!-- MODAL: Editar Unidade -->
-<div id="uniModal" class="ovl" style="display:none;align-items:flex-start;padding-top:40px"
-     onclick="if(event.target===this)UnidadesMod.fecharModal()">
-  <div class="mBox" style="max-width:520px;width:96%;padding:26px 24px;max-height:90vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <h3 id="uniModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">Editar Unidade</h3>
-      <button class="bDel" onclick="UnidadesMod.fecharModal()" style="font-size:1.1rem;padding:2px 7px">✕</button>
-    </div>
-
-    <div class="patFG" style="margin-bottom:12px;align-items:center;display:flex;flex-direction:column;gap:8px">
-      <label class="afLabel" style="align-self:flex-start">Logo (recomendado 400×400px, até 800KB)</label>
-      <img id="uniLogoPreview" style="display:none;max-width:140px;max-height:140px;border-radius:10px;border:1px solid var(--s2);object-fit:contain;background:var(--s0)"/>
-      <input type="file" accept="image/*" id="uniLogoFile" class="afInp" onchange="UnidadesMod.onLogoFile(this)"/>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div class="patFG">
-        <label class="afLabel">CNPJ</label>
-        <input type="text" id="uniCnpj" class="afInp" placeholder="00.000.000/0000-00"/>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Telefone</label>
-        <input type="tel" id="uniTelefone" class="afInp" placeholder="(00) 00000-0000"/>
-      </div>
-    </div>
-    <div class="patFG" style="margin-bottom:10px">
-      <label class="afLabel">Razão Social</label>
-      <input type="text" id="uniRazaoSocial" class="afInp" placeholder="Razão social completa"/>
-    </div>
-    <div class="patFG" style="margin-bottom:10px">
-      <label class="afLabel">Nome Fantasia *</label>
-      <input type="text" id="uniNomeFantasia" class="afInp" placeholder="Nome exibido no sistema"/>
-    </div>
-    <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;margin-bottom:10px">
-      <div class="patFG">
-        <label class="afLabel">CEP</label>
-        <input type="text" id="uniCep" class="afInp" placeholder="00000-000" maxlength="9"
-               oninput="UnidadesMod.onCepInput(this)" onblur="UnidadesMod.buscarCep()"/>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Rua <span id="uniCepStatus" style="font-weight:400;color:var(--s5)"></span></label>
-        <input type="text" id="uniRua" class="afInp" placeholder="Rua / Av."/>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:110px 1fr;gap:10px;margin-bottom:10px">
-      <div class="patFG">
-        <label class="afLabel">Número</label>
-        <input type="text" id="uniNumero" class="afInp" placeholder="Ex: 123"/>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Complemento</label>
-        <input type="text" id="uniComplemento" class="afInp" placeholder="Sala, bloco, referência (opcional)"/>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 70px;gap:10px;margin-bottom:18px">
-      <div class="patFG">
-        <label class="afLabel">Bairro</label>
-        <input type="text" id="uniBairro" class="afInp" placeholder="Bairro"/>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Cidade</label>
-        <input type="text" id="uniCidade" class="afInp" placeholder="Cidade"/>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">UF</label>
-        <input type="text" id="uniUf" class="afInp" placeholder="UF" maxlength="2" style="text-transform:uppercase"/>
-      </div>
-    </div>
-
-    <div style="display:flex;justify-content:flex-end;gap:8px">
-      <button class="btn bGh" onclick="UnidadesMod.fecharModal()">Cancelar</button>
-      <button class="btn bG" id="uniBtnSalvar" onclick="UnidadesMod.salvar()">💾 Salvar</button>
-    </div>
-  </div>
-</div>
 
 <!-- ════ MODAL: ATENDIMENTO ════ -->
 <div id="modalAtend" class="ovl" onclick="if(event.target===this)AtendMod.fecharModal()">
@@ -1268,10 +1105,6 @@
       <div class="patFG">
         <label class="afLabel">Valor Cobrado (R$)</label>
         <input type="number" id="agValorCob" class="afInp" placeholder="0,00" min="0" step="0.01"/>
-        <label class="usuCheckRow" style="margin-top:6px">
-          <input type="checkbox" id="agRetorno" onchange="AgendaMod.onRetornoChange()"/>
-          <span>↩️ Retorno (consulta sem cobrança)</span>
-        </label>
       </div>
     </div>
     <div id="agConvenioWrap" style="display:none;margin-bottom:10px">
@@ -1634,13 +1467,13 @@
         <input type="tel" id="usuTelefone" class="afInp" placeholder="(00) 00000-0000"/>
       </div>
       <div class="patFG">
-        <label class="afLabel">Perfis de Acesso * <small style="font-weight:400;color:var(--s6)">(pode marcar mais de um)</small></label>
-        <div id="usuRolesWrap" style="display:flex;flex-wrap:wrap;gap:10px;padding-top:4px">
-          <label class="usuCheckRow"><input type="checkbox" class="usuRoleChk" value="administrador" onchange="UsuariosMod.onRoleChange()"/><span>Administrador</span></label>
-          <label class="usuCheckRow"><input type="checkbox" class="usuRoleChk" value="profissional_saude" onchange="UsuariosMod.onRoleChange()"/><span>Profissional de Saúde</span></label>
-          <label class="usuCheckRow"><input type="checkbox" class="usuRoleChk" value="recepcionista" onchange="UsuariosMod.onRoleChange()"/><span>Recepcionista</span></label>
-          <label class="usuCheckRow"><input type="checkbox" class="usuRoleChk" value="faturamento" onchange="UsuariosMod.onRoleChange()"/><span>Faturamento</span></label>
-        </div>
+        <label class="afLabel">Perfil de Acesso *</label>
+        <select id="usuRole" class="afInp" onchange="UsuariosMod.onRoleChange()">
+          <option value="recepcionista">Recepcionista</option>
+          <option value="profissional_saude">Profissional de Saúde</option>
+          <option value="faturamento">Faturamento</option>
+          <option value="administrador">Administrador</option>
+        </select>
       </div>
     </div>
 
@@ -1773,21 +1606,19 @@
      ou: python -m http.server 8000) — não abra index.html diretamente.
      ══════════════════════════════════════════════════════════════════════ -->
 <script src="js/core/supabase.js?v=20260629d"></script>
-<script src="js/core/auth.js?v=20260701a"></script>
-<script src="js/modules/pacientes.js?v=20260629d"></script>
-<script src="js/modules/financeiro.js?v=20260701b"></script>
-<script src="js/modules/salas.js?v=20260629d"></script>
+<script src="js/core/auth.js?v=20260630d"></script>
+<script src="js/modules/pacientes.js?v=20260702a"></script>
+<script src="js/modules/financeiro.js?v=20260629d"></script>
+<script src="js/modules/salas.js?v=20260702a"></script>
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
-<script src="js/modules/agenda.js?v=20260701b"></script>
-<script src="js/modules/prontuario.js?v=20260701c"></script>
-<script src="js/modules/recepcao.js?v=20260630b"></script>
+<script src="js/modules/agenda.js?v=20260702a"></script>
+<script src="js/modules/prontuario.js?v=20260629j"></script>
+<script src="js/modules/recepcao.js?v=20260702a"></script>
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
-<script src="js/modules/recebimentos.js?v=20260630a"></script>
-<script src="js/modules/usuarios.js?v=20260702c"></script>
-<script src="js/modules/relatorios.js?v=20260701b"></script>
-<script src="js/modules/unidades.js?v=20260701b"></script>
-<script src="js/core/main.js?v=20260701c"></script>
+<script src="js/modules/recebimentos.js?v=20260702a"></script>
+<script src="js/modules/usuarios.js?v=20260702a"></script>
+<script src="js/core/main.js?v=20260702a"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');
