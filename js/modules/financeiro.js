@@ -98,6 +98,10 @@ function onMonthChange(){
   const m=getMonth();
   const bigLbl=sid('mLabelBig');
   if(bigLbl) bigLbl.textContent=m?fmt(m):'Selecione o mês';
+  /* Sincroniza label e input do painel lateral esquerdo */
+  var _fl=sid('finMesLabel'); if(_fl) _fl.textContent=m?fmt(m):'—';
+  var _ll=sid('finMesLancLabel'); if(_ll) _ll.textContent=m?fmt(m):'—';
+  var _ps=sid('mPickerSide'); if(_ps&&m) _ps.value=m;
   const st=sid('mStatus');
   if(!m){st.className='';return;}
 

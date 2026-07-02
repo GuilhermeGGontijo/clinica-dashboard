@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260703f">
+  <link rel="stylesheet" href="css/style.css?v=20260703g">
 </head>
 <body>
 
@@ -1013,64 +1013,41 @@
 <!-- ════ LAYOUT 2 COLUNAS: Agenda sticky + Conteúdo financeiro ════ -->
 <div class="finDashLayout">
 
-<!-- ── COLUNA ESQUERDA: Agenda de Ocupação Fixa ── -->
-<div class="finAgendaSidebar">
-  <div class="finAgendaSidebarTitle">📅 Mapa de Ocupação Semanal
-    <span style="font-size:.62rem;font-weight:500;color:var(--s5)">(clique para agendar)</span>
+<!-- ── COLUNA ESQUERDA: Navegador de Mês (sticky) ── -->
+<div class="finMesSidebar">
+  <div class="finMesSidebarTitle">📅 Período de Análise</div>
+
+  <!-- Navegação de mês -->
+  <div class="finMesNavRow">
+    <button class="finMesNavBtn" onclick="shiftMonth(-1)" title="Mês anterior">‹</button>
+    <span class="finMesLabelBig" id="finMesLabel">—</span>
+    <button class="finMesNavBtn" onclick="shiftMonth(1)" title="Próximo mês">›</button>
   </div>
-  <div class="gcCtrl gcCtrlSticky">
-    <div class="gcCtrlL" style="flex-wrap:wrap;gap:4px">
-      <span class="gcCtrlLabel">⏱</span>
-      <select id="agStart" class="gcSel" onchange="saveAgConfig()"></select>
-      <span style="font-size:.75rem;color:var(--s6)">às</span>
-      <select id="agEnd" class="gcSel" onchange="saveAgConfig()"></select>
-    </div>
-    <div class="gcCtrlR" style="flex-wrap:wrap;gap:3px">
-      <button class="gcFilterBtn active" id="afAll" onclick="setAgFilter('all')">Geral</button>
-      <button class="gcFilterBtn" id="afS1" onclick="setAgFilter('s1')">S1</button>
-      <button class="gcFilterBtn" id="afS2" onclick="setAgFilter('s2')">S2</button>
-      <button class="gcFilterBtn" id="afS3" onclick="setAgFilter('s3')">S3</button>
-    </div>
+
+  <!-- Status do mês (salvo / novo) -->
+  <div class="finMesStatusRow">
+    <span id="mStatus" class="finMesStatusSpan"></span>
   </div>
-  <div class="gcGridWrap gcGridSticky"><div id="gcGrid"></div></div>
-  <div class="gcLegend gcLegendSticky">
-    <span><span class="gcDot gcDotFree"></span>Livre</span>
-    <span><span class="gcDot" style="background:#dcfce7;border-color:#86efac"></span>S1</span>
-    <span><span class="gcDot" style="background:#dbeafe;border-color:#93c5fd"></span>S2</span>
-    <span><span class="gcDot" style="background:#ffedd5;border-color:#fdba74"></span>S3</span>
-    <span><span class="gcDot gcDotBloq"></span>Bloq</span>
+
+  <!-- Botão salvar -->
+  <button onclick="saveMonth()" class="btn bG finMesSaveBtn">💾 Salvar Mês</button>
+
+  <div class="finMesDivider"></div>
+
+  <!-- Seletor de mês direto -->
+  <div class="finMesPickerRow">
+    <label class="finMesPickerLabel">Ir para mês:</label>
+    <input type="month" class="finMesPickerInp" id="mPickerSide" onchange="sid('mPicker').value=this.value;onMonthChange()"/>
   </div>
-  <div style="margin-top:10px;border-top:1px solid var(--s2);padding-top:10px">
-    <div class="agFormWrapMini">
-      <div class="agFormHeader" style="padding:8px 10px">
-        <span class="agFormHeaderTitle" style="font-size:.76rem">➕ Cadastrar na Agenda</span>
-        <button class="agFClearBtn" onclick="clearAgForm()" style="font-size:.7rem;padding:2px 7px">🗑</button>
-      </div>
-      <div style="padding:8px 10px;display:flex;flex-direction:column;gap:6px">
-        <input type="text" id="fProf" class="agFInp" placeholder="👤 Profissional" autocomplete="off" />
-        <input type="text" id="fEsp"  class="agFInp" placeholder="🏥 Especialidade" autocomplete="off" />
-        <input type="text" id="fProc" class="agFInp" placeholder="📋 Procedimento" autocomplete="off" />
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <select id="fDay" class="agFSel">
-            <option value="seg">Segunda</option>
-            <option value="ter">Terça</option>
-            <option value="qua">Quarta</option>
-            <option value="qui">Quinta</option>
-            <option value="sex">Sexta</option>
-          </select>
-          <select id="fSala" class="agFSel">
-            <option value="s1">Sala 1</option>
-            <option value="s2">Sala 2</option>
-            <option value="s3">Sala 3</option>
-          </select>
-          <select id="fHStart" class="agFSel" onchange="syncFHEnd()"></select>
-          <select id="fHEnd" class="agFSel"></select>
-        </div>
-        <button onclick="saveAgForm()" class="btn bG" style="width:100%;font-size:.78rem;padding:7px">💾 Cadastrar</button>
-      </div>
-    </div>
+
+  <div class="finMesDivider"></div>
+
+  <!-- Dica -->
+  <div class="finMesTip">
+    <div class="finMesTipIco">💡</div>
+    <div class="finMesTipText">Use as setas ou selecione o mês diretamente. KPIs e lançamentos atualizam automaticamente.</div>
   </div>
-</div><!-- /finAgendaSidebar -->
+</div><!-- /finMesSidebar -->
 
 <!-- ── COLUNA DIREITA: Conteúdo financeiro ── -->
 <div class="finMainContent">
@@ -1120,12 +1097,10 @@
       <div class="colDesc">Informe a quantidade realizada de cada serviço no mês. Totais calculados automaticamente.</div>
     </div>
     <div class="lancHead">
-      <span style="font-size:.72rem;font-weight:800;color:var(--s6);text-transform:uppercase;letter-spacing:.05em">📅 Mês:</span>
-      <button class="mNavBtn" onclick="shiftMonth(-1)" title="Mês anterior">‹</button>
-      <input type="month" class="mPick" id="mPicker" onchange="onMonthChange()" />
-      <button class="mNavBtn" onclick="shiftMonth(1)" title="Próximo mês">›</button>
-      <span id="mStatus"></span>
-      <div style="margin-left:auto"><button class="btn bG bSm" onclick="saveMonth()">💾 Salvar Mês</button></div>
+      <span style="font-size:.72rem;font-weight:800;color:var(--s6);text-transform:uppercase;letter-spacing:.05em">📅 Lançamentos —</span>
+      <span id="finMesLancLabel" style="font-size:.82rem;font-weight:800;color:var(--g8)">—</span>
+      <!-- mPicker oculto: continua sendo referenciado pelo JS -->
+      <input type="month" id="mPicker" onchange="onMonthChange()" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0" tabindex="-1"/>
     </div>
     <div class="lancList" id="lancList"></div>
     <div class="lancFooter">
@@ -2105,7 +2080,7 @@
 <script src="js/core/supabase.js?v=20260629d"></script>
 <script src="js/core/auth.js?v=20260630d"></script>
 <script src="js/modules/pacientes.js?v=20260702b"></script>
-<script src="js/modules/financeiro.js?v=20260629d"></script>
+<script src="js/modules/financeiro.js?v=20260703a"></script>
 <script src="js/modules/salas.js?v=20260702b"></script>
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
 <script src="js/modules/agenda.js?v=20260702c"></script>
