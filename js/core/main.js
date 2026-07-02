@@ -146,6 +146,7 @@ function switchSidebar(mod){
   if(mod==='auditoria'){     setTimeout(function(){ AuditoriaMod.init();   },50); }
   if(mod==='admin-cadastro'){ setTimeout(function(){ UsuariosMod.init();         },50); }
   if(mod==='admin-controle'){ setTimeout(function(){ UsuariosMod.initControle(); },50); }
+  if(mod==='admin-odonto-proc'){ setTimeout(function(){ OdontoProcMod.init();    },50); }
 }
 
 function toggleSbGroup(el,grpId){

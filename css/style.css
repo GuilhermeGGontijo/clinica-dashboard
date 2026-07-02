@@ -465,7 +465,7 @@ body.sidebar-open #moduleNav{display:none!important}
 #secHome,#secProntuario,#secAgenda,#secRelatorios,
 #secAdminCadastro,#secAdminControle,#secAdminUnidades,
 #secAdminSalas,#secAdminAtendimentos,#secAdminRecepcao,
-#secAdminConvenios,#secRecebimentos,#secOdontograma,
+#secAdminConvenios,#secAdminOdontoproc,#secRecebimentos,#secOdontograma,
 #modulePacientes{display:none}
 /* Elementos soltos do fin-dashboard também ocultos por padrão */
 #printHeader,.finDashLayout,.topGrid,.agFormWrap,#slCadastro,
@@ -487,6 +487,7 @@ body.sb-admin-salas #secAdminSalas{display:block!important}
 body.sb-admin-atendimentos #secAdminAtendimentos{display:block!important}
 body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
 body.sb-admin-convenios #secAdminConvenios{display:block!important}
+body.sb-admin-odonto-proc #secAdminOdontoproc{display:block!important}
 body.sb-recebimentos #secRecebimentos{display:block!important}
 body.sb-odontograma #secOdontograma{display:block!important}
 body.sb-fin-dashboard #printHeader{display:block!important}
@@ -1988,4 +1989,24 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 .audBdAberto { background: var(--a1); color: var(--a8); }
 .audBdPend   { background: var(--r1); color: var(--r7); }
 .audBdOk     { background: var(--g1); color: var(--g9); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PROCEDIMENTOS ODONTOLÓGICOS (OdontoProcMod)
+══════════════════════════════════════════════════════════════════════ */
+#secAdminOdontoproc { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
+.opGrupo { margin-bottom: 24px; }
+.opGrupoLabel {
+  font-size: .72rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .7px; color: var(--s5); padding: 4px 0 8px;
+  border-bottom: 1.5px solid var(--s2); margin-bottom: 10px;
+}
+.opGrupoTabela { overflow-x: auto; border-radius: 8px; border: 1px solid var(--s2); }
+
+/* Botão Odontograma no Prontuário */
+.prnBtnOdonto {
+  background: var(--b5,#3b82f6); color: #fff; border: none;
+  font-size: .75rem; font-weight: 700; padding: 5px 12px;
+  border-radius: 6px; cursor: pointer; transition: background .15s;
+}
+.prnBtnOdonto:hover { background: var(--b6,#2563eb); }
 </style>

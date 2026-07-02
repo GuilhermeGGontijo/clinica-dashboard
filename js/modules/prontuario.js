@@ -844,6 +844,18 @@ const ProntuarioMod = (function () {
   }
 
   /* ══════════════════════════════════════════════════════════════════════════
+     ABRIR ODONTOGRAMA COM PACIENTE PRÉ-SELECIONADO
+     ══════════════════════════════════════════════════════════════════════════ */
+  function abrirOdontograma() {
+    if (!_pac || !_pac.id) {
+      toast('Selecione um paciente antes de abrir o Odontograma.', 'warn');
+      return;
+    }
+    window._odoPreloadPaciente = { id: _pac.id, nome: _pac.nome_completo };
+    switchSidebar('odontograma');
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
      API PÚBLICA
      ══════════════════════════════════════════════════════════════════════════ */
   return {
@@ -873,7 +885,8 @@ const ProntuarioMod = (function () {
     salvarReceituario,
     salvarAtestado,
     imprimir,
-    calcularIdadeExata
+    calcularIdadeExata,
+    abrirOdontograma
   };
 })();
 

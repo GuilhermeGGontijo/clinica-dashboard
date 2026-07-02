@@ -34,6 +34,13 @@ const OdontogramaMod = (function () {
   ══════════════════════════════════════════════════════════════════ */
   async function init() {
     _resetEstado();
+    /* Preload de paciente vindo do Prontuário */
+    if (window._odoPreloadPaciente) {
+      var pre = window._odoPreloadPaciente;
+      window._odoPreloadPaciente = null;
+      _pacienteId   = pre.id;
+      _pacienteNome = pre.nome;
+    }
     await _carregarProcedimentos();
     _renderArcadas();
     _renderListaProcedimentos();
