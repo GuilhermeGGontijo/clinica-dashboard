@@ -949,17 +949,24 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 
 /* ─── Receituário: itens de medicamento ─── */
 .prnMedItem {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  padding: 11px 12px;
   border: 1px solid var(--s2);
   border-radius: var(--Rs);
   margin-bottom: 8px;
   background: #fafbfc;
+  overflow: hidden;
   transition: border-color .15s;
 }
 .prnMedItem:hover { border-color: var(--s3); }
+/* Linha do cabeçalho: ① Nome ··· Qtd ✕ */
+.prnMedHeader {
+  display: grid;
+  grid-template-columns: 28px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--s2);
+  background: var(--w);
+}
 .prnMedNum {
   width: 24px;
   height: 24px;
@@ -972,24 +979,59 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-top: 5px;
 }
-.prnMedFields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-.prnMedGrid3  { display: grid; grid-template-columns: 1fr 1fr 90px; gap: 6px; }
+/* Apresentação ocupa toda a largura disponível */
+.prnMedApres {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--s8);
+  outline: none;
+  padding: 0;
+}
+.prnMedApres::placeholder { font-weight: 400; color: var(--s4); }
+/* Quantidade alinhada à direita do nome */
+.prnMedQtd {
+  width: 100px;
+  border: 1px solid var(--s2);
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: .83rem;
+  text-align: right;
+  background: var(--w);
+}
+.prnMedQtd:focus { outline: none; border-color: var(--g5); }
+/* Corpo: posologia + dias */
+.prnMedBody { display: flex; flex-direction: column; gap: 0; }
+.prnMedBody input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--s1);
+  background: transparent;
+  padding: 7px 12px 7px 44px;
+  font-size: .84rem;
+  color: var(--s7);
+  box-sizing: border-box;
+  outline: none;
+}
+.prnMedBody input:last-child { border-bottom: none; }
+.prnMedBody input:focus { background: var(--g0, #f0fdf4); }
+.prnMedBody input::placeholder { color: var(--s4); }
 .prnMedRemove {
   background: none;
   border: none;
   color: var(--r5, #dc2626);
   cursor: pointer;
-  font-size: .95rem;
-  padding: 3px 7px;
+  font-size: .9rem;
+  padding: 2px 5px;
   border-radius: 4px;
-  flex-shrink: 0;
   line-height: 1;
   transition: background .1s;
 }
 .prnMedRemove:hover { background: var(--r1, #fee2e2); }
-.prnMedVazio        { color: var(--s3); font-size: .83rem; text-align: center; padding: 20px; }
+.prnMedVazio { color: var(--s3); font-size: .83rem; text-align: center; padding: 20px; }
 .prnBtnAddMed {
   display: flex;
   align-items: center;
