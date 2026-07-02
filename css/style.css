@@ -1699,20 +1699,35 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
   background: var(--w); border: 1.5px solid var(--s2);
   border-radius: var(--Rs); padding: 16px 14px;
 }
+
+/* ── Labels das arcadas ── */
 .odontoArcadaLabel {
-  font-size: .72rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .5px; color: var(--s4); text-align: center;
-  margin: 4px 0 6px;
+  font-size: .65rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--s4); text-align: center;
+  margin: 2px 0 4px;
 }
-.odontoArcadaLabel.decidua { color: var(--g5); }
+.odontoArcadaLabel.decidua {
+  color: var(--g6);
+  font-size: .6rem;
+  letter-spacing: .4px;
+  font-weight: 700;
+}
+/* Label da decídua superior: espaço reduzido acima (vem logo após permanente) */
+.odontoArcadaLabel.odontoLabelDecSup { margin-top: 10px; margin-bottom: 2px; }
+/* Label da decídua inferior: espaço reduzido abaixo (antes da permanente) */
+.odontoArcadaLabel.odontoLabelDecInf { margin-top: 2px; margin-bottom: 10px; }
+
+/* ── Linhas de dentes ── */
 .odontoLinhaDentes {
-  display: flex; justify-content: center; flex-wrap: wrap;
-  gap: 4px; margin-bottom: 4px;
+  display: flex; justify-content: center; flex-wrap: nowrap;
+  gap: 3px; margin-bottom: 2px;
 }
-.odontoLinhaDentes.decidua { opacity: .85; }
+.odontoLinhaDentes.decidua { opacity: .9; gap: 2px; }
+
+/* ── Divisor central (entre arcadas) ── */
 .odontoDivisor {
   border: none; border-top: 2px dashed var(--s3);
-  margin: 10px 0;
+  margin: 8px 4px;
 }
 .odontoLegenda {
   display: flex; gap: 14px; justify-content: center;
