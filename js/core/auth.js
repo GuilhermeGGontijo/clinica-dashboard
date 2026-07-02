@@ -56,6 +56,7 @@ async function doLogin() {
     await supaLoad();
     await loadUserProfile(); applyRoleVisibility();
     showSidebar(); switchSidebar('home');
+    await UnidadesMod.initSilencioso();
     renderGlobal(); renderLanc(); renderAgenda(); renderAll(); onMonthChange();
     /* Primeiro acesso: exigir troca de senha */
     if (USER_PROFILE && USER_PROFILE.senha_provisoria) {

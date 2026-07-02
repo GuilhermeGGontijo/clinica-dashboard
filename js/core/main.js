@@ -144,6 +144,7 @@ function switchSidebar(mod){
   if(mod==='admin-cadastro'){ setTimeout(function(){ UsuariosMod.init();         },50); }
   if(mod==='admin-controle'){ setTimeout(function(){ UsuariosMod.initControle(); },50); }
   if(mod==='relatorios'){ setTimeout(function(){ RelatoriosMod.init(); },50); }
+  if(mod==='admin-unidades'){ setTimeout(function(){ UnidadesMod.init(); },50); }
 }
 
 function toggleSbGroup(el,grpId){
@@ -283,9 +284,8 @@ function switchModule(mod){
     const ll=document.getElementById('loginLogo');
     if(ll){ll.style.fontSize='0';ll.innerHTML='<img src="'+LOGO_URL+'" alt="Logo" style="height:64px;width:auto;border-radius:8px;margin:0 auto;display:block;"/>';}
   }
-  /* Popula abas de unidades */
-  renderUnitTabs();
-  updateUnitDisplay();
+  /* Popula seletor de unidades (nomes reais vêm do Cadastro de Unidades) */
+  await UnidadesMod.initSilencioso();
 
   /* Popula selects de horário da agenda */
   const startSel=sid('agStart');
@@ -337,17 +337,16 @@ function switchModule(mod){
 /* ══════════════════════════════════════
    SELETOR DE UNIDADE
 ══════════════════════════════════════ */
+function unitName(id){
+  if(typeof UnidadesMod!=='undefined' && UnidadesMod.getNome) return UnidadesMod.getNome(id);
+  const u=UNITS.find(u2=>u2.id===id);
+  return u?u.name:id;
+}
 function renderUnitTabs(){
-  const container=sid('unitTabs');
-  if(!container) return;
-  container.innerHTML='';
-  UNITS.forEach(u=>{
-    const btn=document.createElement('button');
-    btn.className='unitTab'+(u.id===CU?' active':'');
-    btn.textContent=u.name;
-    btn.onclick=()=>onUnitChange(u.id);
-    container.appendChild(btn);
-  });
+  const sel=sid('unitSelect');
+  if(!sel) return;
+  sel.innerHTML=UNITS.map(u=>'<option value="'+u.id+'"'+(u.id===CU?' selected':'')+'>'+esc(unitName(u.id))+'</option>').join('');
+  sel.value=CU;
 }
 function onUnitChange(nu){
   if(nu===CU) return;
@@ -370,15 +369,15 @@ function onUnitChange(nu){
   renderAll();
   onMonthChange();
   loadMetaAbs();
-  toast('🏢 '+UNITS.find(u=>u.id===CU).name+' carregada','');
+  toast('🏢 '+unitName(CU)+' carregada','');
   renderComparativo();
 }
 function updateUnitDisplay(){
-  const u=UNITS.find(u=>u.id===CU)||UNITS[0];
-  sid('hUnitName').textContent=u.name;
-  const _pl=sid('patUnitLabel'); if(_pl) _pl.textContent=u.name;
-  const _sl=sid('sbUnitLabel'); if(_sl) _sl.textContent=u.name;
-  const _hl=sid('homeUnitLabel'); if(_hl) _hl.textContent=u.name;
+  const nome=unitName(CU);
+  sid('hUnitName').textContent=nome;
+  const _pl=sid('patUnitLabel'); if(_pl) _pl.textContent=nome;
+  const _sl=sid('sbUnitLabel'); if(_sl) _sl.textContent=nome;
+  const _hl=sid('homeUnitLabel'); if(_hl) _hl.textContent=nome;
 }
 
 /* ══════════════════════════════════════
