@@ -144,6 +144,7 @@ function switchSidebar(mod){
   if(mod==='odontograma'){   setTimeout(function(){ OdontogramaMod.init(); },50); }
   if(mod==='caixa'){         setTimeout(function(){ CaixaMod.init();       },50); }
   if(mod==='auditoria'){     setTimeout(function(){ AuditoriaMod.init();   },50); }
+  if(mod==='admin-unidades'){   setTimeout(function(){ UnidadesMod.init();        },50); }
   if(mod==='admin-cadastro'){ setTimeout(function(){ UsuariosMod.init();         },50); }
   if(mod==='admin-controle'){ setTimeout(function(){ UsuariosMod.initControle(); },50); }
   if(mod==='admin-odonto-proc'){ setTimeout(function(){ OdontoProcMod.init();    },50); }
@@ -288,6 +289,8 @@ function switchModule(mod){
   /* 3. Migra dados do localStorage → financeiro_dados se a tabela estiver vazia */
   FinDb.migrarSeVazio();
   await loadUserProfile(); applyRoleVisibility();
+  /* Carrega nomes reais das unidades do Supabase em segundo plano */
+  if(typeof UnidadesMod!=='undefined') UnidadesMod.initSilencioso();
   showSidebar(); switchSidebar('home');
   /* Logo — header e tela de login */
   if(LOGO_URL){
@@ -351,17 +354,33 @@ function switchModule(mod){
    SELETOR DE UNIDADE
 ══════════════════════════════════════ */
 function renderUnitTabs(){
-  const container=sid('unitTabs');
-  if(!container) return;
-  container.innerHTML='';
-  UNITS.forEach(u=>{
-    const btn=document.createElement('button');
-    btn.className='unitTab'+(u.id===CU?' active':'');
-    btn.textContent=u.name;
-    btn.onclick=()=>onUnitChange(u.id);
-    container.appendChild(btn);
-  });
+  /* Atualiza label do botão dropdown com nome da unidade atual */
+  var lbl = sid('unitDropLabel');
+  var u0  = UNITS.find(function(u){return u.id===CU;})||UNITS[0];
+  var nome = (typeof UnidadesMod!=='undefined') ? UnidadesMod.getNome(CU) : u0.name;
+  if (lbl) lbl.textContent = nome;
+
+  /* Popula menu dropdown */
+  var menu = sid('unitDropMenu');
+  if (!menu) return;
+  menu.innerHTML = UNITS.map(function(u){
+    var n = (typeof UnidadesMod!=='undefined') ? UnidadesMod.getNome(u.id) : u.name;
+    return '<button class="unitDropItem'+(u.id===CU?' active':'')+'" onclick="onUnitChange(\''+u.id+'\');closeUnitDrop()">'+esc(n)+'</button>';
+  }).join('');
 }
+
+function toggleUnitDrop(e){
+  if(e) e.stopPropagation();
+  var d=sid('unitDrop');
+  if(!d) return;
+  var open=d.classList.toggle('open');
+  if(open){
+    /* Fecha ao clicar fora */
+    var _close=function(){d.classList.remove('open');document.removeEventListener('click',_close);};
+    setTimeout(function(){document.addEventListener('click',_close);},10);
+  }
+}
+function closeUnitDrop(){ var d=sid('unitDrop'); if(d) d.classList.remove('open'); }
 function onUnitChange(nu){
   if(nu===CU) return;
   CU=nu;

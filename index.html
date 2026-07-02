@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260703e">
+  <link rel="stylesheet" href="css/style.css?v=20260703f">
 </head>
 <body>
 
@@ -15,7 +15,13 @@
 <div id="unitBar">
   <div class="ubIn">
     <span class="ubLabel">🏢 Unidade:</span>
-    <div id="unitTabs"></div>
+    <div id="unitDrop" class="unitDrop">
+      <button id="unitDropBtn" class="unitDropBtn" onclick="toggleUnitDrop(event)">
+        <span id="unitDropLabel">—</span>
+        <span class="unitDropArrow">▾</span>
+      </button>
+      <div id="unitDropMenu" class="unitDropMenu"></div>
+    </div>
     <div class="ubSep"></div>
     <div class="ubActions">
       <button class="ubBtn ubBtnExp" onclick="exportBackup()" title="Exportar todos os dados como arquivo JSON">📤 Exportar Backup</button>
@@ -580,14 +586,106 @@
 </div>
 
 <div id="secAdminUnidades">
-  <div class="proWrap">
-    <div class="proIco">🏥</div>
-    <div class="proTitle">Cadastro de Unidades</div>
-    <div class="proDesc">
-      Cadastro e gestão das unidades da clínica: nome, endereço, contato,
-      logo e configurações específicas de cada unidade.
+  <div class="secModHdr" style="max-width:860px;margin:0 auto 20px">
+    <div>
+      <div class="secModTitle">🏢 Cadastro de Unidades</div>
+      <div class="secModSub">Dados cadastrais, endereço e logo de cada unidade da clínica</div>
     </div>
-    <div class="proBadge">🔧 Em desenvolvimento</div>
+  </div>
+  <div id="unidadesListWrap" style="max-width:860px;margin:0 auto">
+    <div class="loadingState">Carregando...</div>
+  </div>
+</div>
+
+<!-- Modal: Editar Unidade -->
+<div id="uniModal" class="ovl" style="display:none;align-items:flex-start;padding-top:40px" onclick="if(event.target===this)UnidadesMod.fecharModal()">
+  <div class="mBox" style="max-width:580px;width:96%;padding:24px 22px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h3 id="uniModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">Editar Unidade</h3>
+      <button class="bDel" onclick="UnidadesMod.fecharModal()" style="font-size:1.1rem;padding:2px 8px">✕</button>
+    </div>
+
+    <!-- Logo -->
+    <div class="patFG" style="margin-bottom:16px">
+      <label class="afLabel">Logo da Unidade</label>
+      <div style="display:flex;align-items:center;gap:14px">
+        <img id="uniLogoPreview" src="" alt="logo" style="display:none;width:72px;height:72px;object-fit:contain;border:1.5px solid var(--s2);border-radius:8px;background:var(--s0);padding:4px"/>
+        <div>
+          <label class="btn bSm bGh" style="cursor:pointer;font-size:.78rem">
+            📷 Escolher imagem
+            <input type="file" id="uniLogoFile" accept="image/*" style="display:none" onchange="UnidadesMod.onLogoFile(this)"/>
+          </label>
+          <div style="font-size:.71rem;color:var(--s4);margin-top:5px">PNG, JPG ou SVG — máx. 800KB</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dados cadastrais -->
+    <div class="uniFormSec">Dados Cadastrais</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="patFG" style="grid-column:1/-1">
+        <label class="afLabel">Nome Fantasia *</label>
+        <input type="text" id="uniNomeFantasia" class="afInp" placeholder="Nome da unidade"/>
+      </div>
+      <div class="patFG" style="grid-column:1/-1">
+        <label class="afLabel">Razão Social</label>
+        <input type="text" id="uniRazaoSocial" class="afInp" placeholder="Razão social completa"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">CNPJ</label>
+        <input type="text" id="uniCnpj" class="afInp" placeholder="00.000.000/0001-00" maxlength="18"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Telefone</label>
+        <input type="text" id="uniTelefone" class="afInp" placeholder="(73) 00000-0000"/>
+      </div>
+    </div>
+
+    <!-- Endereço -->
+    <div class="uniFormSec">Endereço</div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:10px;align-items:flex-end">
+      <div class="patFG" style="margin-bottom:0">
+        <label class="afLabel">CEP</label>
+        <input type="text" id="uniCep" class="afInp" placeholder="00000-000" maxlength="9" oninput="UnidadesMod.onCepInput(this)" onblur="UnidadesMod.buscarCep()"/>
+      </div>
+      <button class="btn bSm bGh" onclick="UnidadesMod.buscarCep()" style="height:38px">🔎 Buscar</button>
+    </div>
+    <div id="uniCepStatus" style="font-size:.75rem;margin-bottom:8px"></div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:10px">
+      <div class="patFG" style="margin-bottom:0">
+        <label class="afLabel">Rua / Logradouro</label>
+        <input type="text" id="uniRua" class="afInp" placeholder="Nome da rua"/>
+      </div>
+      <div class="patFG" style="margin-bottom:0;min-width:90px">
+        <label class="afLabel">Número</label>
+        <input type="text" id="uniNumero" class="afInp" placeholder="Nº"/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="patFG" style="margin-bottom:0">
+        <label class="afLabel">Complemento</label>
+        <input type="text" id="uniComplemento" class="afInp" placeholder="Sala, Bloco..."/>
+      </div>
+      <div class="patFG" style="margin-bottom:0">
+        <label class="afLabel">Bairro</label>
+        <input type="text" id="uniBairro" class="afInp" placeholder="Bairro"/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 80px;gap:10px;margin-bottom:20px">
+      <div class="patFG" style="margin-bottom:0">
+        <label class="afLabel">Cidade</label>
+        <input type="text" id="uniCidade" class="afInp" placeholder="Cidade"/>
+      </div>
+      <div class="patFG" style="margin-bottom:0">
+        <label class="afLabel">UF</label>
+        <input type="text" id="uniUf" class="afInp" placeholder="BA" maxlength="2"/>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn bGh bSm" onclick="UnidadesMod.fecharModal()">Cancelar</button>
+      <button class="btn bG bSm" id="uniBtnSalvar" onclick="UnidadesMod.salvar()">💾 Salvar</button>
+    </div>
   </div>
 </div>
 
@@ -2020,8 +2118,9 @@
 <script src="js/modules/admin-odonto-proc.js?v=20260702a"></script>
 <script src="js/modules/caixa.js?v=20260703a"></script>
 <script src="js/modules/auditoria.js?v=20260703a"></script>
+<script src="js/modules/unidades.js?v=20260702a"></script>
 <script src="js/modules/usuarios.js?v=20260702e"></script>
-<script src="js/core/main.js?v=20260703b"></script>
+<script src="js/core/main.js?v=20260703c"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');

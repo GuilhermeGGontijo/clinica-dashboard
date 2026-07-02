@@ -22,10 +22,17 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 #unitBar{background:var(--g9);border-bottom:2px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:400}
 .ubIn{max-width:1440px;margin:0 auto;padding:7px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ubLabel{font-size:.7rem;font-weight:800;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.09em;white-space:nowrap}
-#unitTabs{display:flex;gap:6px;flex-wrap:wrap;flex:1}
-.unitTab{padding:6px 18px;border-radius:var(--Rs);font-size:.85rem;font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap}
-.unitTab:hover{background:rgba(255,255,255,.18);color:var(--w)}
-.unitTab.active{background:var(--w);color:var(--g9);border-color:var(--w);font-weight:800;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+/* ── Unit Dropdown ── */
+.unitDrop{position:relative;flex-shrink:0}
+.unitDropBtn{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:var(--Rs);font-size:.85rem;font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:rgba(255,255,255,.92);transition:all .15s;white-space:nowrap;min-width:200px;justify-content:space-between}
+.unitDropBtn:hover,.unitDrop.open .unitDropBtn{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.5);color:var(--w)}
+.unitDropArrow{font-size:.7rem;opacity:.75;transition:transform .2s}
+.unitDrop.open .unitDropArrow{transform:rotate(180deg)}
+.unitDropMenu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:220px;background:var(--w);border:1.5px solid var(--s2);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.16);z-index:9999;padding:6px;overflow:hidden}
+.unitDrop.open .unitDropMenu{display:block}
+.unitDropItem{display:block;width:100%;text-align:left;padding:9px 14px;border:none;background:none;cursor:pointer;font-size:.86rem;font-weight:600;color:var(--s8);border-radius:6px;transition:background .12s;white-space:nowrap}
+.unitDropItem:hover{background:var(--s1)}
+.unitDropItem.active{background:var(--g1);color:var(--g8);font-weight:800}
 .ubSep{width:1px;height:18px;background:rgba(255,255,255,.2);margin:0 2px}
 .ubActions{display:flex;gap:6px;margin-left:auto}
 .ubBtn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--Rs);
@@ -1989,6 +1996,22 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 .audBdAberto { background: var(--a1); color: var(--a8); }
 .audBdPend   { background: var(--r1); color: var(--r7); }
 .audBdOk     { background: var(--g1); color: var(--g9); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   CADASTRO DE UNIDADES (UnidadesMod)
+══════════════════════════════════════════════════════════════════════ */
+.uniCard{display:flex;align-items:center;gap:16px;background:var(--w);border:1.5px solid var(--s2);border-radius:12px;padding:18px 20px;margin-bottom:14px;transition:box-shadow .15s}
+.uniCard:hover{box-shadow:0 4px 18px rgba(0,0,0,.08)}
+.uniCardLogo{width:60px;height:60px;border-radius:8px;border:1px solid var(--s2);background:var(--s0);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;overflow:hidden}
+.uniCardLogo img{width:100%;height:100%;object-fit:contain}
+.uniCardInfo{flex:1;min-width:0}
+.uniCardNome{font-size:.98rem;font-weight:800;color:var(--s9);margin-bottom:4px}
+.uniCardMeta{font-size:.78rem;color:var(--s5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uniCardVazio{color:var(--a6);font-style:italic}
+.uniCardBadge{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.uniCardBadge.ok{background:var(--g1);color:var(--g8)}
+.uniCardBadge.pend{background:#fff8e1;color:#b45309;border:1px solid #fcd34d}
+.uniFormSec{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--s5);padding:10px 0 6px;border-bottom:1.5px solid var(--s2);margin-bottom:12px}
 
 /* ══════════════════════════════════════════════════════════════════════
    PROCEDIMENTOS ODONTOLÓGICOS (OdontoProcMod)
