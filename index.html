@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260702e">
+  <link rel="stylesheet" href="css/style.css?v=20260702f">
 </head>
 <body>
 
@@ -102,6 +102,9 @@
 
     <div class="sbItem" data-mod="prontuario" onclick="switchSidebar('prontuario')">
       <span class="sbItemIco">📋</span><span class="sbItemLbl">Prontuário Eletrônico</span>
+    </div>
+    <div class="sbItem" data-mod="odontograma" onclick="switchSidebar('odontograma')">
+      <span class="sbItemIco">🦷</span><span class="sbItemLbl">Odontograma</span>
     </div>
 
     <div class="sbItem" data-mod="relatorios" onclick="switchSidebar('relatorios')">
@@ -643,6 +646,116 @@
   </div>
   <div id="convListWrap">
     <div class="convVazio">⏳ Carregando convênios...</div>
+  </div>
+</div>
+
+<!-- ════ SEÇÃO: ODONTOGRAMA ════ -->
+<div id="secOdontograma">
+
+  <!-- Header + paciente -->
+  <div class="odontoHdr">
+    <div>
+      <div class="odontoHdrTitle">🦷 Odontograma Interativo</div>
+      <div class="odontoHdrSub">Selecione as faces do dente e lance no orçamento</div>
+    </div>
+    <div id="odontoPacienteInfo" class="odontoPacInfo">
+      <span style="color:var(--s4);font-size:.84rem">Nenhum paciente selecionado</span>
+    </div>
+    <button class="btn bG bSm" onclick="OdontogramaMod.abrirBuscaPaciente()">👤 Selecionar Paciente</button>
+  </div>
+
+  <div class="odontoLayout">
+
+    <!-- ── Painel Esquerdo: Arcadas ── -->
+    <div class="odontoPainelArcada">
+
+      <div class="odontoLegenda">
+        <span class="odontoLegItem"><span class="odontoLegBox normal"></span> Normal</span>
+        <span class="odontoLegItem"><span class="odontoLegBox selecionada"></span> Selecionado</span>
+        <span class="odontoLegItem"><span class="odontoLegBox finalizada"></span> Registrado</span>
+      </div>
+
+      <!-- Arcada Superior Permanente -->
+      <div class="odontoArcadaLabel">Arcada Superior — Permanente</div>
+      <div id="odontoPermanenteSup" class="odontoLinhaDentes"></div>
+
+      <!-- Arcada Superior Decídua -->
+      <div class="odontoArcadaLabel decidua">Arcada Superior — Decídua (Leite)</div>
+      <div id="odontoDeciduaSup" class="odontoLinhaDentes decidua"></div>
+
+      <div class="odontoDivisor"></div>
+
+      <!-- Arcada Inferior Decídua -->
+      <div id="odontoDeciduaInf" class="odontoLinhaDentes decidua"></div>
+      <div class="odontoArcadaLabel decidua">Arcada Inferior — Decídua (Leite)</div>
+
+      <!-- Arcada Inferior Permanente -->
+      <div id="odontoPermanenteInf" class="odontoLinhaDentes"></div>
+      <div class="odontoArcadaLabel">Arcada Inferior — Permanente</div>
+
+    </div>
+
+    <!-- ── Painel Direito: Orçamento ── -->
+    <div class="odontoPainelOrcamento">
+      <div class="odontoOrcTitle">📋 Orçamento em Andamento</div>
+
+      <div class="odontoOrcProcRow">
+        <label class="afLabel" style="font-size:.75rem;margin:0">Procedimento:</label>
+        <select id="odontoProcSel" class="afInp" style="font-size:.8rem;flex:1">
+          <option value="">— Carregando procedimentos —</option>
+        </select>
+      </div>
+
+      <button class="btn bG" style="width:100%;margin-bottom:10px;font-size:.85rem"
+              onclick="OdontogramaMod.lancarSelecao()">
+        ➕ Lançar Faces Selecionadas
+      </button>
+
+      <div class="odontoItensWrap">
+        <table class="odontoItensTabela">
+          <thead>
+            <tr>
+              <th>Dente</th>
+              <th>Faces</th>
+              <th>Procedimento</th>
+              <th>Valor</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="odontoItensBody">
+            <tr><td colspan="5" class="odontoVazio">Nenhum item lançado</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="odontoTotalRow">
+        <span>Total do Atendimento:</span>
+        <span id="odontoTotal" class="odontoTotalVal">R$ 0,00</span>
+      </div>
+
+      <button id="odontoBtnFinalizar" class="btn bG" style="width:100%;margin-top:8px;background:var(--g6);font-size:.88rem;font-weight:700"
+              onclick="OdontogramaMod.finalizarAtendimento()">
+        ✅ Finalizar e Enviar para Caixa
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════ MODAL: Busca de Paciente (Odontograma) ════ -->
+<div id="odontoModalPaciente" class="ovl"
+     onclick="if(event.target===this)OdontogramaMod.fecharBuscaPaciente()">
+  <div class="mBox" style="max-width:480px;width:96%;padding:24px 22px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">👤 Selecionar Paciente</h3>
+      <button class="bDel" onclick="OdontogramaMod.fecharBuscaPaciente()"
+              style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
+    </div>
+    <input id="odontoBuscaPacInp" class="afInp" type="text"
+           placeholder="Digite o nome do paciente..."
+           oninput="OdontogramaMod.buscarPaciente(this.value)"
+           style="margin-bottom:10px"/>
+    <div id="odontoBuscaPacRes" class="odontoBuscaRes"></div>
   </div>
 </div>
 
@@ -1622,8 +1735,9 @@
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260702b"></script>
+<script src="js/modules/odontograma.js?v=20260702e"></script>
 <script src="js/modules/usuarios.js?v=20260702b"></script>
-<script src="js/core/main.js?v=20260702b"></script>
+<script src="js/core/main.js?v=20260702f"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');

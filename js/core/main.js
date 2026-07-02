@@ -140,7 +140,8 @@ function switchSidebar(mod){
   },50); }
   if(mod==='admin-recepcao'){ setTimeout(function(){ RecepMod.init(); },50); }
   if(mod==='admin-convenios'){ setTimeout(function(){ ConveniosMod.init(); },50); }
-  if(mod==='recebimentos'){   setTimeout(function(){ RecebMod.init();     },50); }
+  if(mod==='recebimentos'){   setTimeout(function(){ RecebMod.init();       },50); }
+  if(mod==='odontograma'){   setTimeout(function(){ OdontogramaMod.init(); },50); }
   if(mod==='admin-cadastro'){ setTimeout(function(){ UsuariosMod.init();         },50); }
   if(mod==='admin-controle'){ setTimeout(function(){ UsuariosMod.initControle(); },50); }
 }
