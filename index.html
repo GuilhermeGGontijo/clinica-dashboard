@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260702a">
+  <link rel="stylesheet" href="css/style.css?v=20260702b">
 </head>
 <body>
 
@@ -681,6 +681,72 @@
   <h1 id="phTitle">Relatório — Clínica da Família</h1>
   <p id="phSub">Gerado em: <strong id="phDate"></strong></p>
 </div>
+
+<!-- ════ LAYOUT 2 COLUNAS: Agenda sticky + Conteúdo financeiro ════ -->
+<div class="finDashLayout">
+
+<!-- ── COLUNA ESQUERDA: Agenda de Ocupação Fixa ── -->
+<div class="finAgendaSidebar">
+  <div class="finAgendaSidebarTitle">📅 Mapa de Ocupação Semanal
+    <span style="font-size:.62rem;font-weight:500;color:var(--s5)">(clique para agendar)</span>
+  </div>
+  <div class="gcCtrl gcCtrlSticky">
+    <div class="gcCtrlL" style="flex-wrap:wrap;gap:4px">
+      <span class="gcCtrlLabel">⏱</span>
+      <select id="agStart" class="gcSel" onchange="saveAgConfig()"></select>
+      <span style="font-size:.75rem;color:var(--s6)">às</span>
+      <select id="agEnd" class="gcSel" onchange="saveAgConfig()"></select>
+    </div>
+    <div class="gcCtrlR" style="flex-wrap:wrap;gap:3px">
+      <button class="gcFilterBtn active" id="afAll" onclick="setAgFilter('all')">Geral</button>
+      <button class="gcFilterBtn" id="afS1" onclick="setAgFilter('s1')">S1</button>
+      <button class="gcFilterBtn" id="afS2" onclick="setAgFilter('s2')">S2</button>
+      <button class="gcFilterBtn" id="afS3" onclick="setAgFilter('s3')">S3</button>
+    </div>
+  </div>
+  <div class="gcGridWrap gcGridSticky"><div id="gcGrid"></div></div>
+  <div class="gcLegend gcLegendSticky">
+    <span><span class="gcDot gcDotFree"></span>Livre</span>
+    <span><span class="gcDot" style="background:#dcfce7;border-color:#86efac"></span>S1</span>
+    <span><span class="gcDot" style="background:#dbeafe;border-color:#93c5fd"></span>S2</span>
+    <span><span class="gcDot" style="background:#ffedd5;border-color:#fdba74"></span>S3</span>
+    <span><span class="gcDot gcDotBloq"></span>Bloq</span>
+  </div>
+  <div style="margin-top:10px;border-top:1px solid var(--s2);padding-top:10px">
+    <div class="agFormWrapMini">
+      <div class="agFormHeader" style="padding:8px 10px">
+        <span class="agFormHeaderTitle" style="font-size:.76rem">➕ Cadastrar na Agenda</span>
+        <button class="agFClearBtn" onclick="clearAgForm()" style="font-size:.7rem;padding:2px 7px">🗑</button>
+      </div>
+      <div style="padding:8px 10px;display:flex;flex-direction:column;gap:6px">
+        <input type="text" id="fProf" class="agFInp" placeholder="👤 Profissional" autocomplete="off" />
+        <input type="text" id="fEsp"  class="agFInp" placeholder="🏥 Especialidade" autocomplete="off" />
+        <input type="text" id="fProc" class="agFInp" placeholder="📋 Procedimento" autocomplete="off" />
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <select id="fDay" class="agFSel">
+            <option value="seg">Segunda</option>
+            <option value="ter">Terça</option>
+            <option value="qua">Quarta</option>
+            <option value="qui">Quinta</option>
+            <option value="sex">Sexta</option>
+          </select>
+          <select id="fSala" class="agFSel">
+            <option value="s1">Sala 1</option>
+            <option value="s2">Sala 2</option>
+            <option value="s3">Sala 3</option>
+          </select>
+          <select id="fHStart" class="agFSel" onchange="syncFHEnd()"></select>
+          <select id="fHEnd" class="agFSel"></select>
+        </div>
+        <button onclick="saveAgForm()" class="btn bG" style="width:100%;font-size:.78rem;padding:7px">💾 Cadastrar</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /finAgendaSidebar -->
+
+<!-- ── COLUNA DIREITA: Conteúdo financeiro ── -->
+<div class="finMainContent">
+
 <div class="secL" id="slCadastro">🏗️ Cadastro de Serviços &amp; Lançamento Mensal</div>
 <div class="topGrid">
 
@@ -742,91 +808,6 @@
   </div>
 
 </div><!-- /topGrid -->
-
-<!-- ════ PAINEL DE CADASTRO ════ -->
-<div class="agFormWrap">
-  <div class="agFormHeader">
-    <span class="agFormHeaderTitle">➕ Cadastrar Profissional na Agenda</span>
-    <button class="agFClearBtn" onclick="clearAgForm()">🗑 Limpar campos</button>
-  </div>
-  <div class="agFormBody">
-    <div class="agFormGrid">
-      <div class="agFG" style="grid-column:span 2">
-        <label>👤 Nome do Profissional</label>
-        <input type="text" id="fProf" class="agFInp" placeholder="Ex: Dr. Guilherme Gontijo" autocomplete="off" />
-      </div>
-      <div class="agFG">
-        <label>🏥 Especialidade</label>
-        <input type="text" id="fEsp" class="agFInp" placeholder="Ex: Clínico Geral" autocomplete="off" />
-      </div>
-      <div class="agFG">
-        <label>📋 Procedimento/Serviço</label>
-        <input type="text" id="fProc" class="agFInp" placeholder="Ex: Consulta Clínica" autocomplete="off" />
-      </div>
-      <div class="agFG">
-        <label>📅 Dia da Semana</label>
-        <select id="fDay" class="agFSel">
-          <option value="seg">Segunda-feira</option>
-          <option value="ter">Terça-feira</option>
-          <option value="qua">Quarta-feira</option>
-          <option value="qui">Quinta-feira</option>
-          <option value="sex">Sexta-feira</option>
-        </select>
-      </div>
-      <div class="agFG">
-        <label>⏰ Horário Início</label>
-        <select id="fHStart" class="agFSel" onchange="syncFHEnd()"></select>
-      </div>
-      <div class="agFG">
-        <label>⏰ Horário Fim</label>
-        <select id="fHEnd" class="agFSel"></select>
-      </div>
-      <div class="agFG">
-        <label>🚪 Sala</label>
-        <select id="fSala" class="agFSel">
-          <option value="s1">Sala 1</option>
-          <option value="s2">Sala 2</option>
-          <option value="s3">Sala 3</option>
-        </select>
-      </div>
-      <div class="agFG agFBtn">
-        <label style="visibility:hidden">btn</label>
-        <button onclick="saveAgForm()">💾 Cadastrar na Agenda</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════ AGENDA DE OCUPAÇÃO ════ -->
-<div class="secL" id="slOcupacao">📅 Mapa de Ocupação Semanal das Salas
-  <span style="font-size:.65rem;font-weight:600;text-transform:none;color:var(--s5);margin-left:4px">(clique em qualquer horário para agendar)</span>
-</div>
-<div class="gcWrap">
-  <div class="gcCtrl">
-    <div class="gcCtrlL">
-      <span class="gcCtrlLabel">⏱ Horário:</span>
-      <span style="font-size:.8rem;color:var(--s7);font-weight:600">Das</span>
-      <select id="agStart" class="gcSel" onchange="saveAgConfig()"></select>
-      <span style="font-size:.8rem;color:var(--s7);font-weight:600">às</span>
-      <select id="agEnd" class="gcSel" onchange="saveAgConfig()"></select>
-      <span id="agCfgHint" style="font-size:.72rem;font-weight:600;color:var(--s5)"></span>
-    </div>
-    <div class="gcCtrlR">
-      <button class="gcFilterBtn active" id="afAll" onclick="setAgFilter('all')">Visão Geral</button>
-      <button class="gcFilterBtn" id="afS1" onclick="setAgFilter('s1')">🚪 Sala 1</button>
-      <button class="gcFilterBtn" id="afS2" onclick="setAgFilter('s2')">🚪 Sala 2</button>
-      <button class="gcFilterBtn" id="afS3" onclick="setAgFilter('s3')">🚪 Sala 3</button>
-    </div>
-  </div>
-  <div class="gcGridWrap"><div id="gcGrid"></div></div>
-  <div class="gcLegend">
-    <span><span class="gcDot gcDotFree"></span>Livre — clique para agendar</span>
-    <span><span class="gcDot" style="background:#dcfce7;border-color:#86efac"></span>Sala 1</span>
-    <span><span class="gcDot" style="background:#dbeafe;border-color:#93c5fd"></span>Sala 2</span>
-    <span><span class="gcDot" style="background:#ffedd5;border-color:#fdba74"></span>Sala 3</span>
-    <span><span class="gcDot gcDotBloq"></span>Bloqueada</span>
-  </div>
-</div>
 
 <!-- ════ KPIs ════ -->
 <div class="secL" id="slKpis">📊 KPIs Mensais — Resultados e Evolução</div>
@@ -965,7 +946,11 @@
 <div class="compWrap">
   <div class="compLoading" id="compLoading">Salve dados de ao menos um mês para ver o comparativo entre todas as unidades.</div>
   <div id="compGrid" style="display:none"></div>
+  <div id="compTotais" style="display:none"></div>
 </div>
+
+</div><!-- /finMainContent -->
+</div><!-- /finDashLayout -->
 
 <!-- ════ MÓDULO: PACIENTES ════ -->
 <div id="modulePacientes">
@@ -1607,18 +1592,18 @@
      ══════════════════════════════════════════════════════════════════════ -->
 <script src="js/core/supabase.js?v=20260629d"></script>
 <script src="js/core/auth.js?v=20260630d"></script>
-<script src="js/modules/pacientes.js?v=20260702a"></script>
+<script src="js/modules/pacientes.js?v=20260702b"></script>
 <script src="js/modules/financeiro.js?v=20260629d"></script>
-<script src="js/modules/salas.js?v=20260702a"></script>
+<script src="js/modules/salas.js?v=20260702b"></script>
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
-<script src="js/modules/agenda.js?v=20260702a"></script>
+<script src="js/modules/agenda.js?v=20260702b"></script>
 <script src="js/modules/prontuario.js?v=20260629j"></script>
-<script src="js/modules/recepcao.js?v=20260702a"></script>
+<script src="js/modules/recepcao.js?v=20260702b"></script>
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
-<script src="js/modules/recebimentos.js?v=20260702a"></script>
-<script src="js/modules/usuarios.js?v=20260702a"></script>
-<script src="js/core/main.js?v=20260702a"></script>
+<script src="js/modules/recebimentos.js?v=20260702b"></script>
+<script src="js/modules/usuarios.js?v=20260702b"></script>
+<script src="js/core/main.js?v=20260702b"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');

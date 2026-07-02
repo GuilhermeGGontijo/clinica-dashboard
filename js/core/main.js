@@ -381,6 +381,15 @@ function onUnitChange(nu){
   loadMetaAbs();
   toast('🏢 '+UNITS.find(u=>u.id===CU).name+' carregada','');
   renderComparativo();
+  /* Re-init módulos Supabase conforme seção ativa */
+  var _bc=document.body.className;
+  if(_bc.includes('sb-admin-atendimentos')) AtendMod.init();
+  else if(_bc.includes('sb-admin-salas'))   SalasMod.init();
+  else if(_bc.includes('sb-agenda'))        AgendaMod.init();
+  else if(_bc.includes('sb-admin-recepcao')) RecepMod.init();
+  else if(_bc.includes('sb-recebimentos'))   RecebMod.init();
+  else if(_bc.includes('sb-admin-convenios')) ConveniosMod.init();
+  else if(_bc.includes('sb-pacientes'))      renderPacientes();
 }
 function updateUnitDisplay(){
   const u=UNITS.find(u=>u.id===CU)||UNITS[0];
@@ -578,9 +587,40 @@ function renderComparativo(){
       html+='<div class="compRow"><span class="compLabel">🎟️ Ticket Médio</span><span class="compVal'+(x.k.ticket!=null?' green':'')+'">'+( x.k.ticket!=null?'R$&nbsp;'+brl(x.k.ticket):'—')+'</span></div>';
       var oc=x.occPct!=null?(x.occPct>=60?' green':x.occPct>=30?' amber':' red'):'';
       html+='<div class="compRow"><span class="compLabel">🚪 Ocup. Agenda</span><span class="compVal'+oc+'">'+( x.occPct!=null?x.occPct.toFixed(1)+'%':'—')+'</span></div>';
+      /* ── campos extras ── */
+      html+='<div class="compRow"><span class="compLabel">👥 Pac. Atendidos</span><span class="compVal'+(x.d.pac>0?' green':'')+'">'+( x.d.pac>0?x.d.pac+' pac.':'—')+'</span></div>';
+      html+='<div class="compRow"><span class="compLabel">🚷 Faltas</span><span class="compVal'+(x.d.faltas>0?' red':'')+'">'+( x.d.faltas>0?x.d.faltas+' pac.':'—')+'</span></div>';
+      html+='<div class="compRow"><span class="compLabel">🔬 Exames Realiz.</span><span class="compVal'+(x.d.exC>0?' green':'')+'">'+( x.d.exC>0?x.d.exC+' exam.':'—')+'</span></div>';
     }
     html+='</div>';
   });
+
+  /* ── total entre todas as unidades ── */
+  var totFat=0,totLucro=0,totPac=0,totFaltas=0,totExames=0,totAgend=0;
+  unitsData.forEach(function(x){
+    if(!x.hasData) return;
+    totFat   += x.d.fat    || 0;
+    totLucro += x.k.lucro  != null ? x.k.lucro : 0;
+    totPac   += x.d.pac    || 0;
+    totFaltas+= x.d.faltas || 0;
+    totExames+= x.d.exC    || 0;
+    totAgend += x.d.agend  || 0;
+  });
+  var totaisEl=sid('compTotais');
+  if(totaisEl){
+    if(anyData){
+      totaisEl.style.display='';
+      totaisEl.innerHTML=
+        '<div class="compTotalItem"><div class="compTotalLabel">💰 Fat. Total Rede</div><div class="compTotalVal">R$&nbsp;'+brl(totFat)+'</div></div>'+
+        '<div class="compTotalItem"><div class="compTotalLabel">📈 Lucro Total Rede</div><div class="compTotalVal">R$&nbsp;'+brl(totLucro)+'</div></div>'+
+        '<div class="compTotalItem"><div class="compTotalLabel">👥 Pac. Totais</div><div class="compTotalVal">'+totPac+'</div></div>'+
+        '<div class="compTotalItem"><div class="compTotalLabel">🚷 Faltas Totais</div><div class="compTotalVal">'+totFaltas+'</div></div>'+
+        '<div class="compTotalItem"><div class="compTotalLabel">🔬 Exames Totais</div><div class="compTotalVal">'+totExames+'</div></div>'+
+        '<div class="compTotalItem"><div class="compTotalLabel">📅 Agend. Totais</div><div class="compTotalVal">'+totAgend+'</div></div>';
+    } else {
+      totaisEl.style.display='none';
+    }
+  }
   grid.innerHTML=html;
 }
 

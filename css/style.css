@@ -468,7 +468,7 @@ body.sidebar-open #moduleNav{display:none!important}
 #secAdminConvenios,#secRecebimentos,
 #modulePacientes{display:none}
 /* Elementos soltos do fin-dashboard também ocultos por padrão */
-#printHeader,.topGrid,.agFormWrap,#slCadastro,
+#printHeader,.finDashLayout,.topGrid,.agFormWrap,#slCadastro,
 #slKpis,.kpiGrid,#slComparativo,.compWrap,
 #slOcupacao,.gcWrap,#slHistorico,.histWrap{display:none}
 
@@ -488,12 +488,49 @@ body.sb-admin-atendimentos #secAdminAtendimentos{display:block!important}
 body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
 body.sb-admin-convenios #secAdminConvenios{display:block!important}
 body.sb-recebimentos #secRecebimentos{display:block!important}
-body.sb-fin-dashboard #printHeader,
+body.sb-fin-dashboard #printHeader{display:block!important}
+body.sb-fin-dashboard .finDashLayout{display:flex!important;gap:20px;align-items:flex-start}
 body.sb-fin-dashboard #slCadastro,body.sb-fin-dashboard .topGrid,
 body.sb-fin-dashboard #slKpis,body.sb-fin-dashboard .kpiGrid,
 body.sb-fin-dashboard #slComparativo,body.sb-fin-dashboard .compWrap,
-body.sb-fin-dashboard .agFormWrap,body.sb-fin-dashboard #slOcupacao,body.sb-fin-dashboard .gcWrap,
 body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block!important}
+
+/* ── Layout fin-dashboard 2 colunas ── */
+.finAgendaSidebar{
+  width:280px;flex-shrink:0;
+  position:sticky;top:104px;
+  max-height:calc(100vh - 110px);
+  overflow-y:auto;
+  background:var(--w);border:1px solid var(--s2);
+  border-radius:var(--R);box-shadow:var(--sh);
+}
+.finAgendaSidebarTitle{
+  font-size:.75rem;font-weight:800;color:var(--g9);
+  text-transform:uppercase;letter-spacing:.05em;
+  padding:12px 14px 8px;border-bottom:2px solid var(--g1);
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+}
+.gcCtrlSticky{padding:8px 12px;border-bottom:1px solid var(--s2);gap:6px;flex-wrap:wrap}
+.gcGridSticky{overflow-x:auto;padding:0 4px}
+.gcLegendSticky{padding:6px 12px;flex-wrap:wrap;gap:6px;font-size:.68rem}
+.agFormWrapMini{border-top:1px solid var(--s2)}
+.agFormWrapMini .agFormHeader{display:flex;align-items:center;justify-content:space-between;background:var(--g0)}
+.agFInp{width:100%;border:1px solid var(--s2);border-radius:6px;padding:6px 8px;font-size:.76rem;color:var(--s9);background:var(--w)}
+.agFInp:focus{outline:none;border-color:var(--g5);box-shadow:0 0 0 2px var(--g1)}
+.finMainContent{flex:1;min-width:0}
+
+/* ── Comparativo total row ── */
+.compTotais{background:linear-gradient(135deg,var(--g9) 0%,var(--g7) 100%);
+  color:#fff;border-radius:0 0 var(--R) var(--R);padding:16px 20px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px 20px;margin-top:2px}
+.compTotalItem{display:flex;flex-direction:column;gap:2px}
+.compTotalLabel{font-size:.68rem;font-weight:600;opacity:.75;text-transform:uppercase;letter-spacing:.05em}
+.compTotalVal{font-size:1rem;font-weight:900}
+
+@media(max-width:900px){
+  body.sb-fin-dashboard .finDashLayout{flex-direction:column!important}
+  .finAgendaSidebar{width:100%;position:relative;top:auto;max-height:none}
+}
 
 /* ══ TELA INICIAL ══ */
 #secHome{padding-top:4px}
@@ -1418,15 +1455,18 @@ body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
   border:1px solid var(--b2);border-radius:var(--Rs);padding:10px 14px;line-height:1.6}
 
 /* Lista de controle */
-.ctrlRow{display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:14px;
+.ctrlRow{display:grid;grid-template-columns:1fr auto auto;align-items:start;gap:14px;
   background:var(--w);border:1px solid var(--s2);border-radius:12px;
   padding:12px 16px;margin-bottom:9px}
 .ctrlRowInativo{opacity:.55}
 .ctrlRowNome{font-size:.9rem;font-weight:700;color:var(--s9);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ctrlRowEmail{font-size:.75rem;color:var(--s4);margin-top:2px}
-@media(max-width:600px){.ctrlRow{grid-template-columns:1fr auto;gap:8px}
-  .ctrlRowBadge{display:none}}
+.ctrlCheck{display:inline-flex;align-items:center;gap:4px;cursor:pointer;
+  padding:4px 6px;border-radius:6px;transition:background .15s}
+.ctrlCheck:hover{background:var(--s1)}
+.ctrlCheck input[type=checkbox]{width:14px;height:14px;accent-color:var(--g7);cursor:pointer}
+@media(max-width:600px){.ctrlRow{grid-template-columns:1fr auto;gap:8px}}
 
 /* Marcadores required / opcional nos labels */
 .usuReq{color:var(--r6);font-weight:800;font-size:.85em}

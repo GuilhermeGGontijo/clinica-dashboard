@@ -391,6 +391,18 @@ const UsuariosMod = (function () {
     if (rw) rw.style.display = (espEl.value === 'medico') ? 'block' : 'none';
   }
 
+  /* Ordem de prioridade de roles (maior index = mais permissivo) */
+  var ROLE_PRIORITY = ['recepcionista','faturamento','profissional_saude','administrador'];
+
+  function _rolePrimario (roles) {
+    var best = roles.reduce(function(acc, r) {
+      var ip = ROLE_PRIORITY.indexOf(r);
+      var ia = ROLE_PRIORITY.indexOf(acc);
+      return ip > ia ? r : acc;
+    }, roles[0] || 'recepcionista');
+    return best;
+  }
+
   /* ── Render painel de controle ── */
   function _renderControle () {
     var wrap = sid('ctrlListWrap');
@@ -400,24 +412,28 @@ const UsuariosMod = (function () {
       return;
     }
     wrap.innerHTML = _lista.map(function(u){
-      var role  = ROLES[u.role] || { label: u.role||'?', cls: 'roleBadgeAdmin' };
-      var ativo = u.ativo !== false;
+      var roles  = Array.isArray(u.roles) && u.roles.length ? u.roles : (u.role ? [u.role] : ['recepcionista']);
+      var ativo  = u.ativo !== false;
+      var badges = roles.map(function(r){
+        var rInfo = ROLES[r] || { label: r, cls: 'roleBadgeAdmin' };
+        return '<span class="roleBadge ' + rInfo.cls + '" style="font-size:.68rem">' + rInfo.label + '</span>';
+      }).join(' ');
+      var checkboxes = Object.entries(ROLES).map(function(e){
+        var checked = roles.indexOf(e[0]) >= 0 ? ' checked' : '';
+        return '<label class="ctrlCheck">'
+          + '<input type="checkbox" value="' + e[0] + '"' + checked
+          + ' onchange="UsuariosMod.mudarRoles(\'' + u.id + '\',this)">'
+          + '<span class="roleBadge ' + e[1].cls + '" style="font-size:.68rem">' + e[1].label + '</span>'
+          + '</label>';
+      }).join('');
       return '<div class="ctrlRow' + (ativo ? '' : ' ctrlRowInativo') + '">'
         + '<div class="ctrlRowInfo">'
         +   '<div class="ctrlRowNome">' + esc(u.nome || u.email || '—') + '</div>'
         +   '<div class="ctrlRowEmail">' + esc(u.email || '') + '</div>'
+        +   '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">' + badges + '</div>'
         + '</div>'
-        + '<div class="ctrlRowBadge">'
-        +   '<span class="roleBadge ' + role.cls + '">' + role.label + '</span>'
-        + '</div>'
-        + '<div class="ctrlRowSel">'
-        +   '<select class="afInp" style="font-size:.8rem;padding:6px 10px" onchange="UsuariosMod.mudarRole(\'' + u.id + '\',this.value)">'
-        +     Object.entries(ROLES).map(function(e){
-                return '<option value="' + e[0] + '"'
-                  + (u.role === e[0] ? ' selected' : '') + '>'
-                  + e[1].label + '</option>';
-              }).join('')
-        +   '</select>'
+        + '<div class="ctrlRowSel" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">'
+        +   checkboxes
         + '</div>'
         + '<div class="ctrlRowAcoes">'
         +   (ativo
@@ -428,20 +444,39 @@ const UsuariosMod = (function () {
     }).join('');
   }
 
-  /* ── Mudar perfil de acesso ── */
-  async function mudarRole (id, novoRole) {
-    var r = await _sb.from('perfis_usuarios').update({ role: novoRole }).eq('id', id);
-    if (r.error) { toast('Erro: ' + r.error.message, 'error'); return; }
+  /* ── Mudar perfis de acesso (multi-role) ── */
+  async function mudarRoles (id, checkbox) {
     var u = _lista.find(function(x){ return String(x.id)===String(id); });
-    if (u) u.role = novoRole;
+    if (!u) return;
+
+    var roles = Array.isArray(u.roles) && u.roles.length ? u.roles.slice() : (u.role ? [u.role] : []);
+    var val = checkbox.value;
+    if (checkbox.checked) {
+      if (roles.indexOf(val) < 0) roles.push(val);
+    } else {
+      roles = roles.filter(function(r){ return r !== val; });
+      if (!roles.length) { toast('O usuário deve ter ao menos um perfil.','warn'); checkbox.checked=true; return; }
+    }
+
+    var primaryRole = _rolePrimario(roles);
+    var r = await _sb.from('perfis_usuarios').update({ role: primaryRole, roles: roles }).eq('id', id);
+    if (r.error) { toast('Erro: ' + r.error.message, 'error'); checkbox.checked = !checkbox.checked; return; }
+
+    u.role = primaryRole;
+    u.roles = roles;
     _renderControle();
     _render();
-    toast('✅ Perfil de acesso atualizado.', 'success');
+    toast('✅ Perfis atualizados.', 'success');
+  }
+
+  /* mantido por compatibilidade com código legado */
+  async function mudarRole (id, novoRole) {
+    await mudarRoles(id, { value: novoRole, checked: true });
   }
 
   return {
     init, initControle, abrirNovo, editar, fecharModal, salvar,
-    toggleAtivo, onRoleChange, onEspChange, mudarRole,
+    toggleAtivo, onRoleChange, onEspChange, mudarRole, mudarRoles,
     canAccess, ROLE_MODULES
   };
 })();
