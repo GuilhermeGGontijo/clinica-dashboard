@@ -311,7 +311,6 @@ const UsuariosMod = (function () {
 
     var payload = {
       nome: nome,
-      email: email,
       telefone: tel||null,
       roles: roles,
       especialidade: esp||null,
