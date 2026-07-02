@@ -1758,4 +1758,177 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
   font-size: .86rem; transition: background .12s;
 }
 .odontoPacItem:hover { background: var(--s1); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   CAIXA DO DIA (CaixaMod)
+══════════════════════════════════════════════════════════════════════ */
+
+/* Seção oculta por padrão */
+#secCaixa    { display: none; max-width: 760px; margin: 0 auto; padding: 24px 20px; }
+#secAuditoria{ display: none; max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+body.sb-caixa     #secCaixa     { display: block !important; }
+body.sb-auditoria #secAuditoria { display: block !important; }
+
+/* Header */
+.cxHdr {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.cxHdrTitle { font-size: 1.18rem; font-weight: 800; color: var(--s9); }
+.cxHdrSub   { font-size: .8rem; color: var(--s5); margin-top: 3px; }
+
+/* Botão vermelho — Fechar Caixa */
+.bDng {
+  background: var(--r6); color: var(--w); border: none;
+  border-radius: var(--Rs); padding: 7px 16px; font-weight: 700;
+  font-size: .82rem; cursor: pointer; transition: background .15s;
+}
+.bDng:hover { background: var(--r7); }
+
+/* Badge de turno */
+.cxTurnoBadge       { font-size: .78rem; font-weight: 700; padding: 3px 10px;
+                       border-radius: 20px; display: inline-block; }
+.cxTurnoBadge.ativo  { background: var(--g1); color: var(--g7); }
+.cxTurnoBadge.fechado{ background: var(--r1); color: var(--r7); }
+
+/* Termômetro de comissão */
+.cxTermometro {
+  background: linear-gradient(135deg, var(--g9) 0%, #166534 100%);
+  border-radius: var(--R); padding: 20px 24px; color: var(--w);
+  margin-bottom: 20px; box-shadow: var(--shm);
+}
+.cxTermTitle { font-size: .78rem; font-weight: 700; opacity: .75;
+               text-transform: uppercase; letter-spacing: .07em; }
+.cxTermVal   { font-size: 2rem; font-weight: 900; margin: 6px 0 12px;
+               font-variant-numeric: tabular-nums; }
+.cxTermBarraWrap { display: flex; align-items: center; gap: 10px; }
+.cxTermBarra {
+  flex: 1; height: 10px; background: rgba(255,255,255,.2);
+  border-radius: 10px; overflow: hidden;
+}
+.cxTermPreench {
+  height: 100%; background: #86efac; border-radius: 10px;
+  transition: width .6s ease;
+}
+.cxTermPct  { font-size: .82rem; font-weight: 800; min-width: 36px; text-align: right; }
+.cxTermMeta { font-size: .72rem; opacity: .65; margin-top: 8px; }
+
+/* Stats row */
+.cxStatsRow {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+}
+.cxStatCard {
+  background: var(--w); border: 1px solid var(--s2); border-radius: var(--R);
+  padding: 14px 18px; text-align: center; box-shadow: var(--sh);
+}
+.cxStatNum { font-size: 1.35rem; font-weight: 800; color: var(--s9);
+             font-variant-numeric: tabular-nums; }
+.cxStatLbl { font-size: .72rem; color: var(--s5); margin-top: 3px;
+             text-transform: uppercase; font-weight: 700; letter-spacing: .05em; }
+
+/* Lista */
+.cxListLabel { font-size: .78rem; font-weight: 800; color: var(--s5);
+               text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; }
+.cxListWrap  { display: flex; flex-direction: column; gap: 10px; }
+
+/* Card de pendente */
+.cxCard {
+  background: var(--w); border: 1px solid var(--s2); border-radius: var(--R);
+  padding: 14px 16px; display: flex; align-items: center;
+  justify-content: space-between; gap: 12px; box-shadow: var(--sh);
+  transition: box-shadow .15s;
+}
+.cxCard:hover { box-shadow: var(--shm); }
+.cxCardLeft  { display: flex; flex-direction: column; gap: 2px; }
+.cxCardVal   { font-size: 1.1rem; font-weight: 800; color: var(--s9);
+               font-variant-numeric: tabular-nums; }
+.cxCardData  { font-size: .72rem; color: var(--s4); }
+.cxCardObs   { font-size: .8rem; color: var(--s5); max-width: 420px;
+               white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cxBtnReceber{ white-space: nowrap; }
+
+/* Estado vazio */
+.cxVazio {
+  background: var(--g0); border: 1px solid var(--g1); border-radius: var(--R);
+  padding: 24px; text-align: center; color: var(--g7);
+  font-weight: 600; font-size: .9rem;
+}
+
+/* Modal de pagamento — valor destaque */
+.cxModalValorBox {
+  background: var(--s0); border: 1px solid var(--s2); border-radius: var(--Rs);
+  padding: 14px 18px; text-align: center; margin-bottom: 18px;
+}
+.cxModalValorLbl { font-size: .72rem; color: var(--s5); text-transform: uppercase;
+                   font-weight: 700; letter-spacing: .07em; }
+.cxModalValor    { font-size: 1.6rem; font-weight: 900; color: var(--g7);
+                   font-variant-numeric: tabular-nums; margin-top: 4px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   AUDITORIA FINANCEIRA (AuditoriaMod)
+══════════════════════════════════════════════════════════════════════ */
+
+/* Header */
+.audHdr {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+}
+.audHdrTitle { font-size: 1.18rem; font-weight: 800; color: var(--s9); }
+.audHdrSub   { font-size: .8rem; color: var(--s5); margin-top: 3px; }
+
+/* Filtros */
+.audFiltros {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;
+  margin-bottom: 20px; padding: 14px 16px;
+  background: var(--w); border: 1px solid var(--s2); border-radius: var(--R);
+}
+
+/* KPIs */
+.audKpis {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.audKpiCard {
+  background: var(--w); border: 1px solid var(--s2); border-radius: var(--R);
+  padding: 14px 16px; box-shadow: var(--sh);
+}
+.audKpiCard.audKpiG { border-left: 4px solid var(--g6); }
+.audKpiCard.audKpiB { border-left: 4px solid var(--b5); }
+.audKpiCard.audKpiY { border-left: 4px solid var(--a5); }
+.audKpiCard.audKpiR { border-left: 4px solid var(--r6); }
+.audKpiVal { font-size: 1.2rem; font-weight: 900; color: var(--s9);
+             font-variant-numeric: tabular-nums; }
+.audKpiLbl { font-size: .71rem; color: var(--s5); margin-top: 4px;
+             text-transform: uppercase; font-weight: 700; letter-spacing: .04em; }
+
+/* Tabela */
+.audTableWrap { overflow-x: auto; background: var(--w);
+                border: 1px solid var(--s2); border-radius: var(--R);
+                box-shadow: var(--sh); }
+.audTable { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.audTable thead th {
+  padding: 11px 14px; text-align: left; font-size: .72rem; font-weight: 800;
+  color: var(--s5); text-transform: uppercase; letter-spacing: .06em;
+  background: var(--s0); border-bottom: 1px solid var(--s2); white-space: nowrap;
+}
+.audTable tbody tr { border-bottom: 1px solid var(--s2); transition: background .1s; }
+.audTable tbody tr:last-child { border-bottom: none; }
+.audTable tbody tr:hover { background: var(--s0); }
+.audTable td { padding: 11px 14px; vertical-align: middle; }
+.audNum     { font-variant-numeric: tabular-nums; font-weight: 700; }
+.audColorG  { color: var(--g7); }
+.audColorB  { color: var(--b5); }
+.audVazio   { text-align: center; color: var(--s4); padding: 28px !important;
+              font-size: .86rem; }
+.audAberto  { color: var(--a6); font-weight: 600; font-size: .8rem; }
+.audTs      { font-size: .75rem; color: var(--s4); }
+
+/* Badges de status */
+.audBadge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: .72rem; font-weight: 700; white-space: nowrap;
+}
+.audBdAberto { background: var(--a1); color: var(--a8); }
+.audBdPend   { background: var(--r1); color: var(--r7); }
+.audBdOk     { background: var(--g1); color: var(--g9); }
 </style>

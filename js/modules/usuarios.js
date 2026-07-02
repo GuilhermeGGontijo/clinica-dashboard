@@ -70,8 +70,8 @@ const UsuariosMod = (function () {
     administrador:      null,
     profissional_saude: ['home','pacientes','agenda','admin-recepcao','prontuario',
                          'relatorios','fin-dashboard','recebimentos'],
-    recepcionista:      ['home','pacientes','agenda','admin-recepcao'],
-    faturamento:        ['home','agenda','relatorios','fin-dashboard','recebimentos',
+    recepcionista:      ['home','pacientes','agenda','admin-recepcao','caixa'],
+    faturamento:        ['home','agenda','relatorios','fin-dashboard','recebimentos','auditoria',
                          'administrativo','admin-salas','admin-atendimentos','admin-convenios']
   };
 

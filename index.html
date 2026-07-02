@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260702f">
+  <link rel="stylesheet" href="css/style.css?v=20260703a">
 </head>
 <body>
 
@@ -106,6 +106,9 @@
     <div class="sbItem" data-mod="odontograma" onclick="switchSidebar('odontograma')">
       <span class="sbItemIco">🦷</span><span class="sbItemLbl">Odontograma</span>
     </div>
+    <div class="sbItem" data-mod="caixa" onclick="switchSidebar('caixa')">
+      <span class="sbItemIco">🏦</span><span class="sbItemLbl">Caixa do Dia</span>
+    </div>
 
     <div class="sbItem" data-mod="relatorios" onclick="switchSidebar('relatorios')">
       <span class="sbItemIco">📊</span><span class="sbItemLbl">Relatórios</span>
@@ -124,6 +127,9 @@
       </div>
       <div class="sbSubItem" data-mod="recebimentos" onclick="switchSidebar('recebimentos')">
         Recebimentos
+      </div>
+      <div class="sbSubItem" data-mod="auditoria" onclick="switchSidebar('auditoria')">
+        Auditoria Financeira
       </div>
     </div>
 
@@ -1104,6 +1110,127 @@
   </div>
 </div>
 
+<!-- ════ SEÇÃO: CAIXA DO DIA ════ -->
+<div id="secCaixa">
+
+  <div class="cxHdr">
+    <div>
+      <div class="cxHdrTitle">🏦 Caixa do Dia</div>
+      <div class="cxHdrSub" id="caixaTurnoInfo">—</div>
+    </div>
+    <button class="btn bDng bSm" onclick="CaixaMod.fecharCaixa()">🔒 Fechar Caixa</button>
+  </div>
+
+  <!-- Termômetro de comissão -->
+  <div id="caixaComissao" class="cxTermometro">
+    <div class="cxTermTitle">🏆 Comissão do Dia</div>
+    <div class="cxTermVal">R$ 0,00</div>
+    <div class="cxTermBarraWrap">
+      <div class="cxTermBarra"><div class="cxTermPreench" style="width:0%"></div></div>
+      <div class="cxTermPct">0%</div>
+    </div>
+    <div class="cxTermMeta">Meta: R$ 50,00 · R$ 2,00/atend</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="cxStatsRow">
+    <div class="cxStatCard">
+      <div class="cxStatNum" id="caixaCntPend">0</div>
+      <div class="cxStatLbl">Pendentes</div>
+    </div>
+    <div class="cxStatCard">
+      <div class="cxStatNum" id="caixaTotalPend">R$ 0,00</div>
+      <div class="cxStatLbl">Total Pendente</div>
+    </div>
+  </div>
+
+  <!-- Lista de pendentes -->
+  <div class="cxListLabel">💳 Pagamentos Pendentes</div>
+  <div id="caixaListWrap" class="cxListWrap">
+    <div class="loadingState">Carregando...</div>
+  </div>
+
+</div>
+
+<!-- ════ SEÇÃO: AUDITORIA FINANCEIRA ════ -->
+<div id="secAuditoria">
+
+  <div class="audHdr">
+    <div>
+      <div class="audHdrTitle">📊 Auditoria Financeira</div>
+      <div class="audHdrSub">Revisão de turnos de caixa · Acesso restrito</div>
+    </div>
+    <button class="btn bG bSm" onclick="AuditoriaMod.filtrar()">🔍 Filtrar</button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="audFiltros">
+    <div class="patFG" style="min-width:140px">
+      <label class="afLabel">De</label>
+      <input type="date" id="audFiltroIni" class="afInp" onchange="AuditoriaMod.filtrar()"/>
+    </div>
+    <div class="patFG" style="min-width:140px">
+      <label class="afLabel">Até</label>
+      <input type="date" id="audFiltroFim" class="afInp" onchange="AuditoriaMod.filtrar()"/>
+    </div>
+    <div class="patFG" style="min-width:180px">
+      <label class="afLabel">Status</label>
+      <select id="audFiltroStatus" class="afInp" onchange="AuditoriaMod.filtrar()">
+        <option value="">Todos</option>
+        <option value="Em Aberto">Em Aberto</option>
+        <option value="Pendente de Auditoria">Pendente de Auditoria</option>
+        <option value="Auditado">Auditado</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="audKpis">
+    <div class="audKpiCard">
+      <div class="audKpiVal" id="audKpiTotal">R$ 0,00</div>
+      <div class="audKpiLbl">💰 Total Arrecadado</div>
+    </div>
+    <div class="audKpiCard audKpiG">
+      <div class="audKpiVal" id="audKpiRetido">R$ 0,00</div>
+      <div class="audKpiLbl">🏥 Retido Clínica (60%)</div>
+    </div>
+    <div class="audKpiCard audKpiB">
+      <div class="audKpiVal" id="audKpiRepasse">R$ 0,00</div>
+      <div class="audKpiLbl">👨‍⚕️ Repasse Médicos (40%)</div>
+    </div>
+    <div class="audKpiCard audKpiY">
+      <div class="audKpiVal" id="audKpiComissao">R$ 0,00</div>
+      <div class="audKpiLbl">🏆 Comissão Recepção</div>
+    </div>
+    <div class="audKpiCard audKpiR">
+      <div class="audKpiVal" id="audKpiPendentes">0</div>
+      <div class="audKpiLbl">⏳ Pendentes de Auditoria</div>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="audTableWrap">
+    <table class="audTable">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Recepcionista</th>
+          <th>Fechamento</th>
+          <th>Total</th>
+          <th>Retido</th>
+          <th>Repasse</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="audTbody">
+        <tr><td colspan="8" class="audVazio">Carregando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
 </main>
 
 <!-- ════ MODAL: ATENDIMENTO ════ -->
@@ -1716,6 +1843,39 @@
   <!-- Conteúdo preenchido dinamicamente por ProntuarioMod.imprimir() -->
 </div>
 
+<!-- ════ MODAL: CAIXA — PROCESSAR PAGAMENTO ════ -->
+<div id="caixaModalPag" class="ovl" onclick="if(event.target===this)CaixaMod.fecharModal()">
+  <div class="mBox" style="max-width:420px;width:96%;padding:24px 22px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h3 style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">💳 Processar Pagamento</h3>
+      <button class="bDel" onclick="CaixaMod.fecharModal()" style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
+    </div>
+    <div class="cxModalValorBox">
+      <div class="cxModalValorLbl">Valor a receber</div>
+      <div class="cxModalValor" id="caixaPagValorLabel">R$ 0,00</div>
+    </div>
+    <div class="patFG" style="margin-bottom:14px">
+      <label class="afLabel">Forma de Pagamento *</label>
+      <select id="caixaPagForma" class="afInp">
+        <option value="">Selecione...</option>
+        <option value="PIX">PIX</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão de Crédito">Cartão de Crédito</option>
+        <option value="Cartão de Débito">Cartão de Débito</option>
+        <option value="Convênio">Convênio</option>
+      </select>
+    </div>
+    <div class="patFG" style="margin-bottom:20px">
+      <label class="afLabel">Observação (opcional)</label>
+      <input type="text" id="caixaPagObs" class="afInp" placeholder="Comprovante, referência..."/>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn bGh bSm" onclick="CaixaMod.fecharModal()">Cancelar</button>
+      <button class="btn bG bSm" id="caixaBtnConfirmar" onclick="CaixaMod.confirmarPagamento()">✅ Confirmar Pagamento</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- ══════════════════════════════════════════════════════════════════════
      SCRIPTS — Monólito Modular (carregados em sequência)
@@ -1736,8 +1896,10 @@
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260702b"></script>
 <script src="js/modules/odontograma.js?v=20260702e"></script>
-<script src="js/modules/usuarios.js?v=20260702b"></script>
-<script src="js/core/main.js?v=20260702f"></script>
+<script src="js/modules/caixa.js?v=20260703a"></script>
+<script src="js/modules/auditoria.js?v=20260703a"></script>
+<script src="js/modules/usuarios.js?v=20260703a"></script>
+<script src="js/core/main.js?v=20260703a"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');
