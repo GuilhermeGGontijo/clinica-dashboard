@@ -957,22 +957,22 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
 /* ── Editor visual (contenteditable) ── */
 #prnEvolucaoTxt {
   width: 100%;
-  flex: 1;
-  min-height: 200px;
+  /* sem flex:1 — o editor cresce com o conteúdo; o pai (.prnAbaContent) rola */
+  min-height: 460px;
   font-family: inherit;
-  font-size: .87rem;
-  line-height: 1.7;
-  padding: 12px 14px;
+  font-size: .88rem;
+  line-height: 1.8;
+  padding: 18px 22px;
   border: 1.5px solid var(--s2);
   border-top: none;
   border-radius: 0 0 var(--Rs) var(--Rs);
   color: var(--s9);
-  background: #fafbfc;
+  background: var(--w);
   box-sizing: border-box;
   outline: none;
-  overflow-y: auto;
+  overflow-y: visible; /* deixa o pai rolar; editor não corta o conteúdo */
 }
-#prnEvolucaoTxt:focus { border-color: var(--g5); background: var(--w); }
+#prnEvolucaoTxt:focus { border-color: var(--g5); }
 #prnEvolucaoTxt:empty::before {
   content: attr(data-placeholder);
   color: var(--s3);
@@ -980,16 +980,27 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   white-space: pre-line;
 }
 
+/* ── Divisória/separador dentro do editor ── */
+#prnEvolucaoTxt hr,
+#prnEvolucaoTxt .prnDiv {
+  border: none;
+  border-top: 2.5px solid var(--s9);
+  margin: 16px 0 14px;
+  opacity: .75;
+}
+
+/* ── Botão Divisória na toolbar ── */
+.prnTbDivBtn { font-size: .77rem; color: var(--s6); letter-spacing: .2px; }
+
 /* ── Editor código-fonte HTML ── */
 .prnEditorSrc {
   display: none;
   width: 100%;
-  flex: 1;
-  min-height: 200px;
+  min-height: 460px;
   font-family: 'Courier New', Courier, monospace;
   font-size: .82rem;
   line-height: 1.6;
-  padding: 12px 14px;
+  padding: 14px 18px;
   border: 1.5px solid var(--g4);
   border-top: none;
   border-radius: 0 0 var(--Rs) var(--Rs);

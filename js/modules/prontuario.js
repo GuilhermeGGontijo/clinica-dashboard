@@ -369,6 +369,34 @@ const ProntuarioMod = (function () {
     document.execCommand(cmd, false, null);
   }
 
+  /* ── Inserir linha separadora (divisória) no ponto do cursor ── */
+  function inserirSeparador () {
+    if (_emCodigoFonte) return;
+    var editor = sid('prnEvolucaoTxt');
+    if (!editor) return;
+    editor.focus();
+
+    var ok = document.execCommand('insertHorizontalRule', false, null);
+    if (!ok) {
+      /* Fallback manual */
+      var sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      var range = sel.getRangeAt(0);
+      range.deleteContents();
+      var hr = document.createElement('hr');
+      hr.className = 'prnDiv';
+      range.insertNode(hr);
+      /* Move cursor para depois do hr */
+      var p = document.createElement('p');
+      p.appendChild(document.createElement('br'));
+      hr.parentNode.insertBefore(p, hr.nextSibling);
+      range.setStart(p, 0);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+
   /* ── Alternar entre visão formatada e código-fonte HTML (também usado para importar modelo pronto) ── */
   function alternarCodigoFonte() {
     var editor = sid('prnEvolucaoTxt');
@@ -831,6 +859,7 @@ const ProntuarioMod = (function () {
     salvarEvolucao,
     injetarModelo,
     formatarTexto,
+    inserirSeparador,
     alternarCodigoFonte,
     abrirSalvarModelo,
     fecharSalvarModelo,
