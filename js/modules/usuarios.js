@@ -146,10 +146,10 @@ const UsuariosMod = (function () {
       +   (u.email    ? '<div class="usuMetaRow">✉️ ' + esc(u.email)    + '</div>' : '')
       +   (u.telefone ? '<div class="usuMetaRow">📞 ' + esc(u.telefone) + '</div>' : '')
       +   (esp        ? '<div class="usuMetaRow">🩺 ' + esc(esp.label)  + '</div>' : '')
-      +   (u.conselho_tipo && u.conselho_numero
+      +   (u.conselho && u.numero_conselho
             ? '<div class="usuMetaRow">📜 '
-              + esc(u.conselho_tipo) + ' ' + esc(u.conselho_numero)
-              + (u.conselho_uf ? '/' + esc(u.conselho_uf) : '') + '</div>'
+              + esc(u.conselho) + ' ' + esc(u.numero_conselho)
+              + (u.uf_conselho ? '/' + esc(u.uf_conselho) : '') + '</div>'
             : '')
       +   (u.especialidade_medica
             ? '<div class="usuMetaRow">🎓 Esp: ' + esc(u.especialidade_medica)
@@ -240,9 +240,9 @@ const UsuariosMod = (function () {
       chk.checked = rolesAtuais.indexOf(chk.value) >= 0;
     });
     set('usuEsp',         u.especialidade);
-    set('usuConselhoTipo',u.conselho_tipo);
-    set('usuConselhoNum', u.conselho_numero);
-    set('usuConselhoUF',  u.conselho_uf);
+    set('usuConselhoTipo',u.conselho);
+    set('usuConselhoNum', u.numero_conselho);
+    set('usuConselhoUF',  u.uf_conselho);
     set('usuEspMedica',   u.especialidade_medica);
     set('usuRqeNum',      u.rqe_numero);
     set('usuRqeUF',       u.rqe_uf);
@@ -314,9 +314,9 @@ const UsuariosMod = (function () {
       telefone: tel||null,
       roles: roles,
       especialidade: esp||null,
-      conselho_tipo: ctipo||null,
-      conselho_numero: cnum||null,
-      conselho_uf: cuf||null,
+      conselho: ctipo||null,
+      numero_conselho: cnum||null,
+      uf_conselho: cuf||null,
       especialidade_medica: espMedica||null,
       rqe_numero: rqeNum||null,
       rqe_uf: rqeUF||null,
