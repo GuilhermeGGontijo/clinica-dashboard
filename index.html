@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260702d">
+  <link rel="stylesheet" href="css/style.css?v=20260702e">
 </head>
 <body>
 
@@ -342,8 +342,28 @@
               <button class="btn bSm" style="white-space:nowrap;background:var(--s1);color:var(--s7);border:1px solid var(--s2);flex-shrink:0"
                       onclick="ProntuarioMod.abrirSalvarModelo()">💾 Salvar modelo</button>
             </div>
-            <textarea id="prnEvolucaoTxt"
-                      placeholder="S (Subjetivo): queixa principal&#10;O (Objetivo): exame físico e sinais vitais&#10;A (Avaliação): hipótese diagnóstica&#10;P (Plano): condutas e encaminhamentos"></textarea>
+
+            <!-- Toolbar de formatação -->
+            <div class="prnEditorToolbar">
+              <button class="prnTbBtn" title="Negrito" onclick="ProntuarioMod.formatarTexto('bold')"><b>B</b></button>
+              <button class="prnTbBtn" title="Itálico" onclick="ProntuarioMod.formatarTexto('italic')"><i>I</i></button>
+              <button class="prnTbBtn" title="Sublinhado" onclick="ProntuarioMod.formatarTexto('underline')"><u>U</u></button>
+              <span class="prnTbSep"></span>
+              <button class="prnTbBtn" title="Lista com marcadores" onclick="ProntuarioMod.formatarTexto('insertUnorderedList')">≡</button>
+              <button class="prnTbBtn" title="Lista numerada" onclick="ProntuarioMod.formatarTexto('insertOrderedList')">1.</button>
+              <span class="prnTbSep"></span>
+              <button class="prnTbBtn prnTbCodigo" id="prnBtnCodigoFonte" title="Alternar Código-Fonte HTML"
+                      onclick="ProntuarioMod.alternarCodigoFonte()">&lt;/&gt; Código-Fonte</button>
+            </div>
+
+            <!-- Editor visual (contenteditable) -->
+            <div id="prnEvolucaoTxt" class="prnEditorVisual" contenteditable="true"
+                 data-placeholder="S (Subjetivo): queixa principal&#10;O (Objetivo): exame físico e sinais vitais&#10;A (Avaliação): hipótese diagnóstica&#10;P (Plano): condutas e encaminhamentos"></div>
+
+            <!-- Editor código-fonte HTML -->
+            <textarea id="prnEvolucaoSrc" class="prnEditorSrc"
+                      placeholder="Cole ou digite o HTML do modelo aqui...&#10;&#10;Exemplo:&#10;&lt;p&gt;&lt;strong&gt;Nome:&lt;/strong&gt; _______________&lt;/p&gt;&#10;&lt;p&gt;&lt;strong&gt;Queixa Principal:&lt;/strong&gt;&lt;/p&gt;&#10;&lt;hr&gt;"></textarea>
+
             <div class="prnAbaActions">
               <button class="btn bG bSm" onclick="ProntuarioMod.salvarEvolucao()">💾 Salvar Evolução</button>
             </div>
@@ -1597,7 +1617,7 @@
 <script src="js/modules/salas.js?v=20260702b"></script>
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
 <script src="js/modules/agenda.js?v=20260702b"></script>
-<script src="js/modules/prontuario.js?v=20260702d"></script>
+<script src="js/modules/prontuario.js?v=20260702e"></script>
 <script src="js/modules/recepcao.js?v=20260702b"></script>
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>

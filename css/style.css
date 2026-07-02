@@ -923,13 +923,88 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   padding: 6px 8px;
   min-width: 160px;
 }
-#prnEvolucaoTxt, #prnExamesTxt {
+/* ── Toolbar do editor de evolução ── */
+.prnEditorToolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  background: var(--s1);
+  border: 1.5px solid var(--s2);
+  border-bottom: none;
+  border-radius: var(--Rs) var(--Rs) 0 0;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.prnTbBtn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: .82rem;
+  color: var(--s7);
+  cursor: pointer;
+  line-height: 1.4;
+  transition: background .12s, border-color .12s;
+  min-width: 28px;
+}
+.prnTbBtn:hover { background: var(--w); border-color: var(--s2); }
+.prnTbBtn.ativo  { background: var(--g1); border-color: var(--g4); color: var(--g7); }
+.prnTbCodigo { margin-left: 4px; font-size: .75rem; letter-spacing: .3px; }
+.prnTbSep { width: 1px; height: 18px; background: var(--s2); margin: 0 4px; }
+
+/* ── Editor visual (contenteditable) ── */
+#prnEvolucaoTxt {
+  width: 100%;
+  flex: 1;
+  min-height: 200px;
+  font-family: inherit;
+  font-size: .87rem;
+  line-height: 1.7;
+  padding: 12px 14px;
+  border: 1.5px solid var(--s2);
+  border-top: none;
+  border-radius: 0 0 var(--Rs) var(--Rs);
+  color: var(--s9);
+  background: #fafbfc;
+  box-sizing: border-box;
+  outline: none;
+  overflow-y: auto;
+}
+#prnEvolucaoTxt:focus { border-color: var(--g5); background: var(--w); }
+#prnEvolucaoTxt:empty::before {
+  content: attr(data-placeholder);
+  color: var(--s3);
+  pointer-events: none;
+  white-space: pre-line;
+}
+
+/* ── Editor código-fonte HTML ── */
+.prnEditorSrc {
+  display: none;
+  width: 100%;
+  flex: 1;
+  min-height: 200px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: .82rem;
+  line-height: 1.6;
+  padding: 12px 14px;
+  border: 1.5px solid var(--g4);
+  border-top: none;
+  border-radius: 0 0 var(--Rs) var(--Rs);
+  color: #1e293b;
+  background: #f8fafc;
+  box-sizing: border-box;
+  resize: vertical;
+}
+.prnEditorSrc:focus { outline: none; border-color: var(--g5); }
+
+#prnExamesTxt {
   width: 100%;
   flex: 1;
   min-height: 200px;
   resize: vertical;
-  resize: vertical;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: inherit;
   font-size: .84rem;
   line-height: 1.65;
   padding: 10px 12px;
@@ -940,7 +1015,7 @@ body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block
   box-sizing: border-box;
   transition: border-color .15s, background .15s;
 }
-#prnEvolucaoTxt:focus, #prnExamesTxt:focus {
+#prnExamesTxt:focus {
   border-color: var(--g5);
   outline: none;
   background: var(--w);
