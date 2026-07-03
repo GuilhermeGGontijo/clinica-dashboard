@@ -50,12 +50,12 @@ const RecepMod = (function () {
   async function _carregar () {
     var hoje = _hoje();
 
-    /* Tentativa 1: query completa com todos os joins */
+    /* Tentativa 1: query completa (pacientes sem alias = mesmo formato do agenda.js) */
     var r = await _sb.from('agendamentos')
       .select([
         'id', 'hora_inicio', 'hora_fim', 'status_recepcao', 'hora_chegada',
         'paciente_id', 'valor_cobrado', 'status',
-        'pacientes(id,nome_completo)',
+        'pacientes(nome_completo)',
         'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
         'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor)',
         'sala:salas!agendamentos_sala_id_fkey(nome)',
@@ -68,13 +68,13 @@ const RecepMod = (function () {
       .order('hora_inicio');
 
     if (r.error) {
-      /* Tentativa 2: sem recebimentos (join pode falhar se FK não existir) */
+      /* Tentativa 2: sem recebimentos */
       console.warn('[RecepMod] join completo falhou, tentando sem recebimentos:', r.error.message);
       r = await _sb.from('agendamentos')
         .select([
           'id', 'hora_inicio', 'hora_fim', 'status_recepcao', 'hora_chegada',
           'paciente_id', 'valor_cobrado', 'status',
-          'pacientes(id,nome_completo)',
+          'pacientes(nome_completo)',
           'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
           'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor)',
           'sala:salas!agendamentos_sala_id_fkey(nome)'
@@ -355,12 +355,18 @@ const RecepMod = (function () {
         criado_por:       userId
       };
 
-      var r = await _sb.from('recebimentos').insert(payload);
+      var r = await _sb.from('recebimentos').insert(payload).select('id,status,forma_pagamento,valor').single();
       if (r.error) throw r.error;
+
+      /* Atualiza estado local imediatamente — não depende do reload do join */
+      var ag = _itens.find(function (a) { return a.id === _pagModalAgId; });
+      if (ag) {
+        if (!ag.recebimentos) ag.recebimentos = [];
+        ag.recebimentos.push(r.data);
+      }
 
       toast('✅ Pagamento confirmado!', 'success');
       fecharPagamento();
-      await _carregar();
       _render();
     } catch (err) {
       toast('Erro ao confirmar: ' + err.message, 'error');

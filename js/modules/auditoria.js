@@ -54,13 +54,14 @@ const AuditoriaMod = (function () {
     var fim    = ((sid('audFiltroFim')    || {}).value || '').trim();
     var stFilt = ((sid('audFiltroStatus') || {}).value || '').trim();
 
-    var query = _sb.from('agendamentos')
+    /* Tentativa 1: query completa com criador */
+    var q1 = _sb.from('agendamentos')
       .select([
         'id', 'data_agendamento', 'hora_inicio', 'status', 'valor_cobrado',
-        'paciente:paciente_id(nome_completo)',
-        'profissional:profissional_id(nome)',
-        'procedimento:procedimento_id(nome,valor_repasse,tipo_repasse)',
-        'criador:criado_por(nome)',
+        'pacientes(nome_completo)',
+        'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
+        'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor_repasse,tipo_repasse)',
+        'criador:perfis_usuarios!agendamentos_criado_por_fkey(nome)',
         'recebimentos(id,valor,status,forma_pagamento,data_recebimento)'
       ].join(','))
       .eq('unidade_id', CU)
@@ -68,10 +69,38 @@ const AuditoriaMod = (function () {
       .order('data_agendamento', { ascending: false })
       .limit(500);
 
-    if (ini) query = query.gte('data_agendamento', ini);
-    if (fim) query = query.lte('data_agendamento', fim);
+    if (ini) q1 = q1.gte('data_agendamento', ini);
+    if (fim) q1 = q1.lte('data_agendamento', fim);
+    var r = await q1;
 
-    var r = await query;
+    if (r.error) {
+      /* Tentativa 2: sem criador */
+      console.warn('[AuditoriaMod] join com criador falhou:', r.error.message);
+      var q2 = _sb.from('agendamentos')
+        .select([
+          'id', 'data_agendamento', 'hora_inicio', 'status', 'valor_cobrado',
+          'pacientes(nome_completo)',
+          'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
+          'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor_repasse,tipo_repasse)',
+          'recebimentos(id,valor,status,forma_pagamento,data_recebimento)'
+        ].join(','))
+        .eq('unidade_id', CU)
+        .neq('status', 'Cancelado')
+        .order('data_agendamento', { ascending: false })
+        .limit(500);
+      if (ini) q2 = q2.gte('data_agendamento', ini);
+      if (fim) q2 = q2.lte('data_agendamento', fim);
+      r = await q2;
+    }
+
+    if (r.error) {
+      console.error('[AuditoriaMod]', r.error.message);
+      var tbody = sid('audTbody');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="audVazio">⚠️ Erro ao carregar dados: ' + r.error.message + '</td></tr>';
+      _dados = [];
+      return;
+    }
+
     _dados = r.data || [];
 
     if (stFilt === 'RECEBIDO') {
@@ -164,7 +193,7 @@ const AuditoriaMod = (function () {
       var dt  = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
       var hr  = (ag.hora_inicio || '').substring(0, 5);
 
-      var pac    = (ag.paciente     && ag.paciente.nome_completo) || '—';
+      var pac    = (ag.pacientes    && ag.pacientes.nome_completo) || '—';
       var prof   = (ag.profissional && ag.profissional.nome)      || '—';
       var proc   = (ag.procedimento && ag.procedimento.nome)      || '—';
       var recep  = (ag.criador      && ag.criador.nome)           || '—';

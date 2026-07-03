@@ -75,13 +75,15 @@ const CaixaMod = (function () {
   ══════════════════════════════════════════════════════════════════ */
   async function _carregarAtendHoje () {
     var hoje = _hoje();
+
+    /* Tentativa 1: query completa com criador */
     var r = await _sb.from('agendamentos')
       .select([
         'id', 'hora_inicio', 'valor_cobrado', 'status',
-        'paciente:paciente_id(nome_completo)',
-        'procedimento:procedimento_id(nome,valor,valor_repasse,tipo_repasse)',
-        'profissional:profissional_id(nome)',
-        'criador:criado_por(nome)',
+        'pacientes(nome_completo)',
+        'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor,valor_repasse,tipo_repasse)',
+        'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
+        'criador:perfis_usuarios!agendamentos_criado_por_fkey(nome)',
         'recebimentos(id,valor,status,forma_pagamento)'
       ].join(','))
       .gte('data_agendamento', hoje)
@@ -89,6 +91,24 @@ const CaixaMod = (function () {
       .eq('unidade_id', CU)
       .neq('status', 'Cancelado')
       .order('hora_inicio');
+
+    if (r.error) {
+      /* Tentativa 2: sem criador (FK de criado_por pode não existir) */
+      console.warn('[CaixaMod] join com criador falhou, tentando sem criador:', r.error.message);
+      r = await _sb.from('agendamentos')
+        .select([
+          'id', 'hora_inicio', 'valor_cobrado', 'status',
+          'pacientes(nome_completo)',
+          'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor,valor_repasse,tipo_repasse)',
+          'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
+          'recebimentos(id,valor,status,forma_pagamento)'
+        ].join(','))
+        .gte('data_agendamento', hoje)
+        .lte('data_agendamento', hoje)
+        .eq('unidade_id', CU)
+        .neq('status', 'Cancelado')
+        .order('hora_inicio');
+    }
 
     if (r.error) {
       console.error('[CaixaMod]', r.error.message);
@@ -161,7 +181,7 @@ const CaixaMod = (function () {
       var pago  = !!receb;
 
       var hora    = (ag.hora_inicio  || '').substring(0, 5);
-      var pac     = (ag.paciente     && ag.paciente.nome_completo) || '—';
+      var pac     = (ag.pacientes   && ag.pacientes.nome_completo) || '—';
       var proc    = (ag.procedimento && ag.procedimento.nome)      || '—';
       var prof    = (ag.profissional && ag.profissional.nome)      || '—';
       var recepNome = (ag.criador    && ag.criador.nome)           || '—';
@@ -333,7 +353,7 @@ const CaixaMod = (function () {
       var receb = ag.recebimentos && ag.recebimentos.find(function (rb) { return rb.status === 'RECEBIDO'; });
       var pago  = !!receb;
       var hora  = (ag.hora_inicio || '').substring(0, 5);
-      var pac   = (ag.paciente     && ag.paciente.nome_completo) || '—';
+      var pac   = (ag.pacientes    && ag.pacientes.nome_completo) || '—';
       var proc  = (ag.procedimento && ag.procedimento.nome)      || '—';
       var prof  = (ag.profissional && ag.profissional.nome)      || '—';
       var recepNome = (ag.criador  && ag.criador.nome)           || '—';
