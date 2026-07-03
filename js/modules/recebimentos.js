@@ -74,7 +74,7 @@ const RecebMod = (function () {
       /* procedimentos separado */
       var prIds = ags.map(function(a){return a.procedimento_id;}).filter(Boolean);
       if (prIds.length) {
-        var rPr = await _sb.from('procedimentos').select('id,nome,valor').in('id', prIds);
+        var rPr = await _sb.from('procedimentos').select('id,nome,valor_padrao').in('id', prIds);
         var prMap = {}; (rPr.data||[]).forEach(function(p){prMap[p.id]=p;});
         ags.forEach(function(ag){ ag.procedimento = prMap[ag.procedimento_id]||null; });
       }
@@ -93,7 +93,7 @@ const RecebMod = (function () {
       var d = new Date(ag.data_agendamento + 'T00:00:00');
       var dt = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
       var hr = (ag.hora_inicio || '').substring(0, 5);
-      var val = parseFloat(ag.valor_cobrado) || parseFloat((ag.procedimento || {}).valor) || 0;
+      var val = parseFloat(ag.valor_cobrado) || parseFloat((ag.procedimento || {}).valor_padrao) || 0;
       var valStr = val > 0 ? 'R$ ' + val.toFixed(2).replace('.', ',') : '—';
       return '<tr>'
         + '<td class="rpNome">' + esc(nome) + '</td>'
@@ -173,7 +173,7 @@ const RecebMod = (function () {
     var prIds = _dados.map(function (ag) { return ag.procedimento_id; }).filter(Boolean)
       .filter(function (v, i, a) { return a.indexOf(v) === i; });
     if (prIds.length) {
-      var rProc = await _sb.from('procedimentos').select('id,nome,valor').in('id', prIds);
+      var rProc = await _sb.from('procedimentos').select('id,nome,valor_padrao').in('id', prIds);
       var procMap = {};
       (rProc.data || []).forEach(function (p) { procMap[p.id] = p; });
       _dados.forEach(function (ag) { ag.procedimento = procMap[ag.procedimento_id] || null; });
@@ -277,7 +277,7 @@ const RecebMod = (function () {
         ? parseFloat(receb.valor) || 0
         : estorn
           ? parseFloat(estorn.valor) || 0
-          : parseFloat(ag.valor_cobrado) || parseFloat((ag.procedimento || {}).valor) || 0;
+          : parseFloat(ag.valor_cobrado) || parseFloat((ag.procedimento || {}).valor_padrao) || 0;
 
       var forma  = receb
         ? (FORMAS[receb.forma_pagamento] || receb.forma_pagamento || '—')
@@ -333,7 +333,7 @@ const RecebMod = (function () {
         ag.paciente = rp.data || null;
       }
       if (ag.procedimento_id) {
-        var rpr = await _sb.from('procedimentos').select('nome,valor').eq('id', ag.procedimento_id).single();
+        var rpr = await _sb.from('procedimentos').select('nome,valor_padrao').eq('id', ag.procedimento_id).single();
         ag.procedimento = rpr.data || null;
       }
     }
@@ -348,7 +348,7 @@ const RecebMod = (function () {
 
     if (formaEl) formaEl.value = ag.forma_pagamento || 'DINHEIRO';
 
-    var val = parseFloat(ag.valor_cobrado) || parseFloat((ag.procedimento || {}).valor) || 0;
+    var val = parseFloat(ag.valor_cobrado) || parseFloat((ag.procedimento || {}).valor_padrao) || 0;
     if (valorEl) valorEl.value = val > 0 ? val.toFixed(2) : '';
 
     if (dataEl)  dataEl.value  = _fmtDate(new Date());

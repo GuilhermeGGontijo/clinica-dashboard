@@ -125,7 +125,7 @@ const CaixaMod = (function () {
     var prIds = _atendHoje.map(function (ag) { return ag.procedimento_id; }).filter(Boolean)
       .filter(function (v, i, a) { return a.indexOf(v) === i; });
     if (prIds.length) {
-      var rProc = await _sb.from('procedimentos').select('id,nome,valor,valor_repasse,tipo_repasse').in('id', prIds);
+      var rProc = await _sb.from('procedimentos').select('id,nome,valor_padrao,valor_repasse,tipo_repasse').in('id', prIds);
       var procMap = {};
       (rProc.data || []).forEach(function (p) { procMap[p.id] = p; });
       _atendHoje.forEach(function (ag) { ag.procedimento = procMap[ag.procedimento_id] || null; });
@@ -181,7 +181,7 @@ const CaixaMod = (function () {
       return acc + (parseFloat((receb || {}).valor) || 0);
     }, 0);
     var totalPendente = pendentes.reduce(function (acc, ag) {
-      return acc + (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor) || 0);
+      return acc + (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor_padrao) || 0);
     }, 0);
 
     var el;
@@ -219,7 +219,7 @@ const CaixaMod = (function () {
       var recepNome = (ag.criador    && ag.criador.nome)           || '—';
       var valor   = pago
         ? (parseFloat(receb.valor) || 0)
-        : (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor) || 0);
+        : (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor_padrao) || 0);
       var forma   = pago ? (FORMAS[receb.forma_pagamento] || receb.forma_pagamento || '—') : '—';
 
       var badge = pago
@@ -283,7 +283,7 @@ const CaixaMod = (function () {
       var userId = su.data && su.data.user ? su.data.user.id : null;
 
       var ag    = _atendHoje.find(function (a) { return a.id === _editAgId; });
-      var valor = ag ? (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor) || 0) : 0;
+      var valor = ag ? (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor_padrao) || 0) : 0;
 
       var payload = {
         agendamento_id:   _editAgId,
@@ -390,7 +390,7 @@ const CaixaMod = (function () {
       var prof  = (ag.profissional && ag.profissional.nome)      || '—';
       var recepNome = (ag.criador  && ag.criador.nome)           || '—';
       var valor = pago ? (parseFloat(receb.valor) || 0)
-                       : (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor) || 0);
+                       : (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor_padrao) || 0);
       var forma = pago ? (FORMAS[receb.forma_pagamento] || receb.forma_pagamento || '—') : '—';
       return '<tr>'
         + '<td>' + hora + '</td>'

@@ -1865,7 +1865,7 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 ══════════════════════════════════════════════════════════════════════ */
 
 /* Seção oculta por padrão */
-#secCaixa    { display: none; max-width: 760px; margin: 0 auto; padding: 24px 20px; }
+#secCaixa    { display: none; max-width: 100%; padding: 20px 24px; }
 #secAuditoria{ display: none; max-width: 100%; padding: 20px 24px; }
 body.sb-caixa     #secCaixa     { display: block !important; }
 body.sb-auditoria #secAuditoria { display: block !important; }
@@ -1975,25 +1975,30 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 /* ── CAIXA — Tabela de atendimentos ── */
 .cxTableScroll { overflow-x: auto; background: var(--w);
   border: 1px solid var(--s2); border-radius: var(--R); box-shadow: var(--sh); }
-.cxTable { width: 100%; border-collapse: collapse; font-size: .84rem; min-width: 820px; }
+.cxTable { width: 100%; border-collapse: collapse; font-size: .79rem; }
 .cxTable thead th {
-  padding: 10px 12px; text-align: left; font-size: .72rem; font-weight: 800;
-  color: var(--s5); text-transform: uppercase; letter-spacing: .06em;
-  background: var(--s0); border-bottom: 1px solid var(--s2); white-space: nowrap;
+  padding: 9px 10px; text-align: left; font-size: .68rem; font-weight: 800;
+  color: var(--s5); text-transform: uppercase; letter-spacing: .05em;
+  background: var(--s0); border-bottom: 2px solid var(--s2); white-space: nowrap;
+  position: sticky; top: 0; z-index: 1;
 }
 .cxTable tbody tr { border-bottom: 1px solid var(--s2); transition: background .1s; }
 .cxTable tbody tr:last-child { border-bottom: none; }
 .cxTable tbody tr:hover { background: var(--s0); }
-.cxTable td { padding: 10px 12px; vertical-align: middle; }
+.cxTable td { padding: 8px 10px; vertical-align: middle; }
 .cxRowPend  { background: #fffbf0; }
 .cxRowPend:hover { background: #fef9e7 !important; }
-.cxTdHora  { white-space: nowrap; font-weight: 700; color: var(--s7); font-size: .88rem; }
-.cxTdPac   { font-weight: 600; min-width: 130px; }
-.cxTdProc  { color: var(--s7); min-width: 130px; }
-.cxTdProf  { color: var(--s6); font-size: .8rem; min-width: 110px; }
-.cxTdRecep { color: var(--s5); font-size: .8rem; min-width: 110px; }
-.cxTdVal   { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.cxTdForma { font-size: .8rem; color: var(--s5); white-space: nowrap; }
+.cxTdHora  { white-space: nowrap; font-weight: 700; color: var(--s7); font-size: .82rem; width: 52px; }
+.cxTdPac   { font-weight: 700; max-width: 150px; overflow: hidden;
+             text-overflow: ellipsis; white-space: nowrap; }
+.cxTdProc  { color: var(--s7); max-width: 150px; overflow: hidden;
+             text-overflow: ellipsis; white-space: nowrap; }
+.cxTdProf  { color: var(--s6); font-size: .77rem; max-width: 130px;
+             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cxTdRecep { color: var(--s5); font-size: .77rem; max-width: 120px;
+             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cxTdVal   { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.cxTdForma { font-size: .77rem; color: var(--s5); white-space: nowrap; }
 .cxStPago  { display:inline-block; background:var(--g1); color:var(--g7);
   font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; }
 .cxStPend  { display:inline-block; background:#fef3c7; color:#92400e;

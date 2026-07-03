@@ -58,7 +58,7 @@ const RecepMod = (function () {
         'valor_cobrado', 'status',
         'pacientes(nome_completo)',
         'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
-        'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor)',
+        'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor_padrao)',
         'sala:salas!agendamentos_sala_id_fkey(nome)'
       ].join(','))
       .gte('data_agendamento', hoje)
@@ -125,6 +125,25 @@ const RecepMod = (function () {
         });
       }
     }
+
+    /* ── 4. Procedimentos por query separada (fallback se join retornou null) ── */
+    var semProc = _itens.filter(function (ag) {
+      return ag.procedimento_id && !(ag.procedimento && ag.procedimento.nome);
+    });
+    if (semProc.length) {
+      var prIds = semProc.map(function (ag) { return ag.procedimento_id; })
+        .filter(function (v, i, a) { return a.indexOf(v) === i; });
+      var rProc = await _sb.from('procedimentos').select('id,nome,valor_padrao').in('id', prIds);
+      if (!rProc.error && rProc.data) {
+        var procMap = {};
+        rProc.data.forEach(function (p) { procMap[p.id] = p; });
+        _itens.forEach(function (ag) {
+          if (ag.procedimento_id && !(ag.procedimento && ag.procedimento.nome)) {
+            ag.procedimento = procMap[ag.procedimento_id] || null;
+          }
+        });
+      }
+    }
   }
 
   /* ── Checar se agendamento tem pagamento confirmado ── */
@@ -135,7 +154,7 @@ const RecepMod = (function () {
 
   function _valorPadrao (ag) {
     return parseFloat(ag.valor_cobrado) ||
-           parseFloat((ag.procedimento && ag.procedimento.valor) || 0) || 0;
+           parseFloat((ag.procedimento && ag.procedimento.valor_padrao) || 0) || 0;
   }
 
   /* ── Render principal ── */
