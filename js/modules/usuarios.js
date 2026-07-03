@@ -296,15 +296,19 @@ const UsuariosMod = (function () {
       email: email,
       telefone: tel||null,
       role: role,
-      especialidade: esp||null,
-      conselho_tipo: ctipo||null,
-      conselho_numero: cnum||null,
-      conselho_uf: cuf||null,
-      especialidade_medica: espMedica||null,
-      rqe_numero: rqeNum||null,
-      rqe_uf: rqeUF||null,
       ativo: true
     };
+
+    /* Campos exclusivos de profissional de saúde */
+    if (role === 'profissional_saude') {
+      payload.especialidade       = esp||null;
+      payload.conselho_tipo       = ctipo||null;
+      payload.conselho_numero     = cnum||null;
+      payload.conselho_uf         = cuf||null;
+      payload.especialidade_medica = espMedica||null;
+      payload.rqe_numero          = rqeNum||null;
+      payload.rqe_uf              = rqeUF||null;
+    }
     if (senhaProvis !== undefined) payload.senha_provisoria = senhaProvis;
 
     try {
