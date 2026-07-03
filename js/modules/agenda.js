@@ -237,7 +237,7 @@ const AgendaMod = (function () {
   async function _carregarProfissionais () {
     var r = await _sb.from('perfis_usuarios')
       .select('id,nome,especialidade,role')
-      .in('role', ['profissional_saude','administrador'])
+      .eq('role', 'profissional_saude')
       .eq('ativo', true).order('nome');
     _profissionais = r.data || [];
   }
