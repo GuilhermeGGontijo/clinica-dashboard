@@ -191,9 +191,18 @@ const RecebMod = (function () {
 
     /* 6. Filtro de status */
     if (stFilt === 'PENDENTE') {
-      _dados = _dados.filter(function (a) { return !a.recebimentos || !a.recebimentos.length; });
+      _dados = _dados.filter(function (a) {
+        return !a.recebimentos || !a.recebimentos.some(function(rb){ return rb.status === 'RECEBIDO'; });
+      });
     } else if (stFilt === 'RECEBIDO') {
-      _dados = _dados.filter(function (a) { return a.recebimentos && a.recebimentos.length; });
+      _dados = _dados.filter(function (a) {
+        return a.recebimentos && a.recebimentos.some(function(rb){ return rb.status === 'RECEBIDO'; });
+      });
+    } else if (stFilt === 'ESTORNADO') {
+      _dados = _dados.filter(function (a) {
+        return a.recebimentos && a.recebimentos.some(function(rb){ return rb.status === 'ESTORNADO'; })
+          && !a.recebimentos.some(function(rb){ return rb.status === 'RECEBIDO'; });
+      });
     }
   }
 
@@ -223,10 +232,15 @@ const RecebMod = (function () {
   ══════════════════════════════════════════════════════════════════ */
   function _renderKpis() {
     var total     = _dados.length;
-    var recebidos = _dados.filter(function (a) { return a.recebimentos && a.recebimentos.length; });
-    var pendentes = total - recebidos.length;
+    var recebidos = _dados.filter(function (a) {
+      return a.recebimentos && a.recebimentos.some(function(rb){ return rb.status === 'RECEBIDO'; });
+    });
+    var pendentes = _dados.filter(function (a) {
+      return !a.recebimentos || !a.recebimentos.some(function(rb){ return rb.status === 'RECEBIDO'; });
+    }).length;
     var valorTotal = recebidos.reduce(function (acc, a) {
-      return acc + (parseFloat((a.recebimentos[0] || {}).valor) || 0);
+      var receb = a.recebimentos.find(function(rb){ return rb.status === 'RECEBIDO'; });
+      return acc + (parseFloat((receb || {}).valor) || 0);
     }, 0);
 
     var el;
@@ -255,36 +269,46 @@ const RecebMod = (function () {
       + '</tr></thead><tbody>';
 
     _dados.forEach(function (ag) {
-      var receb = ag.recebimentos && ag.recebimentos.length ? ag.recebimentos[0] : null;
-      var pago  = !!receb;
+      var receb    = ag.recebimentos && ag.recebimentos.find(function(rb){ return rb.status === 'RECEBIDO'; });
+      var estorn   = !receb && ag.recebimentos && ag.recebimentos.find(function(rb){ return rb.status === 'ESTORNADO'; });
+      var pago     = !!receb;
 
       var valor  = receb
         ? parseFloat(receb.valor) || 0
-        : parseFloat(ag.valor_cobrado) || parseFloat((ag.procedimento || {}).valor) || 0;
+        : estorn
+          ? parseFloat(estorn.valor) || 0
+          : parseFloat(ag.valor_cobrado) || parseFloat((ag.procedimento || {}).valor) || 0;
 
       var forma  = receb
         ? (FORMAS[receb.forma_pagamento] || receb.forma_pagamento || '—')
-        : (ag.forma_pagamento ? (FORMAS[ag.forma_pagamento] || ag.forma_pagamento) : '—');
+        : estorn
+          ? (FORMAS[estorn.forma_pagamento] || estorn.forma_pagamento || '—')
+          : (ag.forma_pagamento ? (FORMAS[ag.forma_pagamento] || ag.forma_pagamento) : '—');
 
       var d      = new Date(ag.data_agendamento + 'T00:00:00');
       var dtFmt  = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-      var stCls  = pago ? 'recebStPago' : 'recebStPend';
-      var stLbl  = pago ? '✅ Recebido' : '⏳ Pendente';
+      var stCls  = pago ? 'recebStPago' : estorn ? 'recebStEstornado' : 'recebStPend';
+      var stLbl  = pago ? '✅ Recebido'  : estorn ? '↩ Estornado'      : '⏳ Pendente';
 
-      html += '<tr>'
+      var acao;
+      if (pago) {
+        acao = '<button class="btn bSm recebBtnEstorno" onclick="RecebMod.estornar(\'' + receb.id + '\')">↩ Estornar</button>';
+      } else if (estorn) {
+        acao = '<button class="btn bG bSm recebBtnBaixa" onclick="RecebMod.abrirBaixa(\'' + ag.id + '\')">💰 Dar Baixa</button>';
+      } else {
+        acao = '<button class="btn bG bSm recebBtnBaixa" onclick="RecebMod.abrirBaixa(\'' + ag.id + '\')">💰 Dar Baixa</button>';
+      }
+
+      html += '<tr class="' + (estorn ? 'recebRowEstornado' : '') + '">'
         + '<td class="recebTdData">' + dtFmt + '<br><small class="recebHora">' + (ag.hora_inicio || '').substring(0,5) + '</small></td>'
         + '<td>' + esc((ag.paciente     && ag.paciente.nome_completo) || '—') + '</td>'
         + '<td>' + esc((ag.procedimento && ag.procedimento.nome)      || '—') + '</td>'
         + '<td>' + esc((ag.profissional && ag.profissional.nome)      || '—') + '</td>'
-        + '<td class="recebValor">' + (valor > 0 ? 'R$ ' + valor.toFixed(2).replace('.', ',') : '—') + '</td>'
+        + '<td class="recebValor' + (estorn ? ' recebValorEstorn' : '') + '">' + (valor > 0 ? 'R$ ' + valor.toFixed(2).replace('.', ',') : '—') + '</td>'
         + '<td>' + forma + '</td>'
         + '<td><span class="' + stCls + '">' + stLbl + '</span></td>'
-        + '<td>'
-        + (pago
-          ? '<button class="btn bSm recebBtnEstorno" onclick="RecebMod.estornar(' + receb.id + ')">↩ Estornar</button>'
-          : '<button class="btn bG bSm recebBtnBaixa" onclick="RecebMod.abrirBaixa(' + ag.id + ')">💰 Dar Baixa</button>')
-        + '</td>'
+        + '<td>' + acao + '</td>'
         + '</tr>';
     });
 
@@ -413,10 +437,12 @@ const RecebMod = (function () {
      ESTORNO
   ══════════════════════════════════════════════════════════════════ */
   async function estornar(recebId) {
-    if (!confirm('Confirmar estorno deste recebimento?')) return;
-    var r = await _sb.from('recebimentos').delete().eq('id', recebId);
-    if (r.error) { toast('Erro ao estornar', 'error'); return; }
-    toast('Estorno realizado', 'success');
+    if (!confirm('Confirmar estorno deste recebimento? O status será alterado para "Estornado".')) return;
+    var r = await _sb.from('recebimentos')
+      .update({ status: 'ESTORNADO' })
+      .eq('id', recebId);
+    if (r.error) { toast('Erro ao estornar: ' + r.error.message, 'error'); return; }
+    toast('↩ Estorno registrado com sucesso', 'success');
     await Promise.all([_carregar(), _carregarAlertaPendentes()]);
     _renderKpis();
     _renderTabela();

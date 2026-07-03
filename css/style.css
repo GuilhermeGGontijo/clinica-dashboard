@@ -1596,10 +1596,15 @@ body.sb-admin-recepcao #secAdminRecepcao{display:block!important}
 .recebTdData{font-weight:600;white-space:nowrap}
 .recebHora{color:var(--s4)}
 .recebValor{font-weight:700;color:var(--s9);white-space:nowrap}
+.recebValorEstorn{color:var(--s4)!important;text-decoration:line-through}
 .recebStPago{display:inline-block;padding:3px 10px;border-radius:99px;
   background:var(--g1);color:var(--g7);font-size:.72rem;font-weight:700;white-space:nowrap}
 .recebStPend{display:inline-block;padding:3px 10px;border-radius:99px;
   background:#fef3c7;color:#92400e;font-size:.72rem;font-weight:700;white-space:nowrap}
+.recebStEstornado{display:inline-block;padding:3px 10px;border-radius:99px;
+  background:#f3f4f6;color:#6b7280;font-size:.72rem;font-weight:700;white-space:nowrap;
+  border:1px solid #d1d5db}
+.recebRowEstornado td{opacity:.65}
 .recebBtnBaixa{background:var(--g6)!important;color:#fff!important;border-color:var(--g7)!important}
 .recebBtnEstorno{background:#fff3cd!important;color:#7c3f00!important;border-color:#fcd34d!important}
 .recebVazio{padding:40px;text-align:center;color:var(--s4);font-size:.88rem;
