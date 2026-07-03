@@ -98,12 +98,15 @@ const UnidadesMod = (function () {
     }
     var logoInp = sid('uniLogoFile'); if (logoInp) logoInp.value = '';
 
-    sid('uniModal').style.display = 'flex';
+    var m = sid('uniModal');
+    if (!m) { console.error('[UnidadesMod] #uniModal não encontrado no DOM'); return; }
+    /* Usa setProperty com !important para vencer o body.sb-active main>*{display:none!important} */
+    m.style.setProperty('display', 'flex', 'important');
   }
 
   function fecharModal () {
     var m = sid('uniModal');
-    if (m) m.style.display = 'none';
+    if (m) { m.style.removeProperty('display'); }
     _editId = null;
     _logoPendente = null;
   }
