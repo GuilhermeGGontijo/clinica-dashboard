@@ -7,9 +7,10 @@
 const RecebMod = (function () {
   'use strict';
 
-  var _dados     = [];
-  var _convenios = [];
-  var _editAgId  = null;   // agendamento_id da baixa em curso
+  var _dados          = [];
+  var _convenios      = [];
+  var _pendentesAlert = [];
+  var _editAgId       = null;   // agendamento_id da baixa em curso
 
   var FORMAS = {
     DINHEIRO: 'Dinheiro',
@@ -38,7 +39,10 @@ const RecebMod = (function () {
   async function _carregarAlertaPendentes () {
     var hoje = _fmtDate(new Date());
     var r = await _sb.from('agendamentos')
-      .select('id, data_agendamento, hora_inicio, paciente:paciente_id(nome_completo), recebimentos(id,status)')
+      .select('id, data_agendamento, hora_inicio, valor_cobrado, forma_pagamento, convenio_id, status,' +
+              'paciente:paciente_id(nome_completo),' +
+              'procedimento:procedimento_id(nome,valor),' +
+              'recebimentos(id,status)')
       .eq('unidade_id', CU)
       .neq('status', 'Cancelado')
       .lte('data_agendamento', hoje)
@@ -49,31 +53,42 @@ const RecebMod = (function () {
     if (!wrap) return;
     if (r.error || !r.data) { wrap.style.display = 'none'; return; }
 
-    var pendentes = r.data.filter(function (ag) {
+    _pendentesAlert = r.data.filter(function (ag) {
       return !ag.recebimentos || !ag.recebimentos.length ||
              ag.recebimentos.every(function (rb) { return rb.status !== 'RECEBIDO'; });
     });
 
-    if (!pendentes.length) { wrap.style.display = 'none'; return; }
+    if (!_pendentesAlert.length) { wrap.style.display = 'none'; return; }
 
-    var lista = pendentes.slice(0, 8).map(function (ag) {
+    var MOSTRAR = 10;
+    var linhas = _pendentesAlert.slice(0, MOSTRAR).map(function (ag) {
       var nome = (ag.paciente && ag.paciente.nome_completo) || '—';
       var d = new Date(ag.data_agendamento + 'T00:00:00');
-      var dt = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      var dt = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
       var hr = (ag.hora_inicio || '').substring(0, 5);
-      return '<span class="recebPendItem">' + esc(nome) + ' <small>' + dt + ' ' + hr + '</small>'
-        + '<button class="recebPendBtnBaixa" onclick="RecebMod.abrirBaixa(\'' + ag.id + '\')" title="Dar baixa">💰</button>'
-        + '</span>';
+      var val = parseFloat(ag.valor_cobrado) || parseFloat((ag.procedimento || {}).valor) || 0;
+      var valStr = val > 0 ? 'R$ ' + val.toFixed(2).replace('.', ',') : '—';
+      return '<tr>'
+        + '<td class="rpNome">' + esc(nome) + '</td>'
+        + '<td class="rpData">' + dt + ' · ' + hr + '</td>'
+        + '<td class="rpProc">' + esc((ag.procedimento && ag.procedimento.nome) || '—') + '</td>'
+        + '<td class="rpVal">' + valStr + '</td>'
+        + '<td class="rpAcao"><button class="btn bG bSm recebPendBtnBaixa" onclick="RecebMod.abrirBaixa(\'' + ag.id + '\')">💰 Dar Baixa</button></td>'
+        + '</tr>';
     }).join('');
 
-    var mais = pendentes.length > 8 ? '<span class="recebPendMais">+' + (pendentes.length - 8) + ' mais</span>' : '';
+    var mais = _pendentesAlert.length > MOSTRAR
+      ? '<tr><td colspan="5" style="text-align:center;padding:6px 0;font-size:.75rem;color:var(--s5)">+ ' + (_pendentesAlert.length - MOSTRAR) + ' outros agendamentos pendentes</td></tr>'
+      : '';
 
-    wrap.style.display = 'flex';
-    wrap.innerHTML = '<div class="recebAlertaIcon">⚠️</div>'
-      + '<div class="recebAlertaBody">'
-      + '<strong>' + pendentes.length + ' paciente' + (pendentes.length > 1 ? 's' : '') + ' com pagamento pendente</strong>'
-      + '<div class="recebPendLista">' + lista + mais + '</div>'
-      + '</div>';
+    wrap.style.display = 'block';
+    wrap.innerHTML = '<div class="recebAlertaTopo"><span class="recebAlertaIcon">⚠️</span>'
+      + '<strong>' + _pendentesAlert.length + ' pagamento' + (_pendentesAlert.length > 1 ? 's' : '') + ' pendente' + (_pendentesAlert.length > 1 ? 's' : '') + '</strong>'
+      + '</div>'
+      + '<div class="recebPendTableWrap"><table class="recebPendTable">'
+      + '<thead><tr><th>Paciente</th><th>Data · Hora</th><th>Procedimento</th><th>Valor</th><th>Ação</th></tr></thead>'
+      + '<tbody>' + linhas + mais + '</tbody>'
+      + '</table></div>';
   }
 
   async function _carregarConvenios() {
@@ -211,9 +226,17 @@ const RecebMod = (function () {
   /* ══════════════════════════════════════════════════════════════════
      MODAL DE BAIXA
   ══════════════════════════════════════════════════════════════════ */
-  function abrirBaixa(agId) {
-    var ag = _dados.find(function (a) { return a.id === agId; });
-    if (!ag) return;
+  async function abrirBaixa(agId) {
+    var ag = _dados.find(function (a) { return a.id === agId; })
+           || _pendentesAlert.find(function (a) { return a.id === agId; });
+    if (!ag) {
+      var r = await _sb.from('agendamentos')
+        .select('id,data_agendamento,hora_inicio,status,forma_pagamento,convenio_id,valor_cobrado,' +
+                'paciente:paciente_id(nome_completo),procedimento:procedimento_id(nome,valor)')
+        .eq('id', agId).single();
+      if (r.error || !r.data) { toast('Agendamento não encontrado.', 'err'); return; }
+      ag = r.data;
+    }
     _editAgId = agId;
 
     /* Pre-fill */
