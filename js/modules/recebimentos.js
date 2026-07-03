@@ -96,7 +96,7 @@ const RecebMod = (function () {
               'procedimento:procedimento_id(nome,valor),' +
               'recebimentos(id,forma_pagamento,valor,data_recebimento,status)')
       .eq('unidade_id', CU)
-      .neq('status', 'Falta')
+      .neq('status', 'Cancelado')
       .order('data_agendamento', { ascending: false });
 
     if (ini) query = query.gte('data_agendamento', ini);
