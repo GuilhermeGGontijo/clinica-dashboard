@@ -346,6 +346,9 @@ const ProntuarioMod = (function () {
     var sexoLabel    = _pac.sexo_biologico === 'F' ? 'Feminino'
                      : _pac.sexo_biologico === 'M' ? 'Masculino' : (_pac.sexo_biologico || '');
 
+    var prof = (_atd && _atd.profissional) ? _atd.profissional : {};
+    var conselhoFmt = [prof.conselho, prof.uf_conselho].filter(Boolean).join('-');
+
     var mapa = {
       'Paciente (Nome)':                _pac.nome_completo || '',
       'Paciente (Idade)':              _pac.data_nascimento ? calcularIdadeExata(_pac.data_nascimento) : '',
@@ -354,7 +357,11 @@ const ProntuarioMod = (function () {
       'Paciente (CPF)':                _pac.cpf || '',
       'Paciente (Telefone)':           _pac.celular || '',
       'Dados Gerais (Data Atual)':     dataAtual,
-      'Dados Gerais (Horário Atual)':  horarioAtual
+      'Dados Gerais (Horário Atual)':  horarioAtual,
+      'Profissional da Saúde (Nome)':          prof.nome || '',
+      'Profissional da Saúde (Especialidade)': prof.especialidade || '',
+      'Profissional da Saúde (Conselho)':      conselhoFmt,
+      'Profissional da Saúde (No. do Conselho)': prof.numero_conselho || ''
     };
 
     function _sub(_, chave) {
