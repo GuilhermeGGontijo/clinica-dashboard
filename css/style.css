@@ -1845,12 +1845,15 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .odontoTotalVal { font-size: 1.05rem; color: var(--g7); }
 
 /* ── Busca de paciente ── */
-.odontoBuscaRes { max-height: 260px; overflow-y: auto; }
+.odontoBuscaRes { max-height: 300px; overflow-y: auto; border:1px solid var(--s2); border-radius:8px; margin-top:4px; }
 .odontoPacItem {
-  padding: 10px 12px; cursor: pointer; border-radius: 6px;
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--s1);
   font-size: .86rem; transition: background .12s;
 }
+.odontoPacItem:last-child { border-bottom: none; }
 .odontoPacItem:hover { background: var(--s1); }
+.odontoPacItemNome { font-weight: 600; color: var(--s8); margin-bottom: 2px; }
+.odontoPacItemMeta { font-size: .78rem; color: var(--s5); }
 
 /* ══════════════════════════════════════════════════════════════════════
    CAIXA DO DIA (CaixaMod)

@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260703m">
+  <link rel="stylesheet" href="css/style.css?v=20260703n">
 </head>
 <body>
 
@@ -937,16 +937,19 @@
 <!-- ════ MODAL: Busca de Paciente (Odontograma) ════ -->
 <div id="odontoModalPaciente" class="ovl"
      onclick="if(event.target===this)OdontogramaMod.fecharBuscaPaciente()">
-  <div class="mBox" style="max-width:480px;width:96%;padding:24px 22px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+  <div class="mBox" style="max-width:500px;width:96%;padding:24px 22px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       <h3 style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">👤 Selecionar Paciente</h3>
       <button class="bDel" onclick="OdontogramaMod.fecharBuscaPaciente()"
               style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
     </div>
+    <p style="font-size:.8rem;color:var(--s5);margin:0 0 10px">
+      Pacientes cadastrados nesta unidade. Digite o nome ou CPF para filtrar.
+    </p>
     <input id="odontoBuscaPacInp" class="afInp" type="text"
-           placeholder="Digite o nome do paciente..."
+           placeholder="🔍 Buscar por nome ou CPF..."
            oninput="OdontogramaMod.buscarPaciente(this.value)"
-           style="margin-bottom:10px"/>
+           style="margin-bottom:8px"/>
     <div id="odontoBuscaPacRes" class="odontoBuscaRes"></div>
   </div>
 </div>
@@ -2183,7 +2186,7 @@
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260703c"></script>
-<script src="js/modules/odontograma.js?v=20260702f"></script>
+<script src="js/modules/odontograma.js?v=20260703a"></script>
 <script src="js/modules/admin-odonto-proc.js?v=20260702a"></script>
 <script src="js/modules/caixa.js?v=20260703c"></script>
 <script src="js/modules/auditoria.js?v=20260703d"></script>

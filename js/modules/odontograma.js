@@ -270,8 +270,8 @@ const OdontogramaMod = (function () {
     if (modal) {
       modal.classList.add('open');
       var inp = sid('odontoBuscaPacInp');
-      if (inp) { inp.value = ''; inp.focus(); }
-      sid('odontoBuscaPacRes') && (sid('odontoBuscaPacRes').innerHTML = '');
+      if (inp) { inp.value = ''; setTimeout(function () { inp.focus(); }, 80); }
+      _renderListaTodosOdo();
     }
   }
 
@@ -285,24 +285,86 @@ const OdontogramaMod = (function () {
     clearTimeout(_buscaTmr);
     var res = sid('odontoBuscaPacRes');
     if (!res) return;
-    if (!q || q.length < 2) { res.innerHTML = ''; return; }
+    if (!q || q.length < 2) {
+      res.innerHTML = '';
+      _renderListaTodosOdo();
+      return;
+    }
     res.innerHTML = '<div style="color:var(--s4);font-size:.82rem;padding:8px">Buscando...</div>';
     _buscaTmr = setTimeout(async function () {
-      var r = await _sb.from('pacientes')
-        .select('id,nome_completo,data_nascimento')
-        .ilike('nome_completo', '%' + q + '%')
-        .limit(10);
+      var queryBase = _sb.from('pacientes')
+        .select('id,nome_completo,cpf,data_nascimento,celular')
+        .eq('ativo', true)
+        .eq('unidade_id', CU);
+
+      /* busca por CPF se começar com dígito, senão por nome */
+      var qFmt = q.replace(/\D/g, '');
+      var r = /^\d/.test(q) && qFmt.length
+        ? await queryBase.ilike('cpf', '%' + qFmt + '%').limit(15)
+        : await queryBase.ilike('nome_completo', '%' + q + '%').limit(15);
+
       var lista = r.data || [];
+      if (r.error) {
+        res.innerHTML = '<div style="color:var(--r6);font-size:.82rem;padding:8px">⚠️ Erro: ' + r.error.message + '</div>';
+        return;
+      }
       if (!lista.length) {
-        res.innerHTML = '<div style="color:var(--s4);font-size:.82rem;padding:8px">Nenhum paciente encontrado</div>';
+        res.innerHTML = '<div style="color:var(--s4);font-size:.82rem;padding:8px">Nenhum paciente encontrado para "' + esc(q) + '"</div>';
         return;
       }
       res.innerHTML = lista.map(function (p) {
+        var idade = _calcIdadePac(p.data_nascimento);
+        var cpfFmt = p.cpf ? p.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '';
         return '<div class="odontoPacItem" onclick="OdontogramaMod.selecionarPaciente(\'' + p.id + '\',\'' + esc(p.nome_completo) + '\')">'
-          + '<strong>' + esc(p.nome_completo) + '</strong>'
+          + '<div class="odontoPacItemNome">👤 <strong>' + esc(p.nome_completo) + '</strong></div>'
+          + '<div class="odontoPacItemMeta">'
+          + (cpfFmt ? 'CPF: ' + cpfFmt + ' · ' : '')
+          + (idade ? idade + ' anos' : '')
+          + (p.celular ? ' · 📱 ' + p.celular : '')
+          + '</div>'
           + '</div>';
       }).join('');
     }, 300);
+  }
+
+  /* Lista todos os pacientes da unidade ao abrir o modal (sem digitar) */
+  async function _renderListaTodosOdo() {
+    var res = sid('odontoBuscaPacRes');
+    if (!res) return;
+    res.innerHTML = '<div style="color:var(--s4);font-size:.82rem;padding:8px">Carregando pacientes...</div>';
+    var r = await _sb.from('pacientes')
+      .select('id,nome_completo,cpf,data_nascimento,celular')
+      .eq('ativo', true)
+      .eq('unidade_id', CU)
+      .order('nome_completo')
+      .limit(50);
+    var lista = r.data || [];
+    if (!lista.length) {
+      res.innerHTML = '<div style="color:var(--s4);font-size:.82rem;padding:8px">Nenhum paciente cadastrado nesta unidade.</div>';
+      return;
+    }
+    res.innerHTML = lista.map(function (p) {
+      var idade = _calcIdadePac(p.data_nascimento);
+      var cpfFmt = p.cpf ? p.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '';
+      return '<div class="odontoPacItem" onclick="OdontogramaMod.selecionarPaciente(\'' + p.id + '\',\'' + esc(p.nome_completo) + '\')">'
+        + '<div class="odontoPacItemNome">👤 <strong>' + esc(p.nome_completo) + '</strong></div>'
+        + '<div class="odontoPacItemMeta">'
+        + (cpfFmt ? 'CPF: ' + cpfFmt + ' · ' : '')
+        + (idade ? idade + ' anos' : '')
+        + (p.celular ? ' · 📱 ' + p.celular : '')
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  function _calcIdadePac(dataNasc) {
+    if (!dataNasc) return '';
+    var hoje = new Date();
+    var nasc  = new Date(dataNasc + 'T00:00:00');
+    var anos  = hoje.getFullYear() - nasc.getFullYear();
+    var m = hoje.getMonth() - nasc.getMonth();
+    if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) anos--;
+    return anos;
   }
 
   function selecionarPaciente(id, nome) {
