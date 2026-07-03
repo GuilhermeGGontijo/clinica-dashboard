@@ -293,7 +293,6 @@ const UsuariosMod = (function () {
 
     var payload = {
       nome: nome,
-      email: email,
       telefone: tel||null,
       role: role,
       ativo: true
