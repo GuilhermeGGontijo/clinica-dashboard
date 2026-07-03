@@ -500,6 +500,7 @@ body.sb-odontograma #secOdontograma{display:block!important}
 body.sb-fin-dashboard #printHeader{display:block!important}
 body.sb-fin-dashboard .finDashLayout{display:flex!important;gap:20px;align-items:flex-start}
 body.sb-fin-dashboard #slCadastro,body.sb-fin-dashboard .topGrid,
+body.sb-fin-dashboard #slOcupacao,body.sb-fin-dashboard .agFormWrap,body.sb-fin-dashboard .gcWrap,
 body.sb-fin-dashboard #slKpis,body.sb-fin-dashboard .kpiGrid,
 body.sb-fin-dashboard #slComparativo,body.sb-fin-dashboard .compWrap,
 body.sb-fin-dashboard #slHistorico,body.sb-fin-dashboard .histWrap{display:block!important}

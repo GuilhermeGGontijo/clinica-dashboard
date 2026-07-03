@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260703g">
+  <link rel="stylesheet" href="css/style.css?v=20260703h">
 </head>
 <body>
 
@@ -1112,6 +1112,87 @@
 
 </div><!-- /topGrid -->
 
+<!-- ════ MAPA DE OCUPAÇÃO SEMANAL ════ -->
+<div class="secL" id="slOcupacao">📅 Mapa de Ocupação Semanal</div>
+
+<!-- Painel Cadastrar na Agenda -->
+<div class="agFormWrap">
+  <div class="agFormHeader">
+    <span class="agFormHeaderTitle">➕ Cadastrar na Agenda</span>
+    <button class="agFClearBtn" onclick="clearAgForm()">🗑 Limpar campos</button>
+  </div>
+  <div class="agFormBody">
+    <div class="agFormGrid">
+      <div class="agFG"><label>Profissional</label><input class="agFInp" id="fProf" type="text" placeholder="Nome do profissional"/></div>
+      <div class="agFG"><label>Especialidade</label><input class="agFInp" id="fEsp" type="text" placeholder="Ex: Clínico Geral"/></div>
+      <div class="agFG"><label>Procedimento</label><input class="agFInp" id="fProc" type="text" placeholder="Ex: Consulta"/></div>
+      <div class="agFG">
+        <label>Dia da Semana</label>
+        <select class="agFSel" id="fDay">
+          <option value="seg">Segunda-feira</option>
+          <option value="ter">Terça-feira</option>
+          <option value="qua">Quarta-feira</option>
+          <option value="qui">Quinta-feira</option>
+          <option value="sex">Sexta-feira</option>
+        </select>
+      </div>
+      <div class="agFG">
+        <label>Sala</label>
+        <select class="agFSel" id="fSala">
+          <option value="s1">Sala 1</option>
+          <option value="s2">Sala 2</option>
+          <option value="s3">Sala 3</option>
+        </select>
+      </div>
+      <div class="agFG"><label>Início</label><select class="agFSel" id="fHStart" onchange="syncFHEnd()"></select></div>
+      <div class="agFG"><label>Fim</label><select class="agFSel" id="fHEnd"></select></div>
+      <div class="agFG agFBtn"><button onclick="saveAgForm()">✅ Cadastrar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Grade de Ocupação -->
+<div class="gcWrap">
+  <div class="gcCtrl">
+    <div class="gcCtrlL">
+      <span class="gcCtrlLabel">Horário:</span>
+      <select class="gcSel" id="agStart" onchange="saveAgConfig()">
+        <option value="5">05:00</option><option value="6">06:00</option><option value="7">07:00</option>
+        <option value="8">08:00</option><option value="9">09:00</option><option value="10">10:00</option>
+        <option value="11">11:00</option><option value="12">12:00</option><option value="13">13:00</option>
+        <option value="14">14:00</option><option value="15">15:00</option><option value="16">16:00</option>
+        <option value="17">17:00</option><option value="18">18:00</option><option value="19">19:00</option>
+        <option value="20">20:00</option>
+      </select>
+      <span class="gcCtrlLabel">até</span>
+      <select class="gcSel" id="agEnd" onchange="saveAgConfig()">
+        <option value="7">07:00</option><option value="8">08:00</option><option value="9">09:00</option>
+        <option value="10">10:00</option><option value="11">11:00</option><option value="12">12:00</option>
+        <option value="13">13:00</option><option value="14">14:00</option><option value="15">15:00</option>
+        <option value="16">16:00</option><option value="17">17:00</option><option value="18">18:00</option>
+        <option value="19">19:00</option><option value="20">20:00</option><option value="21">21:00</option>
+        <option value="22">22:00</option>
+      </select>
+      <span id="agCfgHint" style="font-size:.73rem;color:var(--s5);font-weight:600;margin-left:2px"></span>
+    </div>
+    <div class="gcCtrlR">
+      <span class="gcCtrlLabel">Visualizar:</span>
+      <button id="afAll" class="gcFilterBtn active" onclick="setAgFilter('all')">Todas</button>
+      <button id="afS1" class="gcFilterBtn" onclick="setAgFilter('s1')">Sala 1</button>
+      <button id="afS2" class="gcFilterBtn" onclick="setAgFilter('s2')">Sala 2</button>
+      <button id="afS3" class="gcFilterBtn" onclick="setAgFilter('s3')">Sala 3</button>
+    </div>
+  </div>
+  <div class="gcGridWrap"><div id="gcGrid"></div></div>
+  <div class="gcLegend">
+    <span><span class="gcDot gcDotFree"></span>Sala livre</span>
+    <span><span class="gcDot gcDotBloq"></span>Bloqueada</span>
+    <span><span class="gcDot" style="background:var(--g2);border-color:var(--g5)"></span>Sala 1 — ocupada</span>
+    <span><span class="gcDot" style="background:var(--s1);border-color:var(--s4)"></span>Sala 2 — ocupada</span>
+    <span><span class="gcDot" style="background:#fef3c7;border-color:#f59e0b"></span>Sala 3 — ocupada</span>
+  </div>
+</div>
+
 <!-- ════ KPIs ════ -->
 <div class="secL" id="slKpis">📊 KPIs Mensais — Resultados e Evolução</div>
 <div class="kpiGrid">
@@ -1249,7 +1330,7 @@
 <div class="compWrap">
   <div class="compLoading" id="compLoading">Salve dados de ao menos um mês para ver o comparativo entre todas as unidades.</div>
   <div id="compGrid" style="display:none"></div>
-  <div id="compTotais" style="display:none"></div>
+  <div id="compTotais" class="compTotais" style="display:none"></div>
 </div>
 
 </div><!-- /finMainContent -->
