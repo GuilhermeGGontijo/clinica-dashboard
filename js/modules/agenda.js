@@ -236,10 +236,15 @@ const AgendaMod = (function () {
   }
   async function _carregarProfissionais () {
     var r = await _sb.from('perfis_usuarios')
-      .select('id,nome,especialidade,role')
-      .eq('role', 'profissional_saude')
+      .select('id,nome,especialidade,role,roles')
       .eq('ativo', true).order('nome');
-    _profissionais = r.data || [];
+    /* Filtro client-side: inclui apenas profissionais de saúde
+       (role primário = profissional_saude OU roles array contém profissional_saude) */
+    _profissionais = (r.data || []).filter(function (p) {
+      if (p.role === 'profissional_saude') return true;
+      if (Array.isArray(p.roles) && p.roles.indexOf('profissional_saude') >= 0) return true;
+      return false;
+    });
   }
   async function _carregarConvenios () {
     var r = await _sb.from('convenios').select('id,nome').eq('ativo', true).order('nome');
