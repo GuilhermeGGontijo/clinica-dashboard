@@ -76,39 +76,14 @@ const CaixaMod = (function () {
   async function _carregarAtendHoje () {
     var hoje = _hoje();
 
-    /* ── 1. Agendamentos com joins (sem recebimentos) ── */
+    /* 1. Apenas campos base — sem joins que podem falhar */
     var rAg = await _sb.from('agendamentos')
-      .select([
-        'id', 'hora_inicio', 'valor_cobrado', 'status',
-        'paciente_id', 'criado_por',
-        'pacientes(nome_completo)',
-        'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor,valor_repasse,tipo_repasse)',
-        'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
-        'criador:perfis_usuarios!agendamentos_criado_por_fkey(nome)'
-      ].join(','))
+      .select('id,hora_inicio,valor_cobrado,status,paciente_id,profissional_id,procedimento_id,criado_por')
       .gte('data_agendamento', hoje)
       .lte('data_agendamento', hoje)
       .eq('unidade_id', CU)
       .neq('status', 'Cancelado')
       .order('hora_inicio');
-
-    if (rAg.error) {
-      /* Fallback: sem criador */
-      console.warn('[CaixaMod] join com criador falhou:', rAg.error.message);
-      rAg = await _sb.from('agendamentos')
-        .select([
-          'id', 'hora_inicio', 'valor_cobrado', 'status',
-          'paciente_id', 'criado_por',
-          'pacientes(nome_completo)',
-          'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor,valor_repasse,tipo_repasse)',
-          'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)'
-        ].join(','))
-        .gte('data_agendamento', hoje)
-        .lte('data_agendamento', hoje)
-        .eq('unidade_id', CU)
-        .neq('status', 'Cancelado')
-        .order('hora_inicio');
-    }
 
     if (rAg.error) {
       console.error('[CaixaMod]', rAg.error.message);
@@ -123,38 +98,57 @@ const CaixaMod = (function () {
 
     var agIds = _atendHoje.map(function (a) { return a.id; });
 
-    /* ── 2. Recebimentos por query separada ── */
+    /* 2. Recebimentos */
     var rReceb = await _sb.from('recebimentos')
       .select('agendamento_id,id,valor,status,forma_pagamento')
       .in('agendamento_id', agIds);
-
     var recebMap = {};
-    if (!rReceb.error && rReceb.data) {
-      rReceb.data.forEach(function (rb) {
+    if (!rReceb.error) {
+      (rReceb.data || []).forEach(function (rb) {
         if (!recebMap[rb.agendamento_id]) recebMap[rb.agendamento_id] = [];
         recebMap[rb.agendamento_id].push(rb);
       });
     }
-    _atendHoje.forEach(function (ag) {
-      ag.recebimentos = recebMap[ag.id] || [];
-    });
+    _atendHoje.forEach(function (ag) { ag.recebimentos = recebMap[ag.id] || []; });
 
-    /* ── 3. Nomes de pacientes por query separada (fallback) ── */
-    var semNome = _atendHoje.filter(function (ag) {
-      return ag.paciente_id && !(ag.pacientes && ag.pacientes.nome_completo);
-    });
-    if (semNome.length) {
-      var patIds = semNome.map(function (ag) { return ag.paciente_id; });
-      var rPac = await _sb.from('pacientes').select('id,nome_completo').in('id', patIds);
-      if (!rPac.error && rPac.data) {
-        var pacMap = {};
-        rPac.data.forEach(function (p) { pacMap[p.id] = p.nome_completo; });
-        _atendHoje.forEach(function (ag) {
-          if (ag.paciente_id && !(ag.pacientes && ag.pacientes.nome_completo)) {
-            ag.pacientes = { nome_completo: pacMap[ag.paciente_id] || null };
-          }
-        });
-      }
+    /* 3. Pacientes */
+    var pIds = _atendHoje.map(function (ag) { return ag.paciente_id; }).filter(Boolean)
+      .filter(function (v, i, a) { return a.indexOf(v) === i; });
+    if (pIds.length) {
+      var rPac = await _sb.from('pacientes').select('id,nome_completo').in('id', pIds);
+      var pacMap = {};
+      (rPac.data || []).forEach(function (p) { pacMap[p.id] = p.nome_completo; });
+      _atendHoje.forEach(function (ag) { ag.pacientes = { nome_completo: pacMap[ag.paciente_id] || null }; });
+    }
+
+    /* 4. Procedimentos */
+    var prIds = _atendHoje.map(function (ag) { return ag.procedimento_id; }).filter(Boolean)
+      .filter(function (v, i, a) { return a.indexOf(v) === i; });
+    if (prIds.length) {
+      var rProc = await _sb.from('procedimentos').select('id,nome,valor,valor_repasse,tipo_repasse').in('id', prIds);
+      var procMap = {};
+      (rProc.data || []).forEach(function (p) { procMap[p.id] = p; });
+      _atendHoje.forEach(function (ag) { ag.procedimento = procMap[ag.procedimento_id] || null; });
+    }
+
+    /* 5. Profissionais */
+    var pfIds = _atendHoje.map(function (ag) { return ag.profissional_id; }).filter(Boolean)
+      .filter(function (v, i, a) { return a.indexOf(v) === i; });
+    if (pfIds.length) {
+      var rProf = await _sb.from('perfis_usuarios').select('id,nome').in('id', pfIds);
+      var profMap = {};
+      (rProf.data || []).forEach(function (p) { profMap[p.id] = p; });
+      _atendHoje.forEach(function (ag) { ag.profissional = profMap[ag.profissional_id] || null; });
+    }
+
+    /* 6. Criadores (Recepcionistas) — busca direta por UUID, sem FK hint */
+    var crIds = _atendHoje.map(function (ag) { return ag.criado_por; }).filter(Boolean)
+      .filter(function (v, i, a) { return a.indexOf(v) === i; });
+    if (crIds.length) {
+      var rCriad = await _sb.from('perfis_usuarios').select('id,nome').in('id', crIds);
+      var criadMap = {};
+      (rCriad.data || []).forEach(function (p) { criadMap[p.id] = p.nome; });
+      _atendHoje.forEach(function (ag) { ag.criador = { nome: criadMap[ag.criado_por] || null }; });
     }
   }
 

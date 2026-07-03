@@ -43,16 +43,12 @@ const RecebMod = (function () {
   async function _carregarAlertaPendentes () {
     var hoje = _fmtDate(new Date());
     var query = _sb.from('agendamentos')
-      .select('id, data_agendamento, hora_inicio, valor_cobrado, forma_pagamento, convenio_id, status,' +
-              'paciente:paciente_id(nome_completo),' +
-              'procedimento:procedimento_id(nome,valor),' +
-              'recebimentos(id,status)')
+      .select('id,data_agendamento,hora_inicio,valor_cobrado,forma_pagamento,convenio_id,status,paciente_id,procedimento_id')
       .eq('unidade_id', CU)
       .neq('status', 'Cancelado')
       .lte('data_agendamento', hoje)
       .order('data_agendamento', { ascending: false })
       .limit(100);
-    /* Filtra apenas os agendamentos cadastrados por esta recepcionista */
     if (_userId) query = query.eq('criado_por', _userId);
     var r = await query;
 
@@ -60,7 +56,31 @@ const RecebMod = (function () {
     if (!wrap) return;
     if (r.error || !r.data) { wrap.style.display = 'none'; return; }
 
-    _pendentesAlert = r.data.filter(function (ag) {
+    var ags = r.data;
+    if (ags.length) {
+      var agIds = ags.map(function(a){return a.id;});
+      /* recebimentos separado */
+      var rR = await _sb.from('recebimentos').select('agendamento_id,id,status').in('agendamento_id', agIds);
+      var rmMap = {};
+      if (!rR.error) rR.data.forEach(function(rb){ if(!rmMap[rb.agendamento_id]) rmMap[rb.agendamento_id]=[]; rmMap[rb.agendamento_id].push(rb); });
+      ags.forEach(function(ag){ ag.recebimentos = rmMap[ag.id]||[]; });
+      /* pacientes separado */
+      var pIds = ags.map(function(a){return a.paciente_id;}).filter(Boolean);
+      if (pIds.length) {
+        var rP = await _sb.from('pacientes').select('id,nome_completo').in('id', pIds);
+        var pMap = {}; (rP.data||[]).forEach(function(p){pMap[p.id]=p.nome_completo;});
+        ags.forEach(function(ag){ ag.paciente = {nome_completo: pMap[ag.paciente_id]||null}; });
+      }
+      /* procedimentos separado */
+      var prIds = ags.map(function(a){return a.procedimento_id;}).filter(Boolean);
+      if (prIds.length) {
+        var rPr = await _sb.from('procedimentos').select('id,nome,valor').in('id', prIds);
+        var prMap = {}; (rPr.data||[]).forEach(function(p){prMap[p.id]=p;});
+        ags.forEach(function(ag){ ag.procedimento = prMap[ag.procedimento_id]||null; });
+      }
+    }
+
+    _pendentesAlert = ags.filter(function (ag) {
       return !ag.recebimentos || !ag.recebimentos.length ||
              ag.recebimentos.every(function (rb) { return rb.status !== 'RECEBIDO'; });
     });
@@ -111,23 +131,65 @@ const RecebMod = (function () {
     var fim    = ((sid('recebFiltroFim')    || {}).value) || '';
     var stFilt = ((sid('recebFiltroStatus') || {}).value) || '';
 
-    var query = _sb.from('agendamentos')
-      .select('id,data_agendamento,hora_inicio,status,forma_pagamento,convenio_id,numero_guia,valor_cobrado,' +
-              'paciente:paciente_id(nome_completo),' +
-              'profissional:profissional_id(nome),' +
-              'procedimento:procedimento_id(nome,valor),' +
-              'recebimentos(id,forma_pagamento,valor,data_recebimento,status)')
+    /* 1. Apenas campos base — sem joins que podem falhar */
+    var q = _sb.from('agendamentos')
+      .select('id,data_agendamento,hora_inicio,status,forma_pagamento,convenio_id,numero_guia,valor_cobrado,paciente_id,profissional_id,procedimento_id')
       .eq('unidade_id', CU)
       .neq('status', 'Cancelado')
       .order('data_agendamento', { ascending: false });
 
-    if (ini) query = query.gte('data_agendamento', ini);
-    if (fim) query = query.lte('data_agendamento', fim);
-    if (stFilt === 'PENDENTE') query = query.is('recebimentos', null);
-
-    var r = await query.limit(300);
+    if (ini) q = q.gte('data_agendamento', ini);
+    if (fim) q = q.lte('data_agendamento', fim);
+    var r = await q.limit(300);
     _dados = r.data || [];
+    if (!_dados.length) return;
 
+    var agIds = _dados.map(function (a) { return a.id; });
+
+    /* 2. Recebimentos por query separada */
+    var rReceb = await _sb.from('recebimentos')
+      .select('agendamento_id,id,forma_pagamento,valor,data_recebimento,status')
+      .in('agendamento_id', agIds);
+    var recebMap = {};
+    if (!rReceb.error) {
+      (rReceb.data || []).forEach(function (rb) {
+        if (!recebMap[rb.agendamento_id]) recebMap[rb.agendamento_id] = [];
+        recebMap[rb.agendamento_id].push(rb);
+      });
+    }
+    _dados.forEach(function (ag) { ag.recebimentos = recebMap[ag.id] || []; });
+
+    /* 3. Pacientes por query separada */
+    var pIds = _dados.map(function (ag) { return ag.paciente_id; }).filter(Boolean)
+      .filter(function (v, i, a) { return a.indexOf(v) === i; });
+    if (pIds.length) {
+      var rPac = await _sb.from('pacientes').select('id,nome_completo').in('id', pIds);
+      var pacMap = {};
+      (rPac.data || []).forEach(function (p) { pacMap[p.id] = p.nome_completo; });
+      _dados.forEach(function (ag) { ag.paciente = { nome_completo: pacMap[ag.paciente_id] || null }; });
+    }
+
+    /* 4. Procedimentos por query separada */
+    var prIds = _dados.map(function (ag) { return ag.procedimento_id; }).filter(Boolean)
+      .filter(function (v, i, a) { return a.indexOf(v) === i; });
+    if (prIds.length) {
+      var rProc = await _sb.from('procedimentos').select('id,nome,valor').in('id', prIds);
+      var procMap = {};
+      (rProc.data || []).forEach(function (p) { procMap[p.id] = p; });
+      _dados.forEach(function (ag) { ag.procedimento = procMap[ag.procedimento_id] || null; });
+    }
+
+    /* 5. Profissionais por query separada */
+    var pfIds = _dados.map(function (ag) { return ag.profissional_id; }).filter(Boolean)
+      .filter(function (v, i, a) { return a.indexOf(v) === i; });
+    if (pfIds.length) {
+      var rProf = await _sb.from('perfis_usuarios').select('id,nome').in('id', pfIds);
+      var profMap = {};
+      (rProf.data || []).forEach(function (p) { profMap[p.id] = p; });
+      _dados.forEach(function (ag) { ag.profissional = profMap[ag.profissional_id] || null; });
+    }
+
+    /* 6. Filtro de status */
     if (stFilt === 'PENDENTE') {
       _dados = _dados.filter(function (a) { return !a.recebimentos || !a.recebimentos.length; });
     } else if (stFilt === 'RECEBIDO') {
@@ -238,11 +300,18 @@ const RecebMod = (function () {
            || _pendentesAlert.find(function (a) { return a.id === agId; });
     if (!ag) {
       var r = await _sb.from('agendamentos')
-        .select('id,data_agendamento,hora_inicio,status,forma_pagamento,convenio_id,valor_cobrado,' +
-                'paciente:paciente_id(nome_completo),procedimento:procedimento_id(nome,valor)')
+        .select('id,data_agendamento,hora_inicio,status,forma_pagamento,convenio_id,valor_cobrado,paciente_id,procedimento_id')
         .eq('id', agId).single();
       if (r.error || !r.data) { toast('Agendamento não encontrado.', 'err'); return; }
       ag = r.data;
+      if (ag.paciente_id) {
+        var rp = await _sb.from('pacientes').select('nome_completo').eq('id', ag.paciente_id).single();
+        ag.paciente = rp.data || null;
+      }
+      if (ag.procedimento_id) {
+        var rpr = await _sb.from('procedimentos').select('nome,valor').eq('id', ag.procedimento_id).single();
+        ag.procedimento = rpr.data || null;
+      }
     }
     _editAgId = agId;
 
