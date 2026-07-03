@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260703i">
+  <link rel="stylesheet" href="css/style.css?v=20260703j">
 </head>
 <body>
 
@@ -1407,7 +1407,7 @@
   <div class="audHdr">
     <div>
       <div class="audHdrTitle">📊 Auditoria Financeira</div>
-      <div class="audHdrSub">Revisão de turnos de caixa · Acesso restrito</div>
+      <div class="audHdrSub">Atendimentos · Pagamentos · Repasses · Acesso restrito</div>
     </div>
     <button class="btn bG bSm" onclick="AuditoriaMod.filtrar()">🔍 Filtrar</button>
   </div>
@@ -1423,12 +1423,11 @@
       <input type="date" id="audFiltroFim" class="afInp" onchange="AuditoriaMod.filtrar()"/>
     </div>
     <div class="patFG" style="min-width:180px">
-      <label class="afLabel">Status</label>
+      <label class="afLabel">Status Pagamento</label>
       <select id="audFiltroStatus" class="afInp" onchange="AuditoriaMod.filtrar()">
         <option value="">Todos</option>
-        <option value="Em Aberto">Em Aberto</option>
-        <option value="Pendente de Auditoria">Pendente de Auditoria</option>
-        <option value="Auditado">Auditado</option>
+        <option value="RECEBIDO">✅ Pagos</option>
+        <option value="PENDENTE">⏳ Pendentes</option>
       </select>
     </div>
   </div>
@@ -1441,19 +1440,19 @@
     </div>
     <div class="audKpiCard audKpiG">
       <div class="audKpiVal" id="audKpiRetido">R$ 0,00</div>
-      <div class="audKpiLbl">🏥 Retido Clínica (60%)</div>
+      <div class="audKpiLbl">🏥 Retido Clínica</div>
     </div>
     <div class="audKpiCard audKpiB">
       <div class="audKpiVal" id="audKpiRepasse">R$ 0,00</div>
-      <div class="audKpiLbl">👨‍⚕️ Repasse Médicos (40%)</div>
+      <div class="audKpiLbl">👨‍⚕️ Repasse Profissionais</div>
     </div>
     <div class="audKpiCard audKpiY">
-      <div class="audKpiVal" id="audKpiComissao">R$ 0,00</div>
-      <div class="audKpiLbl">🏆 Comissão Recepção</div>
+      <div class="audKpiVal" id="audKpiComissao">0</div>
+      <div class="audKpiLbl">✅ Atendimentos Pagos</div>
     </div>
     <div class="audKpiCard audKpiR">
       <div class="audKpiVal" id="audKpiPendentes">0</div>
-      <div class="audKpiLbl">⏳ Pendentes de Auditoria</div>
+      <div class="audKpiLbl">⏳ Pagamentos Pendentes</div>
     </div>
   </div>
 
@@ -1462,18 +1461,20 @@
     <table class="audTable">
       <thead>
         <tr>
-          <th>Data</th>
-          <th>Recepcionista</th>
-          <th>Fechamento</th>
-          <th>Total</th>
-          <th>Retido</th>
-          <th>Repasse</th>
+          <th>Data/Hora</th>
+          <th>Paciente</th>
+          <th>Profissional</th>
+          <th>Procedimento</th>
+          <th>Valor</th>
+          <th>% Rep.</th>
+          <th>Retido Clínica</th>
+          <th>Repassado</th>
+          <th>Pagamento</th>
           <th>Status</th>
-          <th></th>
         </tr>
       </thead>
       <tbody id="audTbody">
-        <tr><td colspan="8" class="audVazio">Carregando...</td></tr>
+        <tr><td colspan="10" class="audVazio">Carregando...</td></tr>
       </tbody>
     </table>
   </div>
@@ -2177,7 +2178,7 @@
 <script src="js/modules/odontograma.js?v=20260702f"></script>
 <script src="js/modules/admin-odonto-proc.js?v=20260702a"></script>
 <script src="js/modules/caixa.js?v=20260703a"></script>
-<script src="js/modules/auditoria.js?v=20260703a"></script>
+<script src="js/modules/auditoria.js?v=20260703b"></script>
 <script src="js/modules/unidades.js?v=20260702b"></script>
 <script src="js/modules/usuarios.js?v=20260703g"></script>
 <script src="js/core/main.js?v=20260703c"></script>

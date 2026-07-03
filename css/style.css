@@ -2023,6 +2023,17 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 .audBdAberto { background: var(--a1); color: var(--a8); }
 .audBdPend   { background: var(--r1); color: var(--r7); }
 .audBdOk     { background: var(--g1); color: var(--g9); }
+/* Linha de atendimento pendente */
+.audRowPend  { background: #fffbf0; }
+.audRowPend:hover { background: #fef9e7 !important; }
+/* Colunas da tabela detalhada */
+.audTdData  { white-space: nowrap; font-size: .82rem; }
+.audHora    { color: var(--s4); font-size: .74rem; font-weight: 400; }
+.audTdPac   { font-weight: 600; max-width: 160px; }
+.audTdProf  { color: var(--s6); font-size: .8rem; max-width: 140px; }
+.audTdProc  { color: var(--s7); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audPercCol { color: var(--b6); }
+.audTdForma { font-size: .8rem; color: var(--s5); }
 
 /* ══════════════════════════════════════════════════════════════════════
    CADASTRO DE UNIDADES (UnidadesMod)

@@ -1,28 +1,26 @@
 /* ═══════════════════════════════════════════════════════════════════════
    PAINEL DE CONTROLE CLÍNICO — js/modules/auditoria.js
-   AuditoriaMod: Auditoria Financeira — Visão Admin/Faturamento
+   AuditoriaMod: Auditoria Financeira — Visão por atendimento
+   Fontes: agendamentos + recebimentos + procedimentos
    Depende de: supabase.js (_sb), main.js (sid, esc, toast, CU, USER_ROLE)
 ═══════════════════════════════════════════════════════════════════════ */
 
 const AuditoriaMod = (function () {
   'use strict';
 
-  var _turnos    = [];
-  var _auditando = false;
+  var _dados = [];
 
   /* ══════════════════════════════════════════════════════════════════
      INIT
   ══════════════════════════════════════════════════════════════════ */
   async function init () {
     if (!_sb) return;
-
     var role = window.USER_ROLE || '';
     if (role !== 'administrador' && role !== 'faturamento') {
       var sec = sid('secAuditoria');
-      if (sec) sec.innerHTML = '<div class="loadingState" style="color:var(--r5,#ef4444)">⛔ Acesso restrito a administradores e faturamento.</div>';
+      if (sec) sec.innerHTML = '<div class="loadingState" style="color:var(--r5)">⛔ Acesso restrito a administradores e faturamento.</div>';
       return;
     }
-
     _setupFiltrosDefault();
     await _carregar();
     _render();
@@ -35,55 +33,85 @@ const AuditoriaMod = (function () {
     var hoje = new Date();
     var ini  = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
     var fim  = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-
     var elIni = sid('audFiltroIni');
     var elFim = sid('audFiltroFim');
-    if (elIni && !elIni.value) elIni.value = ini.toISOString().split('T')[0];
-    if (elFim && !elFim.value) elFim.value = fim.toISOString().split('T')[0];
+    if (elIni && !elIni.value) elIni.value = _d(ini);
+    if (elFim && !elFim.value) elFim.value = _d(fim);
   }
 
   async function filtrar () {
+    var tbody = sid('audTbody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="10" class="audVazio">Carregando...</td></tr>';
     await _carregar();
     _render();
   }
 
   /* ══════════════════════════════════════════════════════════════════
-     CARREGAR DADOS
+     CARREGAR — agendamentos + recebimentos + procedimentos
   ══════════════════════════════════════════════════════════════════ */
   async function _carregar () {
     var ini    = ((sid('audFiltroIni')    || {}).value || '').trim();
     var fim    = ((sid('audFiltroFim')    || {}).value || '').trim();
-    var status = ((sid('audFiltroStatus') || {}).value || '').trim();
+    var stFilt = ((sid('audFiltroStatus') || {}).value || '').trim();
 
-    var query = _sb.from('caixa_turnos')
+    var query = _sb.from('agendamentos')
       .select([
-        'id',
-        'data_abertura',
-        'data_fechamento',
-        'total_arrecadado',
-        'total_retido_clinica',
-        'total_repasse_medicos',
-        'comissao_recepcionista',
-        'status_auditoria',
-        'auditor_id',
-        'data_auditoria',
-        'recepcionista:recepcionista_id(nome)',
-        'unidade:unidade_id(name)'
+        'id', 'data_agendamento', 'hora_inicio', 'status', 'valor_cobrado',
+        'paciente:paciente_id(nome_completo)',
+        'profissional:profissional_id(nome)',
+        'procedimento:procedimento_id(nome,valor_repasse,tipo_repasse)',
+        'recebimentos(id,valor,status,forma_pagamento,data_recebimento)'
       ].join(','))
-      .order('data_abertura', { ascending: false })
-      .limit(200);
+      .eq('unidade_id', CU)
+      .neq('status', 'Cancelado')
+      .order('data_agendamento', { ascending: false })
+      .limit(500);
 
-    if (ini)    query = query.gte('data_abertura', ini + 'T00:00:00');
-    if (fim)    query = query.lte('data_abertura', fim + 'T23:59:59');
-    if (status) query = query.eq('status_auditoria', status);
-    if (CU)     query = query.eq('unidade_id', CU);
+    if (ini) query = query.gte('data_agendamento', ini);
+    if (fim) query = query.lte('data_agendamento', fim);
 
-    var r   = await query;
-    _turnos = r.data || [];
+    var r = await query;
+    _dados = r.data || [];
+
+    if (stFilt === 'RECEBIDO') {
+      _dados = _dados.filter(function (ag) {
+        return ag.recebimentos && ag.recebimentos.some(function (rb) { return rb.status === 'RECEBIDO'; });
+      });
+    } else if (stFilt === 'PENDENTE') {
+      _dados = _dados.filter(function (ag) {
+        return !ag.recebimentos || !ag.recebimentos.some(function (rb) { return rb.status === 'RECEBIDO'; });
+      });
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════════
-     RENDERIZAÇÃO
+     CÁLCULO DE REPASSE POR ATENDIMENTO
+  ══════════════════════════════════════════════════════════════════ */
+  function _calcRepasse (ag) {
+    var receb = ag.recebimentos && ag.recebimentos.find(function (rb) { return rb.status === 'RECEBIDO'; });
+    var valorBase = receb
+      ? (parseFloat(receb.valor) || 0)
+      : (parseFloat(ag.valor_cobrado) || 0);
+
+    var repasse = 0, percRepasse = 0;
+    var proc = ag.procedimento;
+    if (proc) {
+      var vr = parseFloat(proc.valor_repasse) || 0;
+      if (proc.tipo_repasse === 'percentual') {
+        repasse = valorBase * (vr / 100);
+        percRepasse = vr;
+      } else if (proc.tipo_repasse === 'fixo' && vr > 0) {
+        repasse = vr;
+        percRepasse = valorBase > 0 ? (vr / valorBase) * 100 : 0;
+      }
+    }
+
+    var retido = valorBase - repasse;
+    return { valorBase: valorBase, repasse: repasse, retido: retido, percRepasse: percRepasse, receb: receb };
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     RENDER
   ══════════════════════════════════════════════════════════════════ */
   function _render () {
     _renderKpis();
@@ -91,119 +119,89 @@ const AuditoriaMod = (function () {
   }
 
   function _renderKpis () {
-    var fechados = _turnos.filter(function (t) { return !!t.data_fechamento; });
+    var totalArr = 0, totalRetido = 0, totalRepasse = 0, pagos = 0, pendentes = 0;
 
-    var total   = _soma(fechados, 'total_arrecadado');
-    var retido  = _soma(fechados, 'total_retido_clinica');
-    var repasse = _soma(fechados, 'total_repasse_medicos');
-    var comiss  = _soma(fechados, 'comissao_recepcionista');
-    var pend    = _turnos.filter(function (t) { return t.status_auditoria === 'Pendente de Auditoria'; }).length;
+    _dados.forEach(function (ag) {
+      var c = _calcRepasse(ag);
+      if (c.receb) {
+        totalArr     += c.valorBase;
+        totalRetido  += c.retido;
+        totalRepasse += c.repasse;
+        pagos++;
+      } else {
+        pendentes++;
+      }
+    });
 
-    _setKpi('audKpiTotal',     _fmt(total));
-    _setKpi('audKpiRetido',    _fmt(retido));
-    _setKpi('audKpiRepasse',   _fmt(repasse));
-    _setKpi('audKpiComissao',  _fmt(comiss));
-    _setKpi('audKpiPendentes', pend);
-  }
+    _kpi('audKpiTotal',     _fmt(totalArr));
+    _kpi('audKpiRetido',    _fmt(totalRetido));
+    _kpi('audKpiRepasse',   _fmt(totalRepasse));
+    _kpi('audKpiComissao',  pagos);
+    _kpi('audKpiPendentes', pendentes);
 
-  function _setKpi (id, val) {
-    var el = sid(id);
-    if (el) el.textContent = val;
+    /* Atualiza labels dos KPIs */
+    _lbl('audKpiComissao',  '✅ Atendimentos Pagos');
+    _lbl('audKpiPendentes', '⏳ Pagamentos Pendentes');
   }
 
   function _renderTabela () {
     var tbody = sid('audTbody');
     if (!tbody) return;
 
-    if (!_turnos.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="audVazio">Nenhum registro encontrado</td></tr>';
+    if (!_dados.length) {
+      tbody.innerHTML = '<tr><td colspan="10" class="audVazio">Nenhum atendimento encontrado para o período selecionado.</td></tr>';
       return;
     }
 
-    tbody.innerHTML = _turnos.map(function (t) {
-      var recep   = (t.recepcionista && t.recepcionista.nome) ? esc(t.recepcionista.nome) : '—';
-      var data    = t.data_abertura
-        ? new Date(t.data_abertura).toLocaleDateString('pt-BR')
-        : '—';
-      var fechado = t.data_fechamento
-        ? new Date(t.data_fechamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        : '<span class="audAberto">Em aberto</span>';
+    var FORMA = { DINHEIRO: 'Dinheiro', PIX: 'PIX', CREDITO: 'Crédito', DEBITO: 'Débito', CONVENIO: 'Convênio' };
 
-      var total   = _fmt(_n(t.total_arrecadado));
-      var retido  = _fmt(_n(t.total_retido_clinica));
-      var repasse = _fmt(_n(t.total_repasse_medicos));
+    tbody.innerHTML = _dados.map(function (ag) {
+      var c = _calcRepasse(ag);
+      var pago = !!c.receb;
 
-      var badge = {
-        'Em Aberto':             '<span class="audBadge audBdAberto">Em Aberto</span>',
-        'Pendente de Auditoria': '<span class="audBadge audBdPend">⏳ Pendente</span>',
-        'Auditado':              '<span class="audBadge audBdOk">✅ Auditado</span>'
-      }[t.status_auditoria] || esc(t.status_auditoria || '—');
+      var d   = new Date(ag.data_agendamento + 'T00:00:00');
+      var dt  = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+      var hr  = (ag.hora_inicio || '').substring(0, 5);
 
-      var acao = '';
-      if (t.status_auditoria === 'Pendente de Auditoria') {
-        acao = '<button class="btn bG bSm" onclick="AuditoriaMod.marcarAuditado(\'' + t.id + '\')">🔍 Auditar</button>';
-      } else if (t.status_auditoria === 'Auditado' && t.data_auditoria) {
-        acao = '<span class="audTs">' + new Date(t.data_auditoria).toLocaleDateString('pt-BR') + '</span>';
-      }
+      var pac  = (ag.paciente     && ag.paciente.nome_completo) || '—';
+      var prof = (ag.profissional && ag.profissional.nome)      || '—';
+      var proc = (ag.procedimento && ag.procedimento.nome)      || '—';
+      var perc = c.percRepasse > 0 ? c.percRepasse.toFixed(0) + '%' : '—';
+      var forma = pago ? (FORMA[c.receb.forma_pagamento] || c.receb.forma_pagamento || '—') : '—';
 
-      return '<tr>'
-        + '<td>' + data + '</td>'
-        + '<td>' + recep + '</td>'
-        + '<td>' + fechado + '</td>'
-        + '<td class="audNum">' + total + '</td>'
-        + '<td class="audNum audColorG">' + retido + '</td>'
-        + '<td class="audNum audColorB">' + repasse + '</td>'
+      var badge = pago
+        ? '<span class="audBadge audBdOk">✅ Pago</span>'
+        : '<span class="audBadge audBdPend">⏳ Pendente</span>';
+
+      return '<tr class="' + (pago ? '' : 'audRowPend') + '">'
+        + '<td class="audTdData">' + dt + '<br><small class="audHora">' + hr + '</small></td>'
+        + '<td class="audTdPac">'  + esc(pac)  + '</td>'
+        + '<td class="audTdProf">' + esc(prof) + '</td>'
+        + '<td class="audTdProc">' + esc(proc) + '</td>'
+        + '<td class="audNum">'    + _fmt(c.valorBase) + '</td>'
+        + '<td class="audNum audPercCol">' + perc + '</td>'
+        + '<td class="audNum audColorG">'  + _fmt(c.retido)  + '</td>'
+        + '<td class="audNum audColorB">'  + _fmt(c.repasse) + '</td>'
+        + '<td class="audTdForma">' + forma + '</td>'
         + '<td>' + badge + '</td>'
-        + '<td>' + acao + '</td>'
         + '</tr>';
     }).join('');
   }
 
   /* ══════════════════════════════════════════════════════════════════
-     AUDITAR
-  ══════════════════════════════════════════════════════════════════ */
-  async function marcarAuditado (turnoId) {
-    if (_auditando) return;
-    if (!confirm('Marcar este caixa como Auditado? Esta ação é registrada.')) return;
-
-    _auditando = true;
-    try {
-      var su     = await _sb.auth.getUser();
-      var userId = su.data && su.data.user ? su.data.user.id : null;
-
-      var r = await _sb.from('caixa_turnos').update({
-        status_auditoria: 'Auditado',
-        auditor_id:       userId,
-        data_auditoria:   new Date().toISOString()
-      }).eq('id', turnoId);
-
-      if (r.error) throw r.error;
-      toast('✅ Caixa marcado como Auditado', 'success');
-      await _carregar();
-      _render();
-
-    } catch (err) {
-      toast('Erro ao auditar: ' + err.message, 'error');
-    } finally {
-      _auditando = false;
-    }
-  }
-
-  /* ══════════════════════════════════════════════════════════════════
      UTILS
   ══════════════════════════════════════════════════════════════════ */
-  function _n   (v) { return parseFloat(v || 0); }
-  function _fmt (v) { return 'R$ ' + _n(v).toFixed(2).replace('.', ','); }
-  function _soma (arr, key) {
-    return arr.reduce(function (acc, t) { return acc + _n(t[key]); }, 0);
+  function _kpi (id, val) { var el = sid(id); if (el) el.textContent = val; }
+  function _lbl (kpiId, txt) {
+    var el = sid(kpiId);
+    if (el && el.nextElementSibling) el.nextElementSibling.textContent = txt;
   }
+  function _n  (v) { return parseFloat(v || 0); }
+  function _fmt(v) { return 'R$ ' + _n(v).toFixed(2).replace('.', ','); }
+  function _d  (dt) { return dt.toISOString().split('T')[0]; }
 
-  /* ══════════════════════════════════════════════════════════════════
-     EXPORT
-  ══════════════════════════════════════════════════════════════════ */
+  /* Mantido por compatibilidade (turno-based) */
+  async function marcarAuditado () {}
+
   return { init, filtrar, marcarAuditado };
 })();
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   FIM AuditoriaMod
-   ══════════════════════════════════════════════════════════════════════════════ */
