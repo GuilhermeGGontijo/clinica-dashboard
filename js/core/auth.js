@@ -52,6 +52,17 @@ async function doLogin() {
   if (error) {
     document.getElementById('loginErr').textContent = 'E-mail ou senha incorretos.';
   } else {
+    /* Verificar se o usuário está ativo antes de liberar acesso */
+    var sessCheck = await _sb.auth.getUser();
+    var uid = sessCheck && sessCheck.data && sessCheck.data.user ? sessCheck.data.user.id : null;
+    if (uid) {
+      var perfilCheck = await _sb.from('perfis_usuarios').select('ativo').eq('id', uid).single();
+      if (perfilCheck.data && perfilCheck.data.ativo === false) {
+        await _sb.auth.signOut();
+        document.getElementById('loginErr').textContent = 'Usuário desativado. Contate o administrador.';
+        return;
+      }
+    }
     document.getElementById('loginOverlay').style.display = 'none';
     await supaLoad();
     await loadUserProfile(); applyRoleVisibility();

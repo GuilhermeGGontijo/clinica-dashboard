@@ -202,6 +202,17 @@ async function loadUserProfile(){
       console.warn('[Auth] Perfil não encontrado em perfis_usuarios para uid:', uid);
       return;
     }
+    /* Bloquear usuário desativado mesmo com sessão ativa */
+    if (res.data.ativo === false) {
+      await _sb.auth.signOut();
+      USER_ROLE = null; USER_PROFILE = null;
+      var ol = document.getElementById('loginOverlay');
+      if (ol) ol.style.display = 'flex';
+      document.body.classList.remove('sidebar-open');
+      var errEl = document.getElementById('loginErr');
+      if (errEl) errEl.textContent = 'Usuário desativado. Contate o administrador.';
+      return;
+    }
     USER_ROLE = res.data.role;
     USER_PROFILE = res.data;
   } catch(e){
