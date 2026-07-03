@@ -48,21 +48,26 @@ const RecepMod = (function () {
 
   /* ── Carregar agendamentos de hoje ── */
   async function _carregar () {
+    var hoje = _hoje();
     var r = await _sb.from('agendamentos')
       .select([
         'id', 'hora_inicio', 'status_recepcao', 'hora_chegada', 'paciente_id', 'valor_cobrado',
-        'pacientes(id,nome_completo)',
-        'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
-        'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor)',
+        'paciente:paciente_id(id,nome_completo)',
+        'profissional:profissional_id(nome)',
+        'procedimento:procedimento_id(nome,valor)',
+        'sala:sala_id(nome)',
         'recebimentos(id,status,forma_pagamento,valor)'
       ].join(','))
-      .eq('data_agendamento', _hoje())
+      .gte('data_agendamento', hoje)
+      .lte('data_agendamento', hoje)
       .eq('unidade_id', CU)
       .neq('status', 'Cancelado')
       .order('hora_inicio');
 
     if (r.error) {
       console.error('[RecepMod]', r.error.message);
+      var wrap = sid('rcpListWrap');
+      if (wrap) wrap.innerHTML = '<div class="rcpVazio">⚠️ Erro ao carregar agendamentos: ' + r.error.message + '</div>';
       _itens = [];
     } else {
       _itens = r.data || [];
@@ -134,11 +139,12 @@ const RecepMod = (function () {
   function _renderCard (ag) {
     var st     = ag.status_recepcao || 'agendado';
     var stInfo = STATUS[st] || STATUS.agendado;
-    var pacNome  = (ag.pacientes    && ag.pacientes.nome_completo) || '—';
-    var profNome = (ag.profissional && ag.profissional.nome)       || '—';
-    var procNome = (ag.procedimento && ag.procedimento.nome)       || '—';
+    var pacNome  = (ag.paciente     && ag.paciente.nome_completo) || '—';
+    var profNome = (ag.profissional && ag.profissional.nome)      || '—';
+    var procNome = (ag.procedimento && ag.procedimento.nome)      || '—';
+    var salaNome = (ag.sala         && ag.sala.nome)              || '';
     var hora     = (ag.hora_inicio  || '').substring(0, 5);
-    var pacId    = ag.paciente_id || (ag.pacientes && ag.pacientes.id);
+    var pacId    = ag.paciente_id || (ag.paciente && ag.paciente.id);
     var pago     = _pagamentoConfirmado(ag);
 
     /* Timer de espera */
@@ -183,7 +189,9 @@ const RecepMod = (function () {
       + '</div>'
       + '<div class="rcpCardBody">'
       +   '<div class="rcpCardNome">' + esc(pacNome) + '</div>'
-      +   '<div class="rcpCardMeta">' + esc(procNome) + ' · ' + esc(profNome) + '</div>'
+      +   '<div class="rcpCardMeta">' + esc(procNome) + ' · ' + esc(profNome)
+      +     (salaNome ? ' · <span class="rcpCardSala">🏠 ' + esc(salaNome) + '</span>' : '')
+      + '</div>'
       +   timerHtml
       +   '<div class="rcpStatusBtns">' + statusBtns + '</div>'
       +   '<div class="rcpPagRow">' + pagBadge + btnPag + '</div>'
@@ -273,7 +281,7 @@ const RecepMod = (function () {
     if (elValor) elValor.value = valor > 0 ? valor.toFixed(2) : '';
     if (elForma) elForma.value = 'DINHEIRO';
     if (elInfo) {
-      var pacNome = (ag.pacientes && ag.pacientes.nome_completo) || '—';
+      var pacNome = (ag.paciente && ag.paciente.nome_completo) || '—';
       var procNome = (ag.procedimento && ag.procedimento.nome) || '—';
       elInfo.textContent = pacNome + ' — ' + procNome;
     }
