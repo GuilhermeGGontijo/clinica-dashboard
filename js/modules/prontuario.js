@@ -86,7 +86,7 @@ const ProntuarioMod = (function () {
      ══════════════════════════════════════════════════════════════════════════ */
   async function carregarPaciente(pacienteId) {
     var r = await _sb.from('pacientes')
-      .select('id,nome_completo,cpf,celular,data_nascimento')
+      .select('id,nome_completo,cpf,celular,data_nascimento,sexo_biologico')
       .eq('id', pacienteId)
       .single();
     if (r.error || !r.data) { toast('Paciente não encontrado', 'error'); return; }
@@ -330,6 +330,45 @@ const ProntuarioMod = (function () {
     sel.innerHTML = html;
   }
 
+  /* ── Formata 'YYYY-MM-DD' → 'DD/MM/YYYY' ── */
+  function _fmtDataNasc(data) {
+    if (!data) return '';
+    var p = data.split('-');
+    return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : data;
+  }
+
+  /* ── Substitui variáveis << ... >> pelo dado real do paciente/atendimento ── */
+  function _resolverVariaveis(html) {
+    if (!html || !_pac) return html;
+    var agora = new Date();
+    var dataAtual    = agora.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    var horarioAtual = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    var sexoLabel    = _pac.sexo_biologico === 'F' ? 'Feminino'
+                     : _pac.sexo_biologico === 'M' ? 'Masculino' : (_pac.sexo_biologico || '');
+
+    var mapa = {
+      'Paciente (Nome)':                _pac.nome_completo || '',
+      'Paciente (Idade)':              _pac.data_nascimento ? calcularIdadeExata(_pac.data_nascimento) : '',
+      'Paciente (Data de Nascimento)': _fmtDataNasc(_pac.data_nascimento),
+      'Paciente (Sexo)':               sexoLabel,
+      'Paciente (CPF)':                _pac.cpf || '',
+      'Paciente (Telefone)':           _pac.celular || '',
+      'Dados Gerais (Data Atual)':     dataAtual,
+      'Dados Gerais (Horário Atual)':  horarioAtual
+    };
+
+    function _sub(_, chave) {
+      var v = mapa[chave.trim()];
+      return v !== undefined ? v : _;
+    }
+
+    /* Conteúdo salvo como HTML: << >> vira &lt;&lt; ... &gt;&gt; no innerHTML */
+    html = html.replace(/&lt;&lt;\s*([^&<>]+?)\s*&gt;&gt;/g, _sub);
+    /* Conteúdo salvo como texto puro ou modelos importados diretamente */
+    html = html.replace(/<<\s*([^<>]+?)\s*>>/g, _sub);
+    return html;
+  }
+
   function injetarModelo() {
     var sel = sid('prnModeloSel');
     if (!sel || !sel.value) return;
@@ -353,6 +392,7 @@ const ProntuarioMod = (function () {
     var conteudo = modelo.conteudo || '';
     // Compatibilidade com modelos antigos salvos como texto puro (sem HTML)
     if (conteudo && conteudo.indexOf('<') === -1) conteudo = esc(conteudo).replace(/\n/g, '<br>');
+    conteudo = _resolverVariaveis(conteudo);
     document.execCommand('insertHTML', false, conteudo);
     sel.value = '';
     toast('Modelo inserido', 'info');
