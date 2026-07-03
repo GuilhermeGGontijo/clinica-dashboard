@@ -701,7 +701,7 @@ const AgendaMod = (function () {
     if (!proc) return;
     var valEl = sid('agValorCob');
     if (valEl && (!valEl.value || parseFloat(valEl.value) === 0)) {
-      valEl.value = proc.valor != null ? parseFloat(proc.valor).toFixed(2) : '';
+      valEl.value = proc.valor_padrao != null ? parseFloat(proc.valor_padrao).toFixed(2) : '';
     }
   }
 
