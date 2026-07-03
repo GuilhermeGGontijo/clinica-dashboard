@@ -282,11 +282,11 @@ function switchModule(mod){
   document.getElementById('loginOverlay').style.display = 'none';
   /* Oculta imediatamente todo conteúdo de main enquanto carrega dados */
   document.body.classList.add('sb-active');
-  /* 1. Carrega dados financeiros da tabela dedicada (financeiro_dados) */
-  await FinDb.loadAll();
-  /* 2. Carrega demais chaves do backup genérico (clinica_dados) */
+  /* 1. Carrega backup genérico (clinica_dados) — base inicial */
   await supaLoad();
-  /* 3. Migra dados do localStorage → financeiro_dados se a tabela estiver vazia */
+  /* 2. Carrega dados financeiros dedicados (financeiro_dados) — sobrescreve com dados mais recentes */
+  await FinDb.loadAll();
+  /* 3. Se financeiro_dados ainda vazio, migra do localStorage → Supabase */
   FinDb.migrarSeVazio();
   await loadUserProfile(); applyRoleVisibility();
   /* Carrega nomes reais das unidades do Supabase em segundo plano */
@@ -324,6 +324,11 @@ function switchModule(mod){
   renderAll();
   onMonthChange();
   loadMetaAbs();
+
+  /* Se não há dados financeiros locais, importa automaticamente do sistema */
+  if(Object.keys(ldD()).length===0){
+    setTimeout(function(){ if(typeof importarHistorico==='function') importarHistorico(); },800);
+  }
 
   /* ── AUTO-SAVE a cada 30 segundos ── */
   setInterval(function(){

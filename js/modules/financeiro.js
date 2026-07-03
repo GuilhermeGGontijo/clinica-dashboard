@@ -146,7 +146,7 @@ function saveMonth(){
   if(!month){toast('Selecione um mês.','err');return;}
   const lanc=readQtyInputs();
   const d=getInputs();
-  const kpiData={agend:d.agend,faltas:d.faltas,exC:d.exC,exR:d.exR,cus:d.cus,pac:d.pac,sal:d.sal,hd:d.hd,du:d.du,tm:d.tm};
+  const kpiData={agend:d.agend,faltas:d.faltas,exC:d.exC,exR:d.exR,fat:d.fat,rep:d.rep,cus:d.cus,pac:d.pac,sal:d.sal,hd:d.hd,du:d.du,tm:d.tm};
   if(!Object.values(lanc).some(v=>v>0)&&!Object.values(kpiData).some(v=>v>0)){toast('Preencha ao menos um campo.','err');return;}
   setLancM(month,lanc);
   const data=ldD();data[month]=kpiData;
@@ -234,12 +234,25 @@ const charts={};
 function renderAll(){
   const data=ldD();
   const keys=Object.keys(data).sort();
-  if(!keys.length){resetEmpty();stamp();return;}
+  if(!keys.length){
+    resetEmpty();
+    /* Sugere importação automática quando não há dados */
+    const tbody=sid('histBody');
+    if(tbody&&typeof _sb!=='undefined'&&_sb){
+      tbody.innerHTML='<tr class="hERow"><td colspan="10" style="text-align:center;padding:18px">'
+        +'Nenhum dado registrado. '
+        +'<a href="#" style="color:var(--g6);font-weight:700" onclick="importarHistorico();return false">📊 Clique aqui para importar dados do sistema</a>'
+        +' ou selecione o mês, preencha os campos e clique em <strong>Salvar Mês</strong>.'
+        +'</td></tr>';
+    }
+    stamp();return;
+  }
   const labels=keys.map(fmt);
   const enriched=keys.map(m=>{
     const t=computeFromLanc(getLancM(m));
-    const fat=t.fat>0?t.fat:(data[m]._fat||0);
-    return{...data[m],fat,rep:t.rep};
+    const fat=t.fat>0?t.fat:(data[m].fat||data[m]._fat||0);
+    const rep=t.rep>0?t.rep:(data[m].rep||0);
+    return{...data[m],fat,rep};
   });
   const kArr=enriched.map(d=>calc(d));
   const sel=getMonth();
