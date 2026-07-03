@@ -49,13 +49,16 @@ const RecepMod = (function () {
   /* ── Carregar agendamentos de hoje ── */
   async function _carregar () {
     var hoje = _hoje();
+
+    /* Tentativa 1: query completa com todos os joins */
     var r = await _sb.from('agendamentos')
       .select([
-        'id', 'hora_inicio', 'status_recepcao', 'hora_chegada', 'paciente_id', 'valor_cobrado',
-        'paciente:paciente_id(id,nome_completo)',
-        'profissional:profissional_id(nome)',
-        'procedimento:procedimento_id(nome,valor)',
-        'sala:sala_id(nome)',
+        'id', 'hora_inicio', 'hora_fim', 'status_recepcao', 'hora_chegada',
+        'paciente_id', 'valor_cobrado', 'status',
+        'pacientes(id,nome_completo)',
+        'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
+        'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor)',
+        'sala:salas!agendamentos_sala_id_fkey(nome)',
         'recebimentos(id,status,forma_pagamento,valor)'
       ].join(','))
       .gte('data_agendamento', hoje)
@@ -65,7 +68,38 @@ const RecepMod = (function () {
       .order('hora_inicio');
 
     if (r.error) {
-      console.error('[RecepMod]', r.error.message);
+      /* Tentativa 2: sem recebimentos (join pode falhar se FK não existir) */
+      console.warn('[RecepMod] join completo falhou, tentando sem recebimentos:', r.error.message);
+      r = await _sb.from('agendamentos')
+        .select([
+          'id', 'hora_inicio', 'hora_fim', 'status_recepcao', 'hora_chegada',
+          'paciente_id', 'valor_cobrado', 'status',
+          'pacientes(id,nome_completo)',
+          'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
+          'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor)',
+          'sala:salas!agendamentos_sala_id_fkey(nome)'
+        ].join(','))
+        .gte('data_agendamento', hoje)
+        .lte('data_agendamento', hoje)
+        .eq('unidade_id', CU)
+        .neq('status', 'Cancelado')
+        .order('hora_inicio');
+    }
+
+    if (r.error) {
+      /* Tentativa 3: select simples sem nenhum join */
+      console.warn('[RecepMod] join sem recebimentos falhou, usando select simples:', r.error.message);
+      r = await _sb.from('agendamentos')
+        .select('*')
+        .gte('data_agendamento', hoje)
+        .lte('data_agendamento', hoje)
+        .eq('unidade_id', CU)
+        .neq('status', 'Cancelado')
+        .order('hora_inicio');
+    }
+
+    if (r.error) {
+      console.error('[RecepMod] todas as tentativas falharam:', r.error.message);
       var wrap = sid('rcpListWrap');
       if (wrap) wrap.innerHTML = '<div class="rcpVazio">⚠️ Erro ao carregar agendamentos: ' + r.error.message + '</div>';
       _itens = [];
@@ -139,12 +173,13 @@ const RecepMod = (function () {
   function _renderCard (ag) {
     var st     = ag.status_recepcao || 'agendado';
     var stInfo = STATUS[st] || STATUS.agendado;
-    var pacNome  = (ag.paciente     && ag.paciente.nome_completo) || '—';
+    var _pac     = ag.pacientes || ag.paciente;
+    var pacNome  = (_pac        && _pac.nome_completo)            || '—';
     var profNome = (ag.profissional && ag.profissional.nome)      || '—';
     var procNome = (ag.procedimento && ag.procedimento.nome)      || '—';
     var salaNome = (ag.sala         && ag.sala.nome)              || '';
     var hora     = (ag.hora_inicio  || '').substring(0, 5);
-    var pacId    = ag.paciente_id || (ag.paciente && ag.paciente.id);
+    var pacId    = ag.paciente_id || (_pac && _pac.id);
     var pago     = _pagamentoConfirmado(ag);
 
     /* Timer de espera */
@@ -281,7 +316,8 @@ const RecepMod = (function () {
     if (elValor) elValor.value = valor > 0 ? valor.toFixed(2) : '';
     if (elForma) elForma.value = 'DINHEIRO';
     if (elInfo) {
-      var pacNome = (ag.paciente && ag.paciente.nome_completo) || '—';
+      var _pac2    = ag.pacientes || ag.paciente;
+      var pacNome  = (_pac2 && _pac2.nome_completo) || '—';
       var procNome = (ag.procedimento && ag.procedimento.nome) || '—';
       elInfo.textContent = pacNome + ' — ' + procNome;
     }
