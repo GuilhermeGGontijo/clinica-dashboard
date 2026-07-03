@@ -236,7 +236,11 @@ function renderAll(){
   const keys=Object.keys(data).sort();
   if(!keys.length){resetEmpty();stamp();return;}
   const labels=keys.map(fmt);
-  const enriched=keys.map(m=>{const t=computeFromLanc(getLancM(m));return{...data[m],fat:t.fat,rep:t.rep};});
+  const enriched=keys.map(m=>{
+    const t=computeFromLanc(getLancM(m));
+    const fat=t.fat>0?t.fat:(data[m]._fat||0);
+    return{...data[m],fat,rep:t.rep};
+  });
   const kArr=enriched.map(d=>calc(d));
   const sel=getMonth();
   const showIdx=data[sel]?keys.indexOf(sel):keys.length-1;
@@ -276,10 +280,72 @@ function buildHist(data,keys,enriched,kArr){
   if(!keys.length){tbody.innerHTML='<tr class="hERow"><td colspan="10">Nenhum dado ainda.</td></tr>';return;}
   [...keys].reverse().forEach((m,ri)=>{
     const i=keys.length-1-ri;const k=kArr[i];const d=enriched[i];
+    const isAuto=!!(data[m]&&data[m]._auto);
+    const mesTd=isAuto?`<td><strong>${fmt(m)}</strong> <span title="Importado do sistema" style="font-size:.68rem;color:var(--s4)">🔄</span></td>`:`<td><strong>${fmt(m)}</strong></td>`;
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><strong>${fmt(m)}</strong></td><td>${k.absent!=null?k.absent.toFixed(1)+'%':'—'}</td><td>${k.repr!=null?k.repr.toFixed(1)+'%':'—'}</td><td>${d.fat>0?'R$'+brl(d.fat):'—'}</td><td style="color:${k.recLiq!=null&&k.recLiq>=0?'var(--g6)':'var(--r6)'}">${k.recLiq!=null?'R$'+brl(k.recLiq):'—'}</td><td style="color:${k.lucro!=null&&k.lucro>=0?'var(--g7)':'var(--r6)'}">${k.lucro!=null?'R$'+brl(k.lucro):'—'}</td><td>${k.ticket!=null?'R$'+brl(k.ticket):'—'}</td><td>${k.cap!=null?k.cap+' atend.':'—'}</td><td style="color:var(--r6)">${k.ocio!=null?k.ocio.toFixed(1)+'%':'—'}</td><td><button class="bDel" onclick="delMonth('${m}')">🗑</button></td>`;
+    if(isAuto) tr.style.opacity='.85';
+    tr.innerHTML=mesTd+`<td>${k.absent!=null?k.absent.toFixed(1)+'%':'—'}</td><td>${k.repr!=null?k.repr.toFixed(1)+'%':'—'}</td><td>${d.fat>0?'R$'+brl(d.fat):'—'}</td><td style="color:${k.recLiq!=null&&k.recLiq>=0?'var(--g6)':'var(--r6)'}">${k.recLiq!=null?'R$'+brl(k.recLiq):'—'}</td><td style="color:${k.lucro!=null&&k.lucro>=0?'var(--g7)':'var(--r6)'}">${k.lucro!=null?'R$'+brl(k.lucro):'—'}</td><td>${k.ticket!=null?'R$'+brl(k.ticket):'—'}</td><td>${k.cap!=null?k.cap+' atend.':'—'}</td><td style="color:var(--r6)">${k.ocio!=null?k.ocio.toFixed(1)+'%':'—'}</td><td><button class="bDel" onclick="delMonth('${m}')">🗑</button></td>`;
     tbody.appendChild(tr);
   });
+}
+
+/* ══════════════════════════════════════
+   IMPORTAR HISTÓRICO DO SISTEMA (Supabase)
+══════════════════════════════════════ */
+async function importarHistorico(){
+  if(!_sb){toast('Supabase não disponível.','err');return;}
+  const btn=sid('btnImportHist');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Carregando...';}
+  try{
+    const d24=new Date();
+    d24.setMonth(d24.getMonth()-23);d24.setDate(1);
+    const ini=d24.getFullYear()+'-'+pad(d24.getMonth()+1)+'-01';
+    const[rAg,rRec]=await Promise.all([
+      _sb.from('agendamentos').select('data_agendamento,paciente_id,status,valor_cobrado')
+        .eq('unidade_id',CU).neq('status','Cancelado').gte('data_agendamento',ini),
+      _sb.from('recebimentos').select('valor,data_recebimento')
+        .eq('unidade_id',CU).eq('status','RECEBIDO').gte('data_recebimento',ini)
+    ]);
+    const byMonth={};
+    (rAg.data||[]).forEach(ag=>{
+      const m=ag.data_agendamento.slice(0,7);
+      if(!byMonth[m]) byMonth[m]={agend:0,faltas:0,pac:new Set(),fat:0};
+      byMonth[m].agend++;
+      if(ag.status==='Falta') byMonth[m].faltas++;
+      if(ag.paciente_id) byMonth[m].pac.add(ag.paciente_id);
+    });
+    (rRec.data||[]).forEach(r=>{
+      const m=(r.data_recebimento||'').slice(0,7);
+      if(!m) return;
+      if(!byMonth[m]) byMonth[m]={agend:0,faltas:0,pac:new Set(),fat:0};
+      byMonth[m].fat+=(parseFloat(r.valor)||0);
+    });
+    const data=ldD();
+    let novos=0,atualizados=0;
+    Object.entries(byMonth).forEach(([m,md])=>{
+      if(!data[m]){
+        data[m]={agend:md.agend,faltas:md.faltas,exC:0,exR:0,cus:0,pac:md.pac.size,sal:0,hd:0,du:0,tm:0,_fat:md.fat,_auto:true};
+        novos++;
+      } else if(data[m]._auto){
+        data[m].agend=md.agend;data[m].faltas=md.faltas;data[m].pac=md.pac.size;data[m]._fat=md.fat;
+        atualizados++;
+      }
+    });
+    if(novos>0||atualizados>0){
+      svD(data);
+      toast('✅ '+(novos+atualizados)+' mês(es) sincronizado(s) do sistema.','');
+    } else if(!Object.keys(byMonth).length){
+      toast('Nenhum agendamento encontrado nos últimos 24 meses.','');
+    } else {
+      toast('Histórico já está atualizado.','');
+    }
+    renderAll();
+  } catch(e){
+    console.error('[importarHistorico]',e);
+    toast('Erro ao importar dados do sistema.','err');
+  } finally {
+    if(btn){btn.disabled=false;btn.textContent='📊 Sincronizar';}
+  }
 }
 
 /* ══════════════════════════════════════

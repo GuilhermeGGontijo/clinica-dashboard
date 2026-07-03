@@ -1040,6 +1040,10 @@
     <input type="month" class="finMesPickerInp" id="mPickerSide" onchange="sid('mPicker').value=this.value;onMonthChange()"/>
   </div>
 
+  <!-- Botão sincronizar histórico do sistema -->
+  <button id="btnImportHist" onclick="importarHistorico()" class="btn finMesSaveBtn" style="background:var(--s1);color:var(--s7);border:1.5px solid var(--s3);margin-top:0">📊 Sincronizar</button>
+  <div style="padding:0 12px 4px;font-size:.65rem;color:var(--s4);text-align:center;line-height:1.4">Importa agendamentos e recebimentos dos últimos 24 meses</div>
+
   <div class="finMesDivider"></div>
 
   <!-- Dica -->
@@ -2161,7 +2165,7 @@
 <script src="js/core/supabase.js?v=20260629d"></script>
 <script src="js/core/auth.js?v=20260630d"></script>
 <script src="js/modules/pacientes.js?v=20260702b"></script>
-<script src="js/modules/financeiro.js?v=20260703a"></script>
+<script src="js/modules/financeiro.js?v=20260703b"></script>
 <script src="js/modules/salas.js?v=20260702b"></script>
 <script src="js/modules/atendimentos.js?v=20260629f"></script>
 <script src="js/modules/agenda.js?v=20260703k"></script>
