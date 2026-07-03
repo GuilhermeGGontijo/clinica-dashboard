@@ -238,12 +238,12 @@ const AgendaMod = (function () {
     var r = await _sb.from('perfis_usuarios')
       .select('id,nome,especialidade,role,roles')
       .eq('ativo', true).order('nome');
-    /* Filtro client-side: inclui apenas profissionais de saúde
-       (role primário = profissional_saude OU roles array contém profissional_saude) */
+    /* Inclui apenas quem tem profissional_saude no array roles[]
+       (espelha exatamente os checkboxes do painel de controle de usuários).
+       Exclui administradores puros mesmo que o campo role primário seja o mais permissivo. */
     _profissionais = (r.data || []).filter(function (p) {
-      if (p.role === 'profissional_saude') return true;
-      if (Array.isArray(p.roles) && p.roles.indexOf('profissional_saude') >= 0) return true;
-      return false;
+      var arr = Array.isArray(p.roles) && p.roles.length ? p.roles : [p.role];
+      return arr.indexOf('profissional_saude') >= 0;
     });
   }
   async function _carregarConvenios () {
