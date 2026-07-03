@@ -783,48 +783,6 @@
   </div>
 </div>
 
-<!-- Modal: Novo / Editar Procedimento Odontológico -->
-<div id="modalOdontoproc" class="ovl" style="display:none;align-items:center" onclick="if(event.target===this)OdontoProcMod.fecharModal()">
-  <div class="mBox" style="max-width:480px;width:96%;padding:24px 22px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <h3 id="odontoprocModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">+ Novo Procedimento</h3>
-      <button class="bDel" onclick="OdontoProcMod.fecharModal()" style="font-size:1.1rem;padding:2px 8px">✕</button>
-    </div>
-    <div class="patFG" style="margin-bottom:12px">
-      <label class="afLabel">Nome do Procedimento *</label>
-      <input type="text" id="opNome" class="afInp" placeholder="Ex: Extração simples, Restauração, Limpeza..."/>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div class="patFG">
-        <label class="afLabel">Especialidade</label>
-        <select id="opEsp" class="afInp">
-          <option value="Clínico Geral">Clínico Geral</option>
-          <option value="Ortodontia">Ortodontia</option>
-          <option value="Endodontia">Endodontia</option>
-          <option value="Periodontia">Periodontia</option>
-          <option value="Cirurgia">Cirurgia</option>
-          <option value="Implantodontia">Implantodontia</option>
-          <option value="Odontopediatria">Odontopediatria</option>
-          <option value="Estética">Estética</option>
-          <option value="Radiologia">Radiologia</option>
-          <option value="Outros">Outros</option>
-        </select>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Valor Base (R$) *</label>
-        <input type="number" id="opValor" class="afInp" step="0.01" min="0" placeholder="0,00"/>
-      </div>
-    </div>
-    <label class="usuCheckRow" style="margin-bottom:18px">
-      <input type="checkbox" id="opAtivo" checked/>
-      <span>Procedimento ativo (aparece no odontograma)</span>
-    </label>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="btn bGh bSm" onclick="OdontoProcMod.fecharModal()">Cancelar</button>
-      <button class="btn bG bSm" id="opBtnSalvar" onclick="OdontoProcMod.salvar()">✅ Salvar</button>
-    </div>
-  </div>
-</div>
 
 <!-- ════ SEÇÃO: CONVÊNIOS ════ -->
 <div id="secAdminConvenios">
@@ -1495,6 +1453,61 @@
 </div>
 
 </main>
+
+<!-- Modal: Novo / Editar Procedimento Odontológico -->
+<div id="modalOdontoproc" class="ovl" style="display:none;align-items:center" onclick="if(event.target===this)OdontoProcMod.fecharModal()">
+  <div class="mBox" style="max-width:520px;width:96%;padding:24px 22px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h3 id="odontoprocModalTitulo" style="color:var(--s9);font-size:1rem;font-weight:800;margin:0">+ Novo Procedimento</h3>
+      <button class="bDel" onclick="OdontoProcMod.fecharModal()" style="font-size:1.1rem;padding:2px 8px">✕</button>
+    </div>
+    <div class="patFG" style="margin-bottom:12px">
+      <label class="afLabel">Nome do Procedimento *</label>
+      <input type="text" id="opNome" class="afInp" placeholder="Ex: Extração simples, Restauração, Limpeza..."/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="patFG">
+        <label class="afLabel">Especialidade</label>
+        <select id="opEsp" class="afInp">
+          <option value="Clínico Geral">Clínico Geral</option>
+          <option value="Ortodontia">Ortodontia</option>
+          <option value="Endodontia">Endodontia</option>
+          <option value="Periodontia">Periodontia</option>
+          <option value="Cirurgia">Cirurgia</option>
+          <option value="Implantodontia">Implantodontia</option>
+          <option value="Odontopediatria">Odontopediatria</option>
+          <option value="Estética">Estética</option>
+          <option value="Radiologia">Radiologia</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Valor Base (R$) *</label>
+        <input type="number" id="opValor" class="afInp" step="0.01" min="0" placeholder="0,00"/>
+      </div>
+    </div>
+    <label class="usuCheckRow" style="margin-bottom:16px">
+      <input type="checkbox" id="opAtivo" checked/>
+      <span>Procedimento ativo (aparece no odontograma)</span>
+    </label>
+    <div style="margin-bottom:18px;border:1px solid var(--s3,#e2e8f0);border-radius:8px;padding:14px">
+      <div style="font-size:.78rem;font-weight:700;color:var(--s7,#334155);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">📦 Materiais Utilizados</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="opMaterialInput" class="afInp" placeholder="Nome do material..."
+               onkeydown="if(event.key==='Enter'){event.preventDefault();OdontoProcMod.adicionarMaterial()}"
+               style="flex:1;margin-bottom:0"/>
+        <button class="btn bG bSm" onclick="OdontoProcMod.adicionarMaterial()" style="white-space:nowrap;padding:0 14px">Confirmar</button>
+      </div>
+      <div id="opMateriaisList" style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px">
+        <span style="font-size:.78rem;color:var(--s5,#94a3b8);font-style:italic">Nenhum material adicionado</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn bGh bSm" onclick="OdontoProcMod.fecharModal()">Cancelar</button>
+      <button class="btn bG bSm" id="opBtnSalvar" onclick="OdontoProcMod.salvar()">✅ Salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════ MODAL: ATENDIMENTO ════ -->
 <div id="modalAtend" class="ovl" onclick="if(event.target===this)AtendMod.fecharModal()">
@@ -2189,7 +2202,7 @@
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260703i"></script>
 <script src="js/modules/odontograma.js?v=20260703a"></script>
-<script src="js/modules/admin-odonto-proc.js?v=20260702a"></script>
+<script src="js/modules/admin-odonto-proc.js?v=20260703b"></script>
 <script src="js/modules/caixa.js?v=20260703g"></script>
 <script src="js/modules/auditoria.js?v=20260703f"></script>
 <script src="js/modules/unidades.js?v=20260702b"></script>
