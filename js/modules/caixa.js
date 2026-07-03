@@ -203,6 +203,11 @@ const CaixaMod = (function () {
     }
 
     var html = '<div class="cxTableScroll"><table class="cxTable">'
+      + '<colgroup>'
+      + '<col class="col-hora"/><col class="col-pac"/><col class="col-proc"/>'
+      + '<col class="col-prof"/><col class="col-recep"/><col class="col-val"/>'
+      + '<col class="col-forma"/><col class="col-st"/><col class="col-ac"/>'
+      + '</colgroup>'
       + '<thead><tr>'
       + '<th>Hora</th><th>Paciente</th><th>Procedimento</th><th>Profissional</th>'
       + '<th>Recepcionista</th><th>Valor</th><th>Forma Pgto</th><th>Status</th><th>Ação</th>'
