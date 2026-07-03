@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260703k">
+  <link rel="stylesheet" href="css/style.css?v=20260703l">
 </head>
 <body>
 
@@ -1365,37 +1365,44 @@
   <div class="cxHdr">
     <div>
       <div class="cxHdrTitle">🏦 Caixa do Dia</div>
-      <div class="cxHdrSub" id="caixaTurnoInfo">—</div>
+      <div id="caixaTurnoInfo" class="cxHdrSub">—</div>
     </div>
-    <button class="btn bDng bSm" onclick="CaixaMod.fecharCaixa()">🔒 Fechar Caixa</button>
-  </div>
-
-  <!-- Termômetro de comissão -->
-  <div id="caixaComissao" class="cxTermometro">
-    <div class="cxTermTitle">🏆 Comissão do Dia</div>
-    <div class="cxTermVal">R$ 0,00</div>
-    <div class="cxTermBarraWrap">
-      <div class="cxTermBarra"><div class="cxTermPreench" style="width:0%"></div></div>
-      <div class="cxTermPct">0%</div>
-    </div>
-    <div class="cxTermMeta">Meta: R$ 50,00 · R$ 2,00/atend</div>
-  </div>
-
-  <!-- Stats -->
-  <div class="cxStatsRow">
-    <div class="cxStatCard">
-      <div class="cxStatNum" id="caixaCntPend">0</div>
-      <div class="cxStatLbl">Pendentes</div>
-    </div>
-    <div class="cxStatCard">
-      <div class="cxStatNum" id="caixaTotalPend">R$ 0,00</div>
-      <div class="cxStatLbl">Total Pendente</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn bSm" style="background:var(--b1);color:var(--b7);border:1.5px solid var(--b3)" onclick="CaixaMod.atualizar()">🔄 Atualizar</button>
+      <button class="btn bDng bSm" onclick="CaixaMod.fecharCaixa()">🔒 Fechar Caixa</button>
     </div>
   </div>
 
-  <!-- Lista de pendentes -->
-  <div class="cxListLabel">💳 Pagamentos Pendentes</div>
-  <div id="caixaListWrap" class="cxListWrap">
+  <!-- KPIs -->
+  <div class="cxKpisRow">
+    <div class="cxKpiCard">
+      <div class="cxKpiVal" id="caixaKpiAgend">0</div>
+      <div class="cxKpiLbl">Agendamentos hoje</div>
+    </div>
+    <div class="cxKpiCard cxKpiG">
+      <div class="cxKpiVal" id="caixaKpiPagos">0</div>
+      <div class="cxKpiLbl">✅ Recebidos</div>
+    </div>
+    <div class="cxKpiCard cxKpiY">
+      <div class="cxKpiVal" id="caixaKpiPend">0</div>
+      <div class="cxKpiLbl">⏳ Pendentes</div>
+    </div>
+    <div class="cxKpiCard cxKpiGr">
+      <div class="cxKpiVal" id="caixaTotalArrecadado">R$ 0,00</div>
+      <div class="cxKpiLbl">💰 Arrecadado hoje</div>
+    </div>
+    <div class="cxKpiCard cxKpiB">
+      <div class="cxKpiVal" id="caixaTotalPend">R$ 0,00</div>
+      <div class="cxKpiLbl">⚠️ Total Pendente</div>
+    </div>
+    <div class="cxKpiCard cxKpiGd">
+      <div class="cxKpiVal" id="caixaKpiComissao">R$ 0,00</div>
+      <div class="cxKpiLbl">🏆 Sua Comissão</div>
+    </div>
+  </div>
+
+  <!-- Tabela de atendimentos do dia -->
+  <div id="caixaListWrap">
     <div class="loadingState">Carregando...</div>
   </div>
 
@@ -1465,6 +1472,7 @@
           <th>Paciente</th>
           <th>Profissional</th>
           <th>Procedimento</th>
+          <th>Recepcionista</th>
           <th>Valor</th>
           <th>% Rep.</th>
           <th>Retido Clínica</th>
@@ -1474,7 +1482,7 @@
         </tr>
       </thead>
       <tbody id="audTbody">
-        <tr><td colspan="10" class="audVazio">Carregando...</td></tr>
+        <tr><td colspan="11" class="audVazio">Carregando...</td></tr>
       </tbody>
     </table>
   </div>
@@ -2174,11 +2182,11 @@
 <script src="js/modules/recepcao.js?v=20260703a"></script>
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
-<script src="js/modules/recebimentos.js?v=20260703b"></script>
+<script src="js/modules/recebimentos.js?v=20260703c"></script>
 <script src="js/modules/odontograma.js?v=20260702f"></script>
 <script src="js/modules/admin-odonto-proc.js?v=20260702a"></script>
-<script src="js/modules/caixa.js?v=20260703a"></script>
-<script src="js/modules/auditoria.js?v=20260703b"></script>
+<script src="js/modules/caixa.js?v=20260703b"></script>
+<script src="js/modules/auditoria.js?v=20260703c"></script>
 <script src="js/modules/unidades.js?v=20260702b"></script>
 <script src="js/modules/usuarios.js?v=20260703g"></script>
 <script src="js/core/main.js?v=20260703c"></script>

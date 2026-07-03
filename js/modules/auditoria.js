@@ -60,6 +60,7 @@ const AuditoriaMod = (function () {
         'paciente:paciente_id(nome_completo)',
         'profissional:profissional_id(nome)',
         'procedimento:procedimento_id(nome,valor_repasse,tipo_repasse)',
+        'criador:criado_por(nome)',
         'recebimentos(id,valor,status,forma_pagamento,data_recebimento)'
       ].join(','))
       .eq('unidade_id', CU)
@@ -149,7 +150,7 @@ const AuditoriaMod = (function () {
     if (!tbody) return;
 
     if (!_dados.length) {
-      tbody.innerHTML = '<tr><td colspan="10" class="audVazio">Nenhum atendimento encontrado para o período selecionado.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="11" class="audVazio">Nenhum atendimento encontrado para o período selecionado.</td></tr>';
       return;
     }
 
@@ -163,11 +164,12 @@ const AuditoriaMod = (function () {
       var dt  = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
       var hr  = (ag.hora_inicio || '').substring(0, 5);
 
-      var pac  = (ag.paciente     && ag.paciente.nome_completo) || '—';
-      var prof = (ag.profissional && ag.profissional.nome)      || '—';
-      var proc = (ag.procedimento && ag.procedimento.nome)      || '—';
-      var perc = c.percRepasse > 0 ? c.percRepasse.toFixed(0) + '%' : '—';
-      var forma = pago ? (FORMA[c.receb.forma_pagamento] || c.receb.forma_pagamento || '—') : '—';
+      var pac    = (ag.paciente     && ag.paciente.nome_completo) || '—';
+      var prof   = (ag.profissional && ag.profissional.nome)      || '—';
+      var proc   = (ag.procedimento && ag.procedimento.nome)      || '—';
+      var recep  = (ag.criador      && ag.criador.nome)           || '—';
+      var perc   = c.percRepasse > 0 ? c.percRepasse.toFixed(0) + '%' : '—';
+      var forma  = pago ? (FORMA[c.receb.forma_pagamento] || c.receb.forma_pagamento || '—') : '—';
 
       var badge = pago
         ? '<span class="audBadge audBdOk">✅ Pago</span>'
@@ -175,10 +177,11 @@ const AuditoriaMod = (function () {
 
       return '<tr class="' + (pago ? '' : 'audRowPend') + '">'
         + '<td class="audTdData">' + dt + '<br><small class="audHora">' + hr + '</small></td>'
-        + '<td class="audTdPac">'  + esc(pac)  + '</td>'
-        + '<td class="audTdProf">' + esc(prof) + '</td>'
-        + '<td class="audTdProc">' + esc(proc) + '</td>'
-        + '<td class="audNum">'    + _fmt(c.valorBase) + '</td>'
+        + '<td class="audTdPac">'   + esc(pac)   + '</td>'
+        + '<td class="audTdProf">'  + esc(prof)  + '</td>'
+        + '<td class="audTdProc">'  + esc(proc)  + '</td>'
+        + '<td class="audTdRecep">' + esc(recep) + '</td>'
+        + '<td class="audNum">'     + _fmt(c.valorBase) + '</td>'
         + '<td class="audNum audPercCol">' + perc + '</td>'
         + '<td class="audNum audColorG">'  + _fmt(c.retido)  + '</td>'
         + '<td class="audNum audColorB">'  + _fmt(c.repasse) + '</td>'

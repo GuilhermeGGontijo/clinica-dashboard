@@ -11,6 +11,7 @@ const RecebMod = (function () {
   var _convenios      = [];
   var _pendentesAlert = [];
   var _editAgId       = null;   // agendamento_id da baixa em curso
+  var _userId         = null;   // ID do usuário logado (para filtrar pendentes)
 
   var FORMAS = {
     DINHEIRO: 'Dinheiro',
@@ -27,6 +28,9 @@ const RecebMod = (function () {
     if (!_sb) return;
     var wrap = sid('recebListWrap');
     if (wrap) wrap.innerHTML = '<div class="loadingState">Carregando recebimentos...</div>';
+    /* Captura o userId atual para filtrar pendentes por recepcionista */
+    var su = await _sb.auth.getUser();
+    _userId = su.data && su.data.user ? su.data.user.id : null;
     _setupFiltros();
     await Promise.all([_carregarConvenios(), _carregar(), _carregarAlertaPendentes()]);
     _renderKpis();
@@ -38,7 +42,7 @@ const RecebMod = (function () {
   ══════════════════════════════════════════════════════════════════ */
   async function _carregarAlertaPendentes () {
     var hoje = _fmtDate(new Date());
-    var r = await _sb.from('agendamentos')
+    var query = _sb.from('agendamentos')
       .select('id, data_agendamento, hora_inicio, valor_cobrado, forma_pagamento, convenio_id, status,' +
               'paciente:paciente_id(nome_completo),' +
               'procedimento:procedimento_id(nome,valor),' +
@@ -48,6 +52,9 @@ const RecebMod = (function () {
       .lte('data_agendamento', hoje)
       .order('data_agendamento', { ascending: false })
       .limit(100);
+    /* Filtra apenas os agendamentos cadastrados por esta recepcionista */
+    if (_userId) query = query.eq('criado_por', _userId);
+    var r = await query;
 
     var wrap = sid('recebAlertaPend');
     if (!wrap) return;

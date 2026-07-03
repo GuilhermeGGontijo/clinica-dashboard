@@ -1,27 +1,21 @@
 /* ═══════════════════════════════════════════════════════════════════════
    PAINEL DE CONTROLE CLÍNICO — js/modules/caixa.js
-   CaixaMod: Caixa do Dia — Recepção/Liquidação + Fechamento de Turno
-   Depende de: supabase.js (_sb), main.js (sid, esc, toast, CU, USER_PROFILE)
+   CaixaMod: Caixa do Dia — Atendimentos de hoje + Fechamento de Turno
+   Depende de: supabase.js (_sb), main.js (sid, esc, toast, CU)
 ═══════════════════════════════════════════════════════════════════════ */
 
 const CaixaMod = (function () {
   'use strict';
 
-  /* ── Configurações de negócio (ajustáveis futuramente via tabela) ── */
   var COMISSAO_POR_ATEND = 2.00;
-  var SPLIT_CLINICA      = 0.60;
-  var SPLIT_MEDICO       = 0.40;
-  var META_COMISSAO      = 50.00;
 
-  /* ── Estado interno ── */
   var _turnoId    = null;
-  var _pendentes  = [];
   var _comissao   = 0;
+  var _atendHoje  = [];
   var _processando = false;
-  var _editRecebId = null;
-  var _editValor   = 0;
+  var _editAgId   = null;
 
-  var FORMAS = ['PIX', 'Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Convênio'];
+  var FORMAS = { DINHEIRO: 'Dinheiro', PIX: 'PIX', CREDITO: 'Crédito', DEBITO: 'Débito', CONVENIO: 'Convênio' };
 
   /* ══════════════════════════════════════════════════════════════════
      INIT
@@ -30,14 +24,19 @@ const CaixaMod = (function () {
     if (!_sb) return;
     var wrap = sid('caixaListWrap');
     if (wrap) wrap.innerHTML = '<div class="loadingState">Carregando caixa do dia...</div>';
-
     await _carregarOuAbrirTurno();
-    await _carregarPendentes();
+    await _carregarAtendHoje();
     _render();
   }
 
+  async function atualizar () {
+    await _carregarAtendHoje();
+    _render();
+    toast('Lista atualizada', 'info');
+  }
+
   /* ══════════════════════════════════════════════════════════════════
-     TURNO — abre automaticamente se não existir um para hoje
+     TURNO
   ══════════════════════════════════════════════════════════════════ */
   async function _carregarOuAbrirTurno () {
     var su = await _sb.auth.getUser();
@@ -45,8 +44,6 @@ const CaixaMod = (function () {
     if (!userId) return;
 
     var hoje = _hoje();
-
-    /* Busca turno aberto hoje para este usuário nesta unidade */
     var r = await _sb.from('caixa_turnos')
       .select('id, comissao_recepcionista')
       .eq('recepcionista_id', userId)
@@ -61,34 +58,46 @@ const CaixaMod = (function () {
       return;
     }
 
-    /* Nenhum turno: abre um novo */
     var rn = await _sb.from('caixa_turnos').insert({
-      recepcionista_id:     userId,
-      unidade_id:           CU,
-      data_abertura:        new Date().toISOString(),
-      status_auditoria:     'Em Aberto',
+      recepcionista_id:       userId,
+      unidade_id:             CU,
+      data_abertura:          new Date().toISOString(),
+      status_auditoria:       'Em Aberto',
       comissao_recepcionista: 0
     }).select('id').single();
 
-    if (!rn.error) {
-      _turnoId  = rn.data.id;
-      _comissao = 0;
-    } else {
-      console.error('[CaixaMod] Erro ao abrir turno:', rn.error.message);
-    }
+    if (!rn.error) { _turnoId = rn.data.id; _comissao = 0; }
+    else console.error('[CaixaMod] Erro ao abrir turno:', rn.error.message);
   }
 
   /* ══════════════════════════════════════════════════════════════════
-     CARREGAR PENDENTES
+     CARREGAR ATENDIMENTOS DE HOJE
   ══════════════════════════════════════════════════════════════════ */
-  async function _carregarPendentes () {
-    var r = await _sb.from('recebimentos')
-      .select('id, valor, status, observacoes, data_recebimento')
+  async function _carregarAtendHoje () {
+    var hoje = _hoje();
+    var r = await _sb.from('agendamentos')
+      .select([
+        'id', 'hora_inicio', 'valor_cobrado', 'status',
+        'paciente:paciente_id(nome_completo)',
+        'procedimento:procedimento_id(nome,valor,valor_repasse,tipo_repasse)',
+        'profissional:profissional_id(nome)',
+        'criador:criado_por(nome)',
+        'recebimentos(id,valor,status,forma_pagamento)'
+      ].join(','))
+      .gte('data_agendamento', hoje)
+      .lte('data_agendamento', hoje)
       .eq('unidade_id', CU)
-      .eq('status', 'PENDENTE')
-      .order('data_recebimento', { ascending: false });
+      .neq('status', 'Cancelado')
+      .order('hora_inicio');
 
-    _pendentes = r.data || [];
+    if (r.error) {
+      console.error('[CaixaMod]', r.error.message);
+      var wrap = sid('caixaListWrap');
+      if (wrap) wrap.innerHTML = '<div class="cxVazio">⚠️ Erro ao carregar: ' + r.error.message + '</div>';
+      _atendHoje = [];
+    } else {
+      _atendHoje = r.data || [];
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -96,88 +105,107 @@ const CaixaMod = (function () {
   ══════════════════════════════════════════════════════════════════ */
   function _render () {
     _renderHdrTurno();
-    _renderTermometro();
-    _renderStats();
-    _renderPendentes();
+    _renderKpis();
+    _renderTabela();
   }
 
   function _renderHdrTurno () {
     var el = sid('caixaTurnoInfo');
     if (!el) return;
-    if (_turnoId) {
-      el.innerHTML = '<span class="cxTurnoBadge ativo">🟢 Turno em aberto</span>';
-    } else {
-      el.innerHTML = '<span class="cxTurnoBadge fechado">🔴 Sem turno ativo</span>';
-    }
+    el.innerHTML = _turnoId
+      ? '<span class="cxTurnoBadge ativo">🟢 Turno em aberto</span>'
+      : '<span class="cxTurnoBadge fechado">🔴 Sem turno ativo</span>';
   }
 
-  function _renderTermometro () {
-    var el = sid('caixaComissao');
-    if (!el) return;
-    var pct  = Math.min(100, (_comissao / META_COMISSAO) * 100);
-    var fmtC = 'R$ ' + _comissao.toFixed(2).replace('.', ',');
-    var fmtM = 'R$ ' + META_COMISSAO.toFixed(2).replace('.', ',');
-    el.innerHTML =
-        '<div class="cxTermTitle">🏆 Comissão do Dia</div>'
-      + '<div class="cxTermVal">' + fmtC + '</div>'
-      + '<div class="cxTermBarraWrap">'
-      +   '<div class="cxTermBarra"><div class="cxTermPreench" style="width:' + pct.toFixed(1) + '%"></div></div>'
-      +   '<div class="cxTermPct">' + pct.toFixed(0) + '%</div>'
-      + '</div>'
-      + '<div class="cxTermMeta">Meta: ' + fmtM + ' · R$ ' + COMISSAO_POR_ATEND.toFixed(2).replace('.', ',') + '/atend</div>';
-  }
+  function _renderKpis () {
+    var pagos = _atendHoje.filter(function (ag) {
+      return ag.recebimentos && ag.recebimentos.some(function (rb) { return rb.status === 'RECEBIDO'; });
+    });
+    var pendentes = _atendHoje.filter(function (ag) {
+      return !ag.recebimentos || !ag.recebimentos.some(function (rb) { return rb.status === 'RECEBIDO'; });
+    });
+    var totalArrecadado = pagos.reduce(function (acc, ag) {
+      var receb = ag.recebimentos.find(function (rb) { return rb.status === 'RECEBIDO'; });
+      return acc + (parseFloat((receb || {}).valor) || 0);
+    }, 0);
+    var totalPendente = pendentes.reduce(function (acc, ag) {
+      return acc + (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor) || 0);
+    }, 0);
 
-  function _renderStats () {
-    var total = _pendentes.reduce(function (acc, r) { return acc + parseFloat(r.valor || 0); }, 0);
     var el;
-    el = sid('caixaCntPend');   if (el) el.textContent = _pendentes.length;
-    el = sid('caixaTotalPend'); if (el) el.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+    el = sid('caixaKpiAgend');        if (el) el.textContent = _atendHoje.length;
+    el = sid('caixaKpiPagos');        if (el) el.textContent = pagos.length;
+    el = sid('caixaKpiPend');         if (el) el.textContent = pendentes.length;
+    el = sid('caixaTotalArrecadado'); if (el) el.textContent = 'R$ ' + totalArrecadado.toFixed(2).replace('.', ',');
+    el = sid('caixaTotalPend');       if (el) el.textContent = 'R$ ' + totalPendente.toFixed(2).replace('.', ',');
+    el = sid('caixaKpiComissao');     if (el) el.textContent = 'R$ ' + _comissao.toFixed(2).replace('.', ',');
   }
 
-  function _renderPendentes () {
+  function _renderTabela () {
     var wrap = sid('caixaListWrap');
     if (!wrap) return;
 
-    if (!_pendentes.length) {
-      wrap.innerHTML = '<div class="cxVazio">✅ Nenhum pagamento pendente no momento.</div>';
+    if (!_atendHoje.length) {
+      wrap.innerHTML = '<div class="cxVazio">📋 Nenhum agendamento para hoje nesta unidade.</div>';
       return;
     }
 
-    wrap.innerHTML = _pendentes.map(function (rec) {
-      var val  = 'R$ ' + parseFloat(rec.valor || 0).toFixed(2).replace('.', ',');
-      var obs  = rec.observacoes || '—';
-      var data = rec.data_recebimento
-        ? new Date(rec.data_recebimento + 'T12:00:00').toLocaleDateString('pt-BR')
-        : '—';
+    var html = '<div class="cxTableScroll"><table class="cxTable">'
+      + '<thead><tr>'
+      + '<th>Hora</th><th>Paciente</th><th>Procedimento</th><th>Profissional</th>'
+      + '<th>Recepcionista</th><th>Valor</th><th>Forma Pgto</th><th>Status</th><th>Ação</th>'
+      + '</tr></thead><tbody>';
 
-      return '<div class="cxCard">'
-        + '<div class="cxCardLeft">'
-        +   '<div class="cxCardVal">' + val + '</div>'
-        +   '<div class="cxCardData">' + data + '</div>'
-        +   '<div class="cxCardObs">' + esc(obs) + '</div>'
-        + '</div>'
-        + '<button class="btn bG bSm cxBtnReceber"'
-        +   ' onclick="CaixaMod.abrirProcessar(\'' + rec.id + '\',' + parseFloat(rec.valor || 0) + ')">'
-        +   '💳 Receber'
-        + '</button>'
-        + '</div>';
-    }).join('');
+    _atendHoje.forEach(function (ag) {
+      var receb = ag.recebimentos && ag.recebimentos.find(function (rb) { return rb.status === 'RECEBIDO'; });
+      var pago  = !!receb;
+
+      var hora    = (ag.hora_inicio  || '').substring(0, 5);
+      var pac     = (ag.paciente     && ag.paciente.nome_completo) || '—';
+      var proc    = (ag.procedimento && ag.procedimento.nome)      || '—';
+      var prof    = (ag.profissional && ag.profissional.nome)      || '—';
+      var recepNome = (ag.criador    && ag.criador.nome)           || '—';
+      var valor   = pago
+        ? (parseFloat(receb.valor) || 0)
+        : (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor) || 0);
+      var forma   = pago ? (FORMAS[receb.forma_pagamento] || receb.forma_pagamento || '—') : '—';
+
+      var badge = pago
+        ? '<span class="cxStPago">✅ Recebido</span>'
+        : '<span class="cxStPend">⏳ Pendente</span>';
+
+      var acao = pago
+        ? '<span style="color:var(--s4);font-size:.8rem">—</span>'
+        : '<button class="btn bG bSm" onclick="CaixaMod.abrirReceber(\'' + ag.id + '\',' + valor.toFixed(2) + ')">💰 Receber</button>';
+
+      html += '<tr class="' + (pago ? '' : 'cxRowPend') + '">'
+        + '<td class="cxTdHora">' + hora + '</td>'
+        + '<td class="cxTdPac">'  + esc(pac)      + '</td>'
+        + '<td class="cxTdProc">' + esc(proc)     + '</td>'
+        + '<td class="cxTdProf">' + esc(prof)     + '</td>'
+        + '<td class="cxTdRecep">'+ esc(recepNome)+ '</td>'
+        + '<td class="cxTdVal">'  + (valor > 0 ? 'R$ ' + valor.toFixed(2).replace('.', ',') : '—') + '</td>'
+        + '<td class="cxTdForma">'+ forma         + '</td>'
+        + '<td>'                  + badge         + '</td>'
+        + '<td>'                  + acao          + '</td>'
+        + '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    wrap.innerHTML = html;
   }
 
   /* ══════════════════════════════════════════════════════════════════
-     PROCESSAR PAGAMENTO
+     MODAL — RECEBER PAGAMENTO
   ══════════════════════════════════════════════════════════════════ */
-  function abrirProcessar (recebId, valor) {
-    _editRecebId = recebId;
-    _editValor   = valor;
+  function abrirReceber (agId, valor) {
+    _editAgId = agId;
     var modal = sid('caixaModalPag');
     if (!modal) return;
     var el = sid('caixaPagValorLabel');
     if (el) el.textContent = 'R$ ' + parseFloat(valor).toFixed(2).replace('.', ',');
-    var sel = sid('caixaPagForma');
-    if (sel) sel.value = '';
-    var obs = sid('caixaPagObs');
-    if (obs) obs.value = '';
+    var sel = sid('caixaPagForma'); if (sel) sel.value = '';
+    var obs = sid('caixaPagObs');   if (obs) obs.value = '';
     modal.classList.add('open');
     setTimeout(function () { var s = sid('caixaPagForma'); if (s) s.focus(); }, 80);
   }
@@ -185,15 +213,13 @@ const CaixaMod = (function () {
   function fecharModal () {
     var modal = sid('caixaModalPag');
     if (modal) modal.classList.remove('open');
-    _editRecebId = null;
-    _editValor   = 0;
+    _editAgId = null;
   }
 
   async function confirmarPagamento () {
-    if (!_editRecebId || _processando) return;
-
-    var forma = (sid('caixaPagForma') || {}).value;
-    var obs   = ((sid('caixaPagObs')  || {}).value || '').trim();
+    if (!_editAgId || _processando) return;
+    var forma = ((sid('caixaPagForma') || {}).value || '').trim();
+    var obs   = ((sid('caixaPagObs')   || {}).value || '').trim();
     if (!forma) { toast('Selecione a forma de pagamento', 'warn'); return; }
 
     _processando = true;
@@ -204,19 +230,24 @@ const CaixaMod = (function () {
       var su     = await _sb.auth.getUser();
       var userId = su.data && su.data.user ? su.data.user.id : null;
 
-      var payload = {
-        status:           'RECEBIDO',
-        forma_pagamento:  forma,
-        data_recebimento: _hoje(),
-        processado_por:   userId,
-        caixa_turno_id:   _turnoId
-      };
-      if (obs) payload.observacoes = obs;
+      var ag    = _atendHoje.find(function (a) { return a.id === _editAgId; });
+      var valor = ag ? (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor) || 0) : 0;
 
-      var r = await _sb.from('recebimentos').update(payload).eq('id', _editRecebId);
+      var payload = {
+        agendamento_id:   _editAgId,
+        unidade_id:       CU,
+        forma_pagamento:  forma,
+        valor:            valor,
+        data_recebimento: _hoje(),
+        status:           'RECEBIDO',
+        criado_por:       userId,
+        caixa_turno_id:   _turnoId,
+        observacoes:      obs || null
+      };
+
+      var r = await _sb.from('recebimentos').insert(payload);
       if (r.error) throw r.error;
 
-      /* Acumula comissão e atualiza o turno */
       _comissao += COMISSAO_POR_ATEND;
       if (_turnoId) {
         await _sb.from('caixa_turnos')
@@ -224,11 +255,9 @@ const CaixaMod = (function () {
           .eq('id', _turnoId);
       }
 
-      toast('✅ Pagamento registrado! +R$ '
-        + COMISSAO_POR_ATEND.toFixed(2).replace('.', ',') + ' de comissão 🏆', 'success');
-
+      toast('✅ Pagamento registrado! +R$ ' + COMISSAO_POR_ATEND.toFixed(2).replace('.', ',') + ' de comissão 🏆', 'success');
       fecharModal();
-      await _carregarPendentes();
+      await _carregarAtendHoje();
       _render();
 
     } catch (err) {
@@ -240,42 +269,54 @@ const CaixaMod = (function () {
   }
 
   /* ══════════════════════════════════════════════════════════════════
-     FECHAR CAIXA
+     FECHAR CAIXA + RELATÓRIO
   ══════════════════════════════════════════════════════════════════ */
   async function fecharCaixa () {
     if (!_turnoId) { toast('Nenhum turno em aberto', 'warn'); return; }
 
-    var pendCnt = _pendentes.length;
-    var msg = pendCnt
-      ? 'Ainda há ' + pendCnt + ' pagamento(s) pendente(s). Fechar mesmo assim?'
+    var pendentes = _atendHoje.filter(function (ag) {
+      return !ag.recebimentos || !ag.recebimentos.some(function (rb) { return rb.status === 'RECEBIDO'; });
+    });
+    var msg = pendentes.length
+      ? 'Ainda há ' + pendentes.length + ' atendimento(s) sem pagamento. Fechar mesmo assim?'
       : 'Fechar o caixa deste turno?';
     if (!confirm(msg)) return;
 
     try {
-      /* Totais do turno */
-      var r = await _sb.from('recebimentos')
-        .select('valor')
-        .eq('caixa_turno_id', _turnoId)
-        .eq('status', 'RECEBIDO');
-
-      var totalArr  = (r.data || []).reduce(function (acc, x) { return acc + parseFloat(x.valor || 0); }, 0);
-      var retido    = parseFloat((totalArr * SPLIT_CLINICA).toFixed(2));
-      var repasse   = parseFloat((totalArr * SPLIT_MEDICO).toFixed(2));
+      var pagos = _atendHoje.filter(function (ag) {
+        return ag.recebimentos && ag.recebimentos.some(function (rb) { return rb.status === 'RECEBIDO'; });
+      });
+      var totalArr = pagos.reduce(function (acc, ag) {
+        var receb = ag.recebimentos.find(function (rb) { return rb.status === 'RECEBIDO'; });
+        return acc + (parseFloat((receb || {}).valor) || 0);
+      }, 0);
+      var totalRepasse = pagos.reduce(function (acc, ag) {
+        var receb = ag.recebimentos.find(function (rb) { return rb.status === 'RECEBIDO'; });
+        var valorBase = parseFloat((receb || {}).valor) || 0;
+        var proc = ag.procedimento;
+        if (!proc) return acc;
+        var vr = parseFloat(proc.valor_repasse) || 0;
+        var rep = proc.tipo_repasse === 'percentual' ? valorBase * (vr / 100)
+                : (proc.tipo_repasse === 'fixo' && vr > 0) ? vr : 0;
+        return acc + rep;
+      }, 0);
+      var totalRetido = totalArr - totalRepasse;
 
       var ru = await _sb.from('caixa_turnos').update({
-        data_fechamento:       new Date().toISOString(),
-        total_arrecadado:      totalArr,
-        total_retido_clinica:  retido,
-        total_repasse_medicos: repasse,
+        data_fechamento:        new Date().toISOString(),
+        total_arrecadado:       totalArr,
+        total_retido_clinica:   totalRetido,
+        total_repasse_medicos:  totalRepasse,
         comissao_recepcionista: _comissao,
-        status_auditoria:      'Pendente de Auditoria'
+        status_auditoria:       'Pendente de Auditoria'
       }).eq('id', _turnoId);
 
       if (ru.error) throw ru.error;
 
-      toast('✅ Caixa fechado! Total: R$ '
-        + totalArr.toFixed(2).replace('.', ',')
+      toast('✅ Caixa fechado! Total: R$ ' + totalArr.toFixed(2).replace('.', ',')
         + ' · Comissão: R$ ' + _comissao.toFixed(2).replace('.', ','), 'success');
+
+      _imprimirRelatorio(totalArr, totalRetido, totalRepasse, pagos.length, pendentes.length);
 
       _turnoId  = null;
       _comissao = 0;
@@ -284,6 +325,67 @@ const CaixaMod = (function () {
     } catch (err) {
       toast('Erro ao fechar caixa: ' + err.message, 'error');
     }
+  }
+
+  function _imprimirRelatorio (totalArr, totalRetido, totalRepasse, cntPagos, cntPend) {
+    var agora = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    var linhas = _atendHoje.map(function (ag) {
+      var receb = ag.recebimentos && ag.recebimentos.find(function (rb) { return rb.status === 'RECEBIDO'; });
+      var pago  = !!receb;
+      var hora  = (ag.hora_inicio || '').substring(0, 5);
+      var pac   = (ag.paciente     && ag.paciente.nome_completo) || '—';
+      var proc  = (ag.procedimento && ag.procedimento.nome)      || '—';
+      var prof  = (ag.profissional && ag.profissional.nome)      || '—';
+      var recepNome = (ag.criador  && ag.criador.nome)           || '—';
+      var valor = pago ? (parseFloat(receb.valor) || 0)
+                       : (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor) || 0);
+      var forma = pago ? (FORMAS[receb.forma_pagamento] || receb.forma_pagamento || '—') : '—';
+      return '<tr>'
+        + '<td>' + hora + '</td>'
+        + '<td>' + pac + '</td>'
+        + '<td>' + proc + '</td>'
+        + '<td>' + prof + '</td>'
+        + '<td>' + recepNome + '</td>'
+        + '<td style="text-align:right">R$ ' + valor.toFixed(2).replace('.', ',') + '</td>'
+        + '<td>' + forma + '</td>'
+        + '<td style="text-align:center">' + (pago ? '✅ Pago' : '⏳ Pendente') + '</td>'
+        + '</tr>';
+    }).join('');
+
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório de Caixa</title>'
+      + '<style>'
+      + 'body{font-family:Arial,sans-serif;padding:24px;color:#222;font-size:13px}'
+      + 'h1{font-size:18px;color:#1a6e2e;margin-bottom:4px}'
+      + '.sub{color:#666;font-size:.85rem;margin-bottom:20px}'
+      + 'table{width:100%;border-collapse:collapse;margin-bottom:20px}'
+      + 'th{background:#1a6e2e;color:#fff;padding:8px 10px;text-align:left;font-size:.82rem}'
+      + 'td{padding:7px 10px;border-bottom:1px solid #e5e7eb;font-size:.82rem}'
+      + 'tr:nth-child(even){background:#f9fafb}'
+      + '.totais{border-top:2px solid #1a6e2e;padding-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}'
+      + '.tItem{background:#f0fdf4;border-radius:8px;padding:12px 16px}'
+      + '.tLabel{font-size:.75rem;color:#666;margin-bottom:4px}'
+      + '.tVal{font-size:1.1rem;font-weight:800;color:#1a6e2e}'
+      + '.tValR{font-size:1.1rem;font-weight:800;color:#dc2626}'
+      + '@media print{.noprint{display:none!important}}'
+      + '</style></head><body>'
+      + '<h1>🏦 Relatório de Fechamento de Caixa</h1>'
+      + '<div class="sub">Emitido em: ' + agora + '</div>'
+      + '<table><thead><tr><th>Hora</th><th>Paciente</th><th>Procedimento</th><th>Profissional</th><th>Recepcionista</th><th>Valor</th><th>Forma</th><th>Status</th></tr></thead>'
+      + '<tbody>' + linhas + '</tbody></table>'
+      + '<div class="totais">'
+      + '<div class="tItem"><div class="tLabel">💰 Total Arrecadado</div><div class="tVal">R$ ' + totalArr.toFixed(2).replace('.', ',') + '</div></div>'
+      + '<div class="tItem"><div class="tLabel">🏥 Retido Clínica</div><div class="tVal">R$ ' + totalRetido.toFixed(2).replace('.', ',') + '</div></div>'
+      + '<div class="tItem"><div class="tLabel">👨‍⚕️ Repasse Profissionais</div><div class="tVal">R$ ' + totalRepasse.toFixed(2).replace('.', ',') + '</div></div>'
+      + '<div class="tItem"><div class="tLabel">✅ Atendimentos Pagos</div><div class="tVal">' + cntPagos + '</div></div>'
+      + '<div class="tItem"><div class="tLabel">⏳ Pendentes</div><div class="tVal ' + (cntPend > 0 ? 'tValR' : '') + '">' + cntPend + '</div></div>'
+      + '<div class="tItem"><div class="tLabel">🏆 Comissão Recepcionista</div><div class="tVal">R$ ' + _comissao.toFixed(2).replace('.', ',') + '</div></div>'
+      + '</div>'
+      + '<br><button class="noprint btn" onclick="window.print()" style="background:#1a6e2e;color:#fff;border:none;padding:10px 22px;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:700">🖨️ Imprimir Relatório</button>'
+      + '</body></html>';
+
+    var w = window.open('', '_blank', 'width=820,height=650');
+    if (w) { w.document.write(html); w.document.close(); }
+    else toast('Habilite popups para imprimir o relatório', 'warn');
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -296,12 +398,8 @@ const CaixaMod = (function () {
       + String(d.getDate()).padStart(2, '0');
   }
 
-  /* ══════════════════════════════════════════════════════════════════
-     EXPORT
-  ══════════════════════════════════════════════════════════════════ */
-  return { init, abrirProcessar, fecharModal, confirmarPagamento, fecharCaixa };
-})();
+  /* Compatibilidade com chamadas antigas */
+  function abrirProcessar (recebId, valor) { toast('Use o botão 💰 Receber na tabela', 'info'); }
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   FIM CaixaMod
-   ══════════════════════════════════════════════════════════════════════════════ */
+  return { init, atualizar, abrirReceber, abrirProcessar, fecharModal, confirmarPagamento, fecharCaixa };
+})();

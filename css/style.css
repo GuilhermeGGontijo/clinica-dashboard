@@ -1947,6 +1947,50 @@ body.sb-auditoria #secAuditoria { display: block !important; }
   font-weight: 600; font-size: .9rem;
 }
 
+/* ── CAIXA — KPIs redesenhados ── */
+.cxKpisRow {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.cxKpiCard {
+  background: var(--w); border: 1px solid var(--s2); border-radius: var(--R);
+  padding: 14px 16px; box-shadow: var(--sh);
+}
+.cxKpiCard.cxKpiG  { border-left: 4px solid var(--g6); }
+.cxKpiCard.cxKpiY  { border-left: 4px solid #f59e0b; }
+.cxKpiCard.cxKpiGr { border-left: 4px solid var(--g7); }
+.cxKpiCard.cxKpiB  { border-left: 4px solid var(--r5); }
+.cxKpiCard.cxKpiGd { border-left: 4px solid var(--b6); }
+.cxKpiVal { font-size: 1.25rem; font-weight: 900; color: var(--s9); }
+.cxKpiLbl { font-size: .7rem; color: var(--s5); margin-top: 4px; font-weight: 600; }
+
+/* ── CAIXA — Tabela de atendimentos ── */
+.cxTableScroll { overflow-x: auto; background: var(--w);
+  border: 1px solid var(--s2); border-radius: var(--R); box-shadow: var(--sh); }
+.cxTable { width: 100%; border-collapse: collapse; font-size: .84rem; min-width: 820px; }
+.cxTable thead th {
+  padding: 10px 12px; text-align: left; font-size: .72rem; font-weight: 800;
+  color: var(--s5); text-transform: uppercase; letter-spacing: .06em;
+  background: var(--s0); border-bottom: 1px solid var(--s2); white-space: nowrap;
+}
+.cxTable tbody tr { border-bottom: 1px solid var(--s2); transition: background .1s; }
+.cxTable tbody tr:last-child { border-bottom: none; }
+.cxTable tbody tr:hover { background: var(--s0); }
+.cxTable td { padding: 10px 12px; vertical-align: middle; }
+.cxRowPend  { background: #fffbf0; }
+.cxRowPend:hover { background: #fef9e7 !important; }
+.cxTdHora  { white-space: nowrap; font-weight: 700; color: var(--s7); font-size: .88rem; }
+.cxTdPac   { font-weight: 600; min-width: 130px; }
+.cxTdProc  { color: var(--s7); min-width: 130px; }
+.cxTdProf  { color: var(--s6); font-size: .8rem; min-width: 110px; }
+.cxTdRecep { color: var(--s5); font-size: .8rem; min-width: 110px; }
+.cxTdVal   { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cxTdForma { font-size: .8rem; color: var(--s5); white-space: nowrap; }
+.cxStPago  { display:inline-block; background:var(--g1); color:var(--g7);
+  font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+.cxStPend  { display:inline-block; background:#fef3c7; color:#92400e;
+  font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+
 /* Modal de pagamento — valor destaque */
 .cxModalValorBox {
   background: var(--s0); border: 1px solid var(--s2); border-radius: var(--Rs);
@@ -1998,7 +2042,7 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 .audTableWrap { overflow-x: auto; background: var(--w);
                 border: 1px solid var(--s2); border-radius: var(--R);
                 box-shadow: var(--sh); }
-.audTable { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.audTable { width: 100%; border-collapse: collapse; font-size: .84rem; min-width: 960px; }
 .audTable thead th {
   padding: 11px 14px; text-align: left; font-size: .72rem; font-weight: 800;
   color: var(--s5); text-transform: uppercase; letter-spacing: .06em;
@@ -2030,11 +2074,12 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 /* Colunas da tabela detalhada */
 .audTdData  { white-space: nowrap; font-size: .82rem; }
 .audHora    { color: var(--s4); font-size: .74rem; font-weight: 400; }
-.audTdPac   { font-weight: 600; max-width: 160px; }
-.audTdProf  { color: var(--s6); font-size: .8rem; max-width: 140px; }
-.audTdProc  { color: var(--s7); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.audPercCol { color: var(--b6); }
-.audTdForma { font-size: .8rem; color: var(--s5); }
+.audTdPac   { font-weight: 600; min-width: 130px; }
+.audTdProf  { color: var(--s6); font-size: .8rem; min-width: 120px; }
+.audTdProc  { color: var(--s7); min-width: 130px; }
+.audTdRecep { color: var(--s5); font-size: .8rem; min-width: 120px; }
+.audPercCol { color: var(--b6); white-space: nowrap; }
+.audTdForma { font-size: .8rem; color: var(--s5); white-space: nowrap; }
 
 /* ══════════════════════════════════════════════════════════════════════
    CADASTRO DE UNIDADES (UnidadesMod)
