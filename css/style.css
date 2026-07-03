@@ -1861,7 +1861,7 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 
 /* Seção oculta por padrão */
 #secCaixa    { display: none; max-width: 760px; margin: 0 auto; padding: 24px 20px; }
-#secAuditoria{ display: none; max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+#secAuditoria{ display: none; max-width: 100%; padding: 20px 24px; }
 body.sb-caixa     #secCaixa     { display: block !important; }
 body.sb-auditoria #secAuditoria { display: block !important; }
 
@@ -2011,51 +2011,57 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 /* Header */
 .audHdr {
   display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+  gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
 }
 .audHdrTitle { font-size: 1.18rem; font-weight: 800; color: var(--s9); }
 .audHdrSub   { font-size: .8rem; color: var(--s5); margin-top: 3px; }
 
-/* Filtros */
+/* Filtros — barra única compacta */
 .audFiltros {
-  display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;
-  margin-bottom: 20px; padding: 14px 16px;
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+  margin-bottom: 14px; padding: 10px 14px;
   background: var(--w); border: 1px solid var(--s2); border-radius: var(--R);
 }
+.audFiltros label { font-size: .73rem; color: var(--s5); font-weight: 700;
+                    text-transform: uppercase; letter-spacing: .04em; }
+.audFiltros select, .audFiltros input[type="date"] {
+  font-size: .8rem; padding: 5px 8px; }
 
-/* KPIs */
+/* KPIs — faixa horizontal sempre em 5 colunas */
 .audKpis {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px; margin-bottom: 20px;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 10px; margin-bottom: 14px;
 }
 .audKpiCard {
   background: var(--w); border: 1px solid var(--s2); border-radius: var(--R);
-  padding: 14px 16px; box-shadow: var(--sh);
+  padding: 10px 14px; box-shadow: var(--sh);
+  display: flex; flex-direction: column; gap: 2px;
 }
 .audKpiCard.audKpiG { border-left: 4px solid var(--g6); }
 .audKpiCard.audKpiB { border-left: 4px solid var(--b5); }
 .audKpiCard.audKpiY { border-left: 4px solid var(--a5); }
 .audKpiCard.audKpiR { border-left: 4px solid var(--r6); }
-.audKpiVal { font-size: 1.2rem; font-weight: 900; color: var(--s9);
+.audKpiVal { font-size: 1.1rem; font-weight: 900; color: var(--s9);
              font-variant-numeric: tabular-nums; }
-.audKpiLbl { font-size: .71rem; color: var(--s5); margin-top: 4px;
+.audKpiLbl { font-size: .67rem; color: var(--s5); margin-top: 2px;
              text-transform: uppercase; font-weight: 700; letter-spacing: .04em; }
 
-/* Tabela */
+/* Tabela — full width, sem min-width forçado */
 .audTableWrap { overflow-x: auto; background: var(--w);
                 border: 1px solid var(--s2); border-radius: var(--R);
                 box-shadow: var(--sh); }
-.audTable { width: 100%; border-collapse: collapse; font-size: .84rem; min-width: 960px; }
+.audTable { width: 100%; border-collapse: collapse; font-size: .79rem; }
 .audTable thead th {
-  padding: 11px 14px; text-align: left; font-size: .72rem; font-weight: 800;
-  color: var(--s5); text-transform: uppercase; letter-spacing: .06em;
-  background: var(--s0); border-bottom: 1px solid var(--s2); white-space: nowrap;
+  padding: 9px 10px; text-align: left; font-size: .68rem; font-weight: 800;
+  color: var(--s5); text-transform: uppercase; letter-spacing: .05em;
+  background: var(--s0); border-bottom: 2px solid var(--s2); white-space: nowrap;
+  position: sticky; top: 0; z-index: 1;
 }
 .audTable tbody tr { border-bottom: 1px solid var(--s2); transition: background .1s; }
 .audTable tbody tr:last-child { border-bottom: none; }
 .audTable tbody tr:hover { background: var(--s0); }
-.audTable td { padding: 11px 14px; vertical-align: middle; }
-.audNum     { font-variant-numeric: tabular-nums; font-weight: 700; }
+.audTable td { padding: 8px 10px; vertical-align: middle; }
+.audNum     { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; }
 .audColorG  { color: var(--g7); }
 .audColorB  { color: var(--b5); }
 .audVazio   { text-align: center; color: var(--s4); padding: 28px !important;
@@ -2065,8 +2071,8 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 
 /* Badges de status */
 .audBadge {
-  display: inline-block; padding: 3px 10px; border-radius: 20px;
-  font-size: .72rem; font-weight: 700; white-space: nowrap;
+  display: inline-block; padding: 3px 9px; border-radius: 20px;
+  font-size: .69rem; font-weight: 700; white-space: nowrap;
 }
 .audBdAberto { background: var(--a1); color: var(--a8); }
 .audBdPend   { background: var(--r1); color: var(--r7); }
@@ -2074,15 +2080,19 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 /* Linha de atendimento pendente */
 .audRowPend  { background: #fffbf0; }
 .audRowPend:hover { background: #fef9e7 !important; }
-/* Colunas da tabela detalhada */
-.audTdData  { white-space: nowrap; font-size: .82rem; }
-.audHora    { color: var(--s4); font-size: .74rem; font-weight: 400; }
-.audTdPac   { font-weight: 600; min-width: 130px; }
-.audTdProf  { color: var(--s6); font-size: .8rem; min-width: 120px; }
-.audTdProc  { color: var(--s7); min-width: 130px; }
-.audTdRecep { color: var(--s5); font-size: .8rem; min-width: 120px; }
-.audPercCol { color: var(--b6); white-space: nowrap; }
-.audTdForma { font-size: .8rem; color: var(--s5); white-space: nowrap; }
+/* Colunas — larguras compactas com truncamento */
+.audTdData  { white-space: nowrap; font-size: .77rem; width: 72px; }
+.audHora    { color: var(--s4); font-size: .71rem; font-weight: 400; }
+.audTdPac   { font-weight: 700; max-width: 150px; overflow: hidden;
+              text-overflow: ellipsis; white-space: nowrap; }
+.audTdProf  { color: var(--s6); font-size: .77rem; max-width: 130px;
+              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audTdProc  { color: var(--s7); max-width: 140px; overflow: hidden;
+              text-overflow: ellipsis; white-space: nowrap; }
+.audTdRecep { color: var(--s5); font-size: .77rem; max-width: 110px;
+              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audPercCol { color: var(--b6); white-space: nowrap; text-align: center; }
+.audTdForma { font-size: .77rem; color: var(--s5); white-space: nowrap; }
 
 /* ══════════════════════════════════════════════════════════════════════
    CADASTRO DE UNIDADES (UnidadesMod)
