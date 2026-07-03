@@ -399,7 +399,7 @@ const RecebMod = (function () {
 
       toast('✅ Pagamento registrado com sucesso!', 'success');
       fecharModal();
-      await _carregar();
+      await Promise.all([_carregar(), _carregarAlertaPendentes()]);
       _renderKpis();
       _renderTabela();
     } catch (err) {
@@ -417,9 +417,18 @@ const RecebMod = (function () {
     var r = await _sb.from('recebimentos').delete().eq('id', recebId);
     if (r.error) { toast('Erro ao estornar', 'error'); return; }
     toast('Estorno realizado', 'success');
-    await _carregar();
+    await Promise.all([_carregar(), _carregarAlertaPendentes()]);
     _renderKpis();
     _renderTabela();
+  }
+
+  async function atualizar() {
+    var wrap = sid('recebListWrap');
+    if (wrap) wrap.innerHTML = '<div class="loadingState">Atualizando...</div>';
+    await Promise.all([_carregar(), _carregarAlertaPendentes()]);
+    _renderKpis();
+    _renderTabela();
+    toast('Lista atualizada ✓', 'info');
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -431,5 +440,5 @@ const RecebMod = (function () {
       + String(d.getDate()).padStart(2, '0');
   }
 
-  return { init, filtrar, abrirBaixa, fecharModal, salvarBaixa, estornar, onFormaChange };
+  return { init, filtrar, atualizar, abrirBaixa, fecharModal, salvarBaixa, estornar, onFormaChange };
 })();
