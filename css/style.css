@@ -2139,4 +2139,200 @@ body.sb-auditoria #secAuditoria { display: block !important; }
   border-radius: 6px; cursor: pointer; transition: background .15s;
 }
 .prnBtnOdonto:hover { background: var(--b6,#2563eb); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVO GERAL — Tablet, Mobile e telas pequenas
+   Breakpoints: ≤1024px | ≤768px | ≤600px | ≤480px | ≤360px
+   Complementa as @media já existentes — não as substitui.
+═══════════════════════════════════════════════════════════════════════ */
+
+/* ── ≤1024px: Tablet deitado / desktop compacto ─────────────────────── */
+@media(max-width:1024px){
+  /* Unit bar — botão dropdown menor */
+  .unitDropBtn{min-width:150px}
+  /* Odontograma stack antes dos 900px */
+  .odontoLayout{grid-template-columns:1fr}
+  .odontoPainelOrcamento{position:relative;top:auto}
+  /* KPI grid — minimums menores */
+  .kpiGrid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  /* Auditoria — KPIs em 3 colunas */
+  .audKpis{grid-template-columns:repeat(3,1fr)}
+  /* Prontuário — timeline lateral stack */
+  .prnCorpo{flex-direction:column}
+  .prnTimeline{width:100%;max-height:280px;flex-shrink:unset;overflow-y:auto}
+  /* Secções admin sem max-width rígido */
+  #secAdminCadastro,#secAdminControle{padding:20px 18px}
+  #secAdminRecepcao{max-width:100%;padding:20px 18px}
+  #secAuditoria{max-width:100%}
+  #secCaixa{max-width:100%}
+}
+
+/* ── ≤768px: Tablet retrato ──────────────────────────────────────────── */
+@media(max-width:768px){
+  /* Unit bar */
+  .ubIn{padding:5px 12px;gap:6px}
+  .unitDropBtn{min-width:130px;font-size:.8rem;padding:5px 10px}
+  .ubLabel{display:none}
+  /* Header */
+  .hIn{padding:9px 14px;gap:6px}
+  .bName{font-size:1rem}
+  .bSub{display:none}
+  /* Main */
+  main{padding:10px 10px 56px}
+  /* KPI grid — 1 coluna */
+  .kpiGrid{grid-template-columns:1fr}
+  /* rG3 — 2 colunas */
+  .rG3,.rG3b{grid-template-columns:1fr 1fr}
+  /* Modais mais largos no tablet */
+  .mBox{max-width:520px;width:96%;padding:22px 18px}
+  /* Comparativo — 1 coluna */
+  .compGrid{grid-template-columns:1fr!important}
+  .compUnit{border-right:none!important;border-bottom:1px solid var(--s2)}
+  /* Auditoria — 3 cols */
+  .audKpis{grid-template-columns:repeat(3,1fr);gap:8px}
+  /* Recepção — stats 2 cols */
+  .rcpStats{grid-template-columns:repeat(2,1fr)}
+  /* Recepção — card ações quebra para baixo */
+  .rcpCard{flex-wrap:wrap}
+  .rcpCardAcoes{flex-direction:row;flex-wrap:wrap;width:100%;justify-content:flex-start}
+  /* secModHdr wrap */
+  .secModHdr{align-items:flex-start}
+  /* Caixa / Recebimentos — padding */
+  #secCaixa,#secRecebimentos{padding:16px 14px!important}
+  /* Agenda — grade mínima menor */
+  .agGradeHdrCol,.agGradeCol{min-width:90px}
+  /* Receb KPIs */
+  .recebKpis{grid-template-columns:repeat(2,1fr)}
+  /* Finance sidebar — já tem breakpoint 900px mas reforça */
+  .finMesSidebar{position:relative!important;top:auto!important;max-height:none!important;width:100%!important}
+}
+
+/* ── ≤600px: Mobile grande / phablet ────────────────────────────────── */
+@media(max-width:600px){
+  /* Unit bar */
+  .ubIn{padding:4px 10px;gap:4px}
+  .ubBtn{font-size:.7rem;padding:3px 8px}
+  .ubBtnImp{display:none}
+  /* Header */
+  .bLogo{height:34px;min-width:34px;font-size:17px}
+  .bName{font-size:.92rem}
+  .hIn{padding:8px 12px}
+  #saveInd{display:none}
+  /* Main */
+  main{padding:8px 8px 60px}
+  /* rG3 — 1 coluna */
+  .rG3,.rG3b{grid-template-columns:1fr}
+  /* Modais */
+  .mBox{padding:18px 14px;border-radius:12px;width:97%}
+  /* Agenda — grade body menor */
+  .agGradeBody{height:calc(100vh - 250px);min-height:280px}
+  .agGradeHdrCol,.agGradeCol{min-width:76px}
+  /* Agenda — filtros wrap */
+  .agNavRow{flex-direction:column;align-items:flex-start}
+  .agNavLeft,.agNavRight{width:100%}
+  .agFiltro{min-width:100%!important;font-size:.8rem}
+  /* Auditoria — 2 colunas KPIs */
+  .audKpis{grid-template-columns:repeat(2,1fr)}
+  /* Home cards */
+  .homeCards{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+  .homeCard{padding:14px 12px;gap:10px}
+  .homeCardIco{width:38px;height:38px;font-size:1.1rem}
+  /* Comparativo total */
+  .compTotais{grid-template-columns:repeat(2,1fr)}
+  /* Secções com padding reduzido */
+  #secAdminCadastro,#secAdminControle{padding:14px 12px}
+  #secAdminRecepcao{padding:14px 12px}
+  #secAuditoria,#secCaixa{padding:14px 12px!important}
+  /* secModHdr — empilha */
+  .secModHdr{flex-direction:column;align-items:flex-start;gap:8px}
+  .secModHdr .btn,.secModHdr button{align-self:flex-start}
+  /* Recepção — card compacto */
+  .rcpCard{padding:12px 14px;gap:10px}
+  .rcpCardNome{font-size:.92rem}
+  .rcpCardMeta{font-size:.74rem}
+  .rcpStatusBtns{gap:4px}
+  .rcpStBtn{font-size:.72rem;padding:4px 10px}
+  /* Pacientes form grid */
+  .patFormGrid{grid-template-columns:1fr 1fr}
+  /* Prontuário — compact */
+  .prnTimeline{max-height:200px}
+  body.sb-prontuario main{height:calc(100vh - 74px)}
+  /* kpiGrid gap */
+  .kpiGrid{gap:10px}
+  /* Toast full width */
+  #toast{left:50%;width:calc(100% - 24px);text-align:center;white-space:normal}
+}
+
+/* ── ≤480px: Mobile ─────────────────────────────────────────────────── */
+@media(max-width:480px){
+  /* Unit bar — sem wrap forçado */
+  .ubIn{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .unitDropBtn{min-width:110px;font-size:.76rem;padding:4px 8px}
+  .ubLabel{display:none}
+  /* Header ainda mais compacto */
+  .hIn{padding:7px 10px}
+  .bLogo{height:30px;min-width:30px;font-size:15px}
+  .bName{font-size:.84rem}
+  .brand{gap:8px}
+  .hR{gap:4px}
+  /* Main */
+  main{padding:6px 6px 62px}
+  /* Seção labels */
+  .secL{font-size:.7rem;margin:18px 0 9px}
+  /* KPI values compactos */
+  .rV{font-size:1.25rem}
+  .rLb{font-size:.62rem}
+  /* Botões de modal empilhados */
+  .mActs{flex-wrap:wrap}
+  .mActs>.btn{flex:1 1 auto;justify-content:center;min-width:120px}
+  /* Auditoria KPIs gap menor */
+  .audKpis{gap:6px}
+  .audKpi{padding:10px 8px!important}
+  /* Home welcome */
+  .homeWelcome{padding:16px 14px}
+  .homeWelcomeTitle{font-size:1.05rem}
+  /* Recebimentos filtros */
+  .recebFiltros{flex-direction:column!important;align-items:stretch!important}
+  .recebFiltros .afInp,.recebFiltros select,.recebFiltros .btn{width:100%}
+  /* cxTableScroll tabela — colunas ocultam no mobile */
+  .cxTdRecep,.audTdRecep{display:none}
+  /* Agenda navegação */
+  .agNavLeft{flex-wrap:wrap}
+  .agTitulo{font-size:.9rem;min-width:auto}
+  /* Triagem grid */
+  .trgGrid6{grid-template-columns:repeat(2,1fr)!important}
+  /* Odontograma botões */
+  .odBtns{flex-wrap:wrap}
+  /* recepção botão abre triagem e prontuário */
+  .rcpCardAcoes{flex-direction:column}
+  /* Pacientes form grid — 1 coluna */
+  .patFormGrid{grid-template-columns:1fr}
+  .patFG.sp2,.patFG.sp3{grid-column:span 1}
+  /* Modal agenda mais compacta */
+  .agBox{max-width:100%!important}
+  /* Prontuário body */
+  body.sb-prontuario main{height:calc(100vh - 70px)}
+  /* Caixa / Receb */
+  #secCaixa,#secRecebimentos{padding:10px 8px!important}
+  .cxKpisRow{grid-template-columns:repeat(2,1fr);gap:8px}
+  .recebKpis{grid-template-columns:repeat(2,1fr);gap:8px}
+  /* Finance */
+  .finMainContent .topGrid{grid-template-columns:1fr}
+}
+
+/* ── ≤360px: Mobile pequeno ─────────────────────────────────────────── */
+@media(max-width:360px){
+  .hIn{padding:6px 8px}
+  .bName{font-size:.78rem}
+  .bLogo{height:28px;min-width:28px;font-size:13px}
+  main{padding:4px 4px 62px}
+  .btn{padding:6px 10px;font-size:.77rem}
+  .homeWelcomeTitle{font-size:.95rem}
+  .homeWelcomeSub{font-size:.78rem}
+  .audKpis{grid-template-columns:1fr 1fr}
+  .recebKpis{grid-template-columns:1fr 1fr}
+  .rcpStats{grid-template-columns:repeat(2,1fr)}
+  .mBox{padding:14px 12px}
+  main{padding:4px 4px 62px}
+}
 </style>
