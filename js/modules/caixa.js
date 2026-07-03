@@ -76,15 +76,15 @@ const CaixaMod = (function () {
   async function _carregarAtendHoje () {
     var hoje = _hoje();
 
-    /* Tentativa 1: query completa com criador */
-    var r = await _sb.from('agendamentos')
+    /* ── 1. Agendamentos com joins (sem recebimentos) ── */
+    var rAg = await _sb.from('agendamentos')
       .select([
         'id', 'hora_inicio', 'valor_cobrado', 'status',
+        'paciente_id', 'criado_por',
         'pacientes(nome_completo)',
         'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor,valor_repasse,tipo_repasse)',
         'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
-        'criador:perfis_usuarios!agendamentos_criado_por_fkey(nome)',
-        'recebimentos(id,valor,status,forma_pagamento)'
+        'criador:perfis_usuarios!agendamentos_criado_por_fkey(nome)'
       ].join(','))
       .gte('data_agendamento', hoje)
       .lte('data_agendamento', hoje)
@@ -92,16 +92,16 @@ const CaixaMod = (function () {
       .neq('status', 'Cancelado')
       .order('hora_inicio');
 
-    if (r.error) {
-      /* Tentativa 2: sem criador (FK de criado_por pode não existir) */
-      console.warn('[CaixaMod] join com criador falhou, tentando sem criador:', r.error.message);
-      r = await _sb.from('agendamentos')
+    if (rAg.error) {
+      /* Fallback: sem criador */
+      console.warn('[CaixaMod] join com criador falhou:', rAg.error.message);
+      rAg = await _sb.from('agendamentos')
         .select([
           'id', 'hora_inicio', 'valor_cobrado', 'status',
+          'paciente_id', 'criado_por',
           'pacientes(nome_completo)',
           'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor,valor_repasse,tipo_repasse)',
-          'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
-          'recebimentos(id,valor,status,forma_pagamento)'
+          'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)'
         ].join(','))
         .gte('data_agendamento', hoje)
         .lte('data_agendamento', hoje)
@@ -110,13 +110,51 @@ const CaixaMod = (function () {
         .order('hora_inicio');
     }
 
-    if (r.error) {
-      console.error('[CaixaMod]', r.error.message);
+    if (rAg.error) {
+      console.error('[CaixaMod]', rAg.error.message);
       var wrap = sid('caixaListWrap');
-      if (wrap) wrap.innerHTML = '<div class="cxVazio">⚠️ Erro ao carregar: ' + r.error.message + '</div>';
+      if (wrap) wrap.innerHTML = '<div class="cxVazio">⚠️ Erro ao carregar: ' + rAg.error.message + '</div>';
       _atendHoje = [];
-    } else {
-      _atendHoje = r.data || [];
+      return;
+    }
+
+    _atendHoje = rAg.data || [];
+    if (!_atendHoje.length) return;
+
+    var agIds = _atendHoje.map(function (a) { return a.id; });
+
+    /* ── 2. Recebimentos por query separada ── */
+    var rReceb = await _sb.from('recebimentos')
+      .select('agendamento_id,id,valor,status,forma_pagamento')
+      .in('agendamento_id', agIds);
+
+    var recebMap = {};
+    if (!rReceb.error && rReceb.data) {
+      rReceb.data.forEach(function (rb) {
+        if (!recebMap[rb.agendamento_id]) recebMap[rb.agendamento_id] = [];
+        recebMap[rb.agendamento_id].push(rb);
+      });
+    }
+    _atendHoje.forEach(function (ag) {
+      ag.recebimentos = recebMap[ag.id] || [];
+    });
+
+    /* ── 3. Nomes de pacientes por query separada (fallback) ── */
+    var semNome = _atendHoje.filter(function (ag) {
+      return ag.paciente_id && !(ag.pacientes && ag.pacientes.nome_completo);
+    });
+    if (semNome.length) {
+      var patIds = semNome.map(function (ag) { return ag.paciente_id; });
+      var rPac = await _sb.from('pacientes').select('id,nome_completo').in('id', patIds);
+      if (!rPac.error && rPac.data) {
+        var pacMap = {};
+        rPac.data.forEach(function (p) { pacMap[p.id] = p.nome_completo; });
+        _atendHoje.forEach(function (ag) {
+          if (ag.paciente_id && !(ag.pacientes && ag.pacientes.nome_completo)) {
+            ag.pacientes = { nome_completo: pacMap[ag.paciente_id] || null };
+          }
+        });
+      }
     }
   }
 

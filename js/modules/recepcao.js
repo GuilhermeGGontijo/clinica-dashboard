@@ -50,16 +50,16 @@ const RecepMod = (function () {
   async function _carregar () {
     var hoje = _hoje();
 
-    /* Tentativa 1: query completa (pacientes sem alias = mesmo formato do agenda.js) */
-    var r = await _sb.from('agendamentos')
+    /* ── 1. Agendamentos com joins opcionais (sem recebimentos) ── */
+    var rAg = await _sb.from('agendamentos')
       .select([
         'id', 'hora_inicio', 'hora_fim', 'status_recepcao', 'hora_chegada',
-        'paciente_id', 'valor_cobrado', 'status',
+        'paciente_id', 'profissional_id', 'procedimento_id', 'sala_id',
+        'valor_cobrado', 'status',
         'pacientes(nome_completo)',
         'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
         'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor)',
-        'sala:salas!agendamentos_sala_id_fkey(nome)',
-        'recebimentos(id,status,forma_pagamento,valor)'
+        'sala:salas!agendamentos_sala_id_fkey(nome)'
       ].join(','))
       .gte('data_agendamento', hoje)
       .lte('data_agendamento', hoje)
@@ -67,18 +67,11 @@ const RecepMod = (function () {
       .neq('status', 'Cancelado')
       .order('hora_inicio');
 
-    if (r.error) {
-      /* Tentativa 2: sem recebimentos */
-      console.warn('[RecepMod] join completo falhou, tentando sem recebimentos:', r.error.message);
-      r = await _sb.from('agendamentos')
-        .select([
-          'id', 'hora_inicio', 'hora_fim', 'status_recepcao', 'hora_chegada',
-          'paciente_id', 'valor_cobrado', 'status',
-          'pacientes(nome_completo)',
-          'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
-          'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor)',
-          'sala:salas!agendamentos_sala_id_fkey(nome)'
-        ].join(','))
+    if (rAg.error) {
+      /* Fallback: sem joins, só campos base */
+      console.warn('[RecepMod] join falhou, usando select simples:', rAg.error.message);
+      rAg = await _sb.from('agendamentos')
+        .select('id,hora_inicio,hora_fim,status_recepcao,hora_chegada,paciente_id,profissional_id,procedimento_id,sala_id,valor_cobrado,status')
         .gte('data_agendamento', hoje)
         .lte('data_agendamento', hoje)
         .eq('unidade_id', CU)
@@ -86,25 +79,51 @@ const RecepMod = (function () {
         .order('hora_inicio');
     }
 
-    if (r.error) {
-      /* Tentativa 3: select simples sem nenhum join */
-      console.warn('[RecepMod] join sem recebimentos falhou, usando select simples:', r.error.message);
-      r = await _sb.from('agendamentos')
-        .select('*')
-        .gte('data_agendamento', hoje)
-        .lte('data_agendamento', hoje)
-        .eq('unidade_id', CU)
-        .neq('status', 'Cancelado')
-        .order('hora_inicio');
-    }
-
-    if (r.error) {
-      console.error('[RecepMod] todas as tentativas falharam:', r.error.message);
+    if (rAg.error) {
+      console.error('[RecepMod]', rAg.error.message);
       var wrap = sid('rcpListWrap');
-      if (wrap) wrap.innerHTML = '<div class="rcpVazio">⚠️ Erro ao carregar agendamentos: ' + r.error.message + '</div>';
+      if (wrap) wrap.innerHTML = '<div class="rcpVazio">⚠️ Erro ao carregar: ' + rAg.error.message + '</div>';
       _itens = [];
-    } else {
-      _itens = r.data || [];
+      return;
+    }
+
+    _itens = rAg.data || [];
+    if (!_itens.length) return;
+
+    var agIds = _itens.map(function (a) { return a.id; });
+
+    /* ── 2. Recebimentos por query separada (evita problema de FK join) ── */
+    var rReceb = await _sb.from('recebimentos')
+      .select('agendamento_id,id,status,forma_pagamento,valor')
+      .in('agendamento_id', agIds);
+
+    var recebMap = {};
+    if (!rReceb.error && rReceb.data) {
+      rReceb.data.forEach(function (rb) {
+        if (!recebMap[rb.agendamento_id]) recebMap[rb.agendamento_id] = [];
+        recebMap[rb.agendamento_id].push(rb);
+      });
+    }
+    _itens.forEach(function (ag) {
+      ag.recebimentos = recebMap[ag.id] || [];
+    });
+
+    /* ── 3. Nomes de pacientes por query separada (fallback se join retornou null) ── */
+    var semNome = _itens.filter(function (ag) {
+      return ag.paciente_id && !(ag.pacientes && ag.pacientes.nome_completo);
+    });
+    if (semNome.length) {
+      var patIds = semNome.map(function (ag) { return ag.paciente_id; });
+      var rPac = await _sb.from('pacientes').select('id,nome_completo').in('id', patIds);
+      if (!rPac.error && rPac.data) {
+        var pacMap = {};
+        rPac.data.forEach(function (p) { pacMap[p.id] = p.nome_completo; });
+        _itens.forEach(function (ag) {
+          if (ag.paciente_id && !(ag.pacientes && ag.pacientes.nome_completo)) {
+            ag.pacientes = { nome_completo: pacMap[ag.paciente_id] || null };
+          }
+        });
+      }
     }
   }
 

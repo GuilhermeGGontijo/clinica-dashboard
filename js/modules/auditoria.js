@@ -54,15 +54,15 @@ const AuditoriaMod = (function () {
     var fim    = ((sid('audFiltroFim')    || {}).value || '').trim();
     var stFilt = ((sid('audFiltroStatus') || {}).value || '').trim();
 
-    /* Tentativa 1: query completa com criador */
+    /* ── 1. Agendamentos com joins (sem recebimentos) ── */
     var q1 = _sb.from('agendamentos')
       .select([
         'id', 'data_agendamento', 'hora_inicio', 'status', 'valor_cobrado',
+        'paciente_id',
         'pacientes(nome_completo)',
         'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
         'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor_repasse,tipo_repasse)',
-        'criador:perfis_usuarios!agendamentos_criado_por_fkey(nome)',
-        'recebimentos(id,valor,status,forma_pagamento,data_recebimento)'
+        'criador:perfis_usuarios!agendamentos_criado_por_fkey(nome)'
       ].join(','))
       .eq('unidade_id', CU)
       .neq('status', 'Cancelado')
@@ -74,15 +74,15 @@ const AuditoriaMod = (function () {
     var r = await q1;
 
     if (r.error) {
-      /* Tentativa 2: sem criador */
+      /* Fallback: sem criador */
       console.warn('[AuditoriaMod] join com criador falhou:', r.error.message);
       var q2 = _sb.from('agendamentos')
         .select([
           'id', 'data_agendamento', 'hora_inicio', 'status', 'valor_cobrado',
+          'paciente_id',
           'pacientes(nome_completo)',
           'profissional:perfis_usuarios!agendamentos_profissional_id_fkey(nome)',
-          'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor_repasse,tipo_repasse)',
-          'recebimentos(id,valor,status,forma_pagamento,data_recebimento)'
+          'procedimento:procedimentos!agendamentos_procedimento_id_fkey(nome,valor_repasse,tipo_repasse)'
         ].join(','))
         .eq('unidade_id', CU)
         .neq('status', 'Cancelado')
@@ -102,6 +102,44 @@ const AuditoriaMod = (function () {
     }
 
     _dados = r.data || [];
+
+    if (_dados.length) {
+      var agIds = _dados.map(function (a) { return a.id; });
+
+      /* ── 2. Recebimentos por query separada ── */
+      var rReceb = await _sb.from('recebimentos')
+        .select('agendamento_id,id,valor,status,forma_pagamento,data_recebimento')
+        .in('agendamento_id', agIds);
+
+      var recebMap = {};
+      if (!rReceb.error && rReceb.data) {
+        rReceb.data.forEach(function (rb) {
+          if (!recebMap[rb.agendamento_id]) recebMap[rb.agendamento_id] = [];
+          recebMap[rb.agendamento_id].push(rb);
+        });
+      }
+      _dados.forEach(function (ag) {
+        ag.recebimentos = recebMap[ag.id] || [];
+      });
+
+      /* ── 3. Nomes de pacientes por query separada (fallback) ── */
+      var semNome = _dados.filter(function (ag) {
+        return ag.paciente_id && !(ag.pacientes && ag.pacientes.nome_completo);
+      });
+      if (semNome.length) {
+        var patIds = semNome.map(function (ag) { return ag.paciente_id; });
+        var rPac = await _sb.from('pacientes').select('id,nome_completo').in('id', patIds);
+        if (!rPac.error && rPac.data) {
+          var pacMap = {};
+          rPac.data.forEach(function (p) { pacMap[p.id] = p.nome_completo; });
+          _dados.forEach(function (ag) {
+            if (ag.paciente_id && !(ag.pacientes && ag.pacientes.nome_completo)) {
+              ag.pacientes = { nome_completo: pacMap[ag.paciente_id] || null };
+            }
+          });
+        }
+      }
+    }
 
     if (stFilt === 'RECEBIDO') {
       _dados = _dados.filter(function (ag) {
