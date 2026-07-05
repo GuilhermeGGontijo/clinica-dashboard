@@ -145,7 +145,10 @@ const AnamneseMod = (function () {
         var radioSim = (val && val.resposta === 'SIM');
         var radioNao = (val && val.resposta === 'NAO');
         var txtVal   = (val && val.detalhe) ? val.detalhe : '';
-        var showTxt  = radioSim ? '' : 'display:none';
+        var detDisabled = radioNao ? ' disabled' : '';
+        var detStyle    = radioNao
+          ? 'background:var(--s1);color:var(--s4);cursor:not-allowed'
+          : '';
 
         html += '<div class="anamRadioRow">';
         html += '<label class="anamRadioLabel">'
@@ -159,8 +162,10 @@ const AnamneseMod = (function () {
           + (radioNao ? ' checked' : '') + '>'
           + ' <span>NÃO</span></label>';
         html += '</div>';
-        html += '<input type="text" class="afInp anamInput anamCondicional" id="anam_' + p.id + '_det"'
-          + ' style="' + showTxt + '" value="' + esc(txtVal) + '" placeholder="Especifique..."/>';
+        html += '<input type="text" class="afInp anamInput" id="anam_' + p.id + '_det"'
+          + (detStyle ? ' style="' + detStyle + '"' : '')
+          + detDisabled
+          + ' value="' + esc(txtVal) + '" placeholder="Se SIM, especifique..."/>';
 
       } else if (p.tipo === 'textarea') {
         var tv = typeof val === 'string' ? val : '';
@@ -194,9 +199,12 @@ const AnamneseMod = (function () {
   function toggleTexto(pergId, show) {
     var el = sid('anam_' + pergId + '_det');
     if (!el) return;
-    el.style.display = show ? '' : 'none';
+    el.disabled = !show;
+    el.style.background    = show ? '' : 'var(--s1)';
+    el.style.color         = show ? '' : 'var(--s4)';
+    el.style.cursor        = show ? '' : 'not-allowed';
     if (!show) el.value = '';
-    if (show) el.focus();
+    if (show) { el.style.borderColor = ''; el.focus(); }
   }
 
   /* ══════════════════════════════════════════════════════════════════
