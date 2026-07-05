@@ -438,7 +438,6 @@ const EstoqueMod = (function () {
     var titulo = sid('estMovTituloModal');
     if (titulo) titulo.textContent = tipo === 'ENTRADA' ? '📥 Registrar Entrada' : '📤 Registrar Saída';
 
-    // populate product select
     var sel = sid('estMovProduto');
     if (sel) {
       sel.innerHTML = '<option value="">— Selecione o produto —</option>'
@@ -450,9 +449,72 @@ const EstoqueMod = (function () {
     }
 
     _vl('estMovQtd', '');
-    _vl('estMovCusto', '');
     _vl('estMovObs', '');
+
+    // Oculta info/preview antes de popular
+    var info = sid('estMovInfoEmbal');
+    if (info) info.style.display = 'none';
+    var prev = sid('estMovPreview');
+    if (prev) prev.style.display = 'none';
+
+    // Se produto já selecionado, preenche custo automaticamente
+    if (produtoId) onMovProdutoChange();
+
     m.style.display = 'flex';
+  }
+
+  function onMovProdutoChange () {
+    var prodId = _gv('estMovProduto');
+    var prod   = _produtos.find(function (p) { return p.id === prodId; });
+    var info   = sid('estMovInfoEmbal');
+    var prev   = sid('estMovPreview');
+
+    if (!prod) {
+      _vl('estMovCusto', '');
+      if (info) info.style.display = 'none';
+      if (prev) prev.style.display = 'none';
+      return;
+    }
+
+    // Preenche custo unitário a partir do cadastro do produto
+    _vl('estMovCusto', prod.custo_unitario || 0);
+
+    // Mostra info de embalagem
+    var upe = parseFloat(prod.unidades_por_embalagem || 1);
+    var um  = prod.unidade_medida || 'unidade';
+    var infoUPE = sid('estMovInfoUPE');
+    if (info && infoUPE) {
+      infoUPE.textContent = upe + ' ' + um + ' por embalagem  ·  Custo/unidade: ' + _fmtMoeda(prod.custo_unitario);
+      info.style.display = '';
+    }
+
+    calcMovPreview();
+  }
+
+  function calcMovPreview () {
+    var prodId    = _gv('estMovProduto');
+    var prod      = _produtos.find(function (p) { return p.id === prodId; });
+    var qtdEmbal  = parseFloat(_gv('estMovQtd'))   || 0;
+    var custoUnit = parseFloat(_gv('estMovCusto')) || 0;
+    var prev      = sid('estMovPreview');
+    if (!prev) return;
+
+    if (!prod || qtdEmbal <= 0) {
+      prev.style.display = 'none';
+      return;
+    }
+
+    var upe          = parseFloat(prod.unidades_por_embalagem || 1);
+    var totalUnid    = qtdEmbal * upe;
+    var totalCusto   = totalUnid * custoUnit;
+    var um           = prod.unidade_medida || 'unidades';
+
+    var elUnid  = sid('estMovPrevUnidades');
+    var elTotal = sid('estMovPrevTotal');
+    if (elUnid)  elUnid.textContent  = _fmtQ(qtdEmbal) + ' embal. × ' + _fmtQ(upe) + ' ' + um + ' = ' + _fmtQ(totalUnid) + ' ' + um;
+    if (elTotal) elTotal.textContent = _fmtMoeda(totalCusto);
+
+    prev.style.display = '';
   }
 
   function fecharModalMov () {
@@ -463,10 +525,15 @@ const EstoqueMod = (function () {
 
   async function salvarMov () {
     if (_salvando) return;
-    var prodId = _gv('estMovProduto');
-    var qtd    = parseFloat(_gv('estMovQtd'));
-    if (!prodId)   { toast('Selecione o produto', 'warn'); return; }
-    if (!qtd || qtd <= 0) { toast('Quantidade deve ser maior que zero', 'warn'); return; }
+    var prodId    = _gv('estMovProduto');
+    var qtdEmbal  = parseFloat(_gv('estMovQtd'));
+    if (!prodId)            { toast('Selecione o produto', 'warn'); return; }
+    if (!qtdEmbal || qtdEmbal <= 0) { toast('Quantidade deve ser maior que zero', 'warn'); return; }
+
+    // Converte embalagens → unidades individuais
+    var prod = _produtos.find(function (p) { return p.id === prodId; });
+    var upe  = prod ? parseFloat(prod.unidades_por_embalagem || 1) : 1;
+    var qtd  = qtdEmbal * upe;
 
     _salvando = true;
     var btn = sid('estBtnSalvarMov');
@@ -488,7 +555,7 @@ const EstoqueMod = (function () {
       });
       if (r.error) throw r.error;
 
-      // Atualiza saldo
+      // Atualiza saldo em unidades individuais
       var delta = _movTipo === 'SAIDA' ? -qtd : qtd;
       await _atualizarSaldo(prodId, CU, delta);
 
@@ -1056,6 +1123,8 @@ const EstoqueMod = (function () {
     // movimentações
     abrirModalMov:       abrirModalMov,
     fecharModalMov:      fecharModalMov,
+    onMovProdutoChange:  onMovProdutoChange,
+    calcMovPreview:      calcMovPreview,
     salvarMov:           salvarMov,
     // pedidos
     abrirModalPedido:    abrirModalPedido,

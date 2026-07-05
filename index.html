@@ -1613,18 +1613,34 @@
 
 <!-- Modal: Movimentação (Entrada/Saída Manual) -->
 <div class="modal" id="modalEstMov" style="display:none">
-  <div class="modalBox" style="max-width:460px;width:95%">
+  <div class="modalBox" style="max-width:480px;width:95%">
     <div class="modalHdr">
       <h3 id="estMovTituloModal">📥 Registrar Entrada</h3>
       <button class="bDel" onclick="EstoqueMod.fecharModalMov()">✕</button>
     </div>
     <div class="patFG"><label class="afLabel">Produto *</label>
-      <select id="estMovProduto" class="afInp"></select></div>
+      <select id="estMovProduto" class="afInp" onchange="EstoqueMod.onMovProdutoChange()"></select></div>
+    <!-- Info de embalagem (preenchida automaticamente ao selecionar produto) -->
+    <div id="estMovInfoEmbal" style="display:none;background:var(--s1);border-radius:8px;padding:9px 13px;margin-bottom:2px;font-size:.82rem;color:var(--s6);border:1px solid var(--s2)">
+      <span id="estMovInfoUPE"></span>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="patFG"><label class="afLabel">Quantidade *</label>
-        <input type="number" id="estMovQtd" class="afInp" placeholder="0" min="0.001" step="0.001"/></div>
-      <div class="patFG"><label class="afLabel">Custo Unitário (R$)</label>
-        <input type="number" id="estMovCusto" class="afInp" placeholder="0,00" min="0" step="0.01"/></div>
+      <div class="patFG"><label class="afLabel" id="estMovQtdLabel">Qtd. de embalagens *</label>
+        <input type="number" id="estMovQtd" class="afInp" placeholder="0" min="0.001" step="0.001" oninput="EstoqueMod.calcMovPreview()"/></div>
+      <div class="patFG"><label class="afLabel">Custo por unidade (R$)</label>
+        <input type="number" id="estMovCusto" class="afInp" placeholder="0,00" min="0" step="0.01" oninput="EstoqueMod.calcMovPreview()"/></div>
+    </div>
+    <!-- Preview do cálculo automático -->
+    <div id="estMovPreview" style="display:none;background:var(--g1);border:1.5px solid var(--g3);border-radius:8px;padding:10px 14px;margin-bottom:4px">
+      <div style="font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g6);margin-bottom:6px">Resumo da movimentação</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:.84rem">
+        <span style="color:var(--s6)">Total de unidades:</span>
+        <strong id="estMovPrevUnidades" style="color:var(--g7)">—</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.84rem">
+        <span style="color:var(--s6)">Custo total:</span>
+        <strong id="estMovPrevTotal" style="color:var(--g7)">—</strong>
+      </div>
     </div>
     <div class="patFG"><label class="afLabel">Observações</label>
       <input type="text" id="estMovObs" class="afInp" placeholder="Motivo, referência..."/></div>
@@ -2610,7 +2626,7 @@
 <script src="js/modules/odontograma.js?v=20260705k"></script>
 <script src="js/modules/anamnese-odonto.js?v=20260705b"></script>
 <script src="js/modules/admin-odonto-proc.js?v=20260705a"></script>
-<script src="js/modules/estoque.js?v=20260705b"></script>
+<script src="js/modules/estoque.js?v=20260705c"></script>
 <script src="js/modules/caixa.js?v=20260705b"></script>
 <script src="js/modules/auditoria.js?v=20260703f"></script>
 <script src="js/modules/unidades.js?v=20260702b"></script>
