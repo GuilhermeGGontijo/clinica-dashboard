@@ -70,7 +70,7 @@ const OdontoProcMod = (function () {
 
     /* 2 — Intervenções (com especialidade_id) */
     var ri = await _sb.from('odonto_procedimentos')
-      .select('id,nome_intervencao,valor_base,especialidade_id,ativo,materiais')
+      .select('id,nome_intervencao,valor_base,especialidade_id,ativo,materiais,tipo_visual')
       .order('nome_intervencao');
 
     if (ri.error) {
@@ -283,6 +283,7 @@ const OdontoProcMod = (function () {
     var nome  = sid('opNome');             if (nome)  nome.value  = '';
     var valor = sid('opValor');            if (valor) valor.value = '';
     var ativo = sid('opAtivo');            if (ativo) ativo.checked = true;
+    var tv    = sid('opTipoVisual');       if (tv)    tv.value    = 'nenhum';
     var inp   = sid('opMaterialInput');    if (inp)   inp.value   = '';
     _renderMateriais();
     var m = sid('modalOdontoproc'); if (m) m.style.display = 'flex';
@@ -301,6 +302,7 @@ const OdontoProcMod = (function () {
     var nome  = sid('opNome');             if (nome)  nome.value  = inv.nome_intervencao || '';
     var valor = sid('opValor');            if (valor) valor.value = parseFloat(inv.valor_base) || '';
     var ativo = sid('opAtivo');            if (ativo) ativo.checked = inv.ativo !== false;
+    var tv    = sid('opTipoVisual');       if (tv)    tv.value    = inv.tipo_visual || 'nenhum';
     var inp   = sid('opMaterialInput');    if (inp)   inp.value   = '';
     _renderMateriais();
     var m = sid('modalOdontoproc'); if (m) m.style.display = 'flex';
@@ -326,12 +328,14 @@ const OdontoProcMod = (function () {
     if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
 
     try {
+      var tipoVisual = ((sid('opTipoVisual') || {}).value || 'nenhum');
       var payload = {
         nome_intervencao: nome,
         valor_base:       valor,
         especialidade_id: espId,
         ativo:            ativo,
-        materiais:        _materiais.length ? _materiais : null
+        materiais:        _materiais.length ? _materiais : null,
+        tipo_visual:      tipoVisual
       };
 
       var r;

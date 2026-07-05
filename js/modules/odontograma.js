@@ -12,12 +12,37 @@ const OdontogramaMod = (function () {
   var _pacienteNome   = '';
   var _denteSel       = null;   // número do dente selecionado
   var _espSel         = null;   // UUID da especialidade selecionada
-  var _intAtual       = null;   // { id, nome_intervencao, valor_base }
+  var _intAtual       = null;   // { id, nome_intervencao, valor_base, tipo_visual }
   var _itens          = [];     // carrinho de orçamento
-  var _especialidades = [];     // [{id, nome, procs:[{id, nome_intervencao, valor_base}]}]
+  var _especialidades = [];     // [{id, nome, procs:[...]}]
   var _finalizando    = false;
   var _histOrcamentos = [];     // cache do histórico carregado
   var _histVizIdx     = 0;      // índice atual na visualização histórica
+  var _estadoPaciente = {};     // { denteNum: [{tipo_visual, faces, cor}] }
+  var _statusSel      = 'a_realizar'; // status da próxima intervenção
+
+  /* ── Cores por status ── */
+  var _COR_STATUS = {
+    a_realizar: '#ef4444',
+    executado:  '#22c55e',
+    existente:  '#3b82f6'
+  };
+
+  /* ── Posição central de cada face no SVG viewBox 0 0 100 100 ── */
+  var _FACE_POS = {
+    'V': { cx: 50, cy: 10 },
+    'L': { cx: 50, cy: 90 },
+    'M': { cx: 10, cy: 50 },
+    'D': { cx: 90, cy: 50 },
+    'O': { cx: 50, cy: 50 },
+    'I': { cx: 50, cy: 50 }
+  };
+
+  /* Mapeamento de label → código de face (para registros antigos com labels) */
+  var _LABEL_TO_CODE = {
+    'Vestibular': 'V', 'Lingual/Palatina': 'L',
+    'Mesial': 'M', 'Distal': 'D', 'Oclusal': 'O', 'Incisal': 'I'
+  };
 
   /* ── Numeração FDI ── */
   var PERM_SUP = [18,17,16,15,14,13,12,11, 21,22,23,24,25,26,27,28];
@@ -77,6 +102,7 @@ const OdontogramaMod = (function () {
     _mostrarSelecaoPaciente();
     _atualizarPainelLateral();
     _carregarHistoricoPaciente();
+    _carregarEstadoPaciente();
   }
 
   /* ── Carregar especialidades + intervenções em paralelo ── */
@@ -85,7 +111,7 @@ const OdontogramaMod = (function () {
     var rE = await _sb.from('especialidades_odonto')
       .select('id,nome').eq('ativo', true).order('nome');
     var rI = await _sb.from('odonto_procedimentos')
-      .select('id,nome_intervencao,valor_base,especialidade_id')
+      .select('id,nome_intervencao,valor_base,especialidade_id,tipo_visual')
       .eq('ativo', true).order('nome_intervencao');
 
     var esps = rE.error ? [] : (rE.data || []);
@@ -342,6 +368,9 @@ const OdontogramaMod = (function () {
     var txt = sid('odoFacesSelText');
     if (txt) txt.textContent = 'Nenhuma face selecionada';
 
+    /* Reset status para "A Realizar" ao abrir */
+    setStatusViz('a_realizar');
+
     var m = sid('odontoModalIntervencao'); if (m) m.style.display = 'flex';
   }
 
@@ -362,21 +391,34 @@ const OdontogramaMod = (function () {
     var inputs = Array.from(document.querySelectorAll('.odoFaceChkInput:checked'));
     if (!inputs.length) { toast('Selecione pelo menos uma face', 'warn'); return; }
 
-    var faces = _facesParaDente(_denteSel);
+    var faces    = _facesParaDente(_denteSel);
     var facesSel = inputs.map(function (el) {
       return faces.find(function (f) { return f.c === el.value; }) || { c: el.value, l: el.dataset.label };
     });
 
+    var facesStr   = facesSel.map(function (f) { return f.c; }).join(',');
+    var tipoVisual = _intAtual.tipo_visual || 'nenhum';
+
     _itens.push({
       dente:            _denteSel,
-      faces:            facesSel.map(function (f) { return f.c; }).join(','),
+      faces:            facesStr,
       facesLabels:      facesSel.map(function (f) { return f.l; }).join(', '),
       procedimentoId:   _intAtual.id,
       procedimentoNome: _intAtual.nome_intervencao,
-      valor:            Number(_intAtual.valor_base)
+      valor:            Number(_intAtual.valor_base),
+      tipoVisual:       tipoVisual,
+      statusVisual:     _statusSel
     });
 
-    /* Colorir indicadores visuais no grid do odontograma */
+    /* Aplica símbolo SVG imediatamente no dente */
+    if (tipoVisual !== 'nenhum') {
+      var cor = _COR_STATUS[_statusSel] || _COR_STATUS.a_realizar;
+      if (!_estadoPaciente[_denteSel]) _estadoPaciente[_denteSel] = [];
+      _estadoPaciente[_denteSel].push({ tipo_visual: tipoVisual, faces: facesStr, cor: cor });
+      _aplicarEstadoNoOdontograma();
+    }
+
+    /* Colorir indicadores de face no grid (legado) */
     facesSel.forEach(function (face) {
       var el = document.querySelector('.odFace[data-dente="' + _denteSel + '"][data-face="' + face.c + '"]');
       if (el) { el.classList.remove('selecionada'); el.classList.add('finalizada'); }
@@ -539,11 +581,15 @@ const OdontogramaMod = (function () {
       tbody.innerHTML = '<tr><td colspan="5" class="odontoVazio">Nenhum item lançado</td></tr>';
       return;
     }
+    var _statDot = { a_realizar: '🔴', executado: '🟢', existente: '🔵' };
     tbody.innerHTML = _itens.map(function (item, idx) {
       return '<tr>'
         + '<td><strong>' + item.dente + '</strong></td>'
         + '<td style="font-size:.72rem">' + esc(item.facesLabels) + '</td>'
         + '<td>' + esc(item.procedimentoNome) + '</td>'
+        + '<td style="font-size:.72rem;white-space:nowrap">'
+        + (_statDot[item.statusVisual] || '🔴') + ' ' + (item.statusVisual === 'executado' ? 'Exec.' : item.statusVisual === 'existente' ? 'Exist.' : 'A real.')
+        + '</td>'
         + '<td>R$ ' + item.valor.toFixed(2).replace('.', ',') + '</td>'
         + '<td><button class="odontoRemBtn" onclick="OdontogramaMod.removerItem(' + idx + ')">✕</button></td>'
         + '</tr>';
@@ -646,10 +692,12 @@ const OdontogramaMod = (function () {
 
   function selecionarPaciente(id, nome) {
     _pacienteId = id; _pacienteNome = nome;
+    _estadoPaciente = {};
     fecharBuscaPaciente();
     _mostrarSelecaoPaciente();
     toast('Paciente: ' + nome, 'success');
     _carregarHistoricoPaciente();
+    _carregarEstadoPaciente();
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -685,10 +733,11 @@ const OdontogramaMod = (function () {
         return {
           orcamento_id:    rOrc.data.id,
           dente_numero:    item.dente,
-          faces:           item.facesLabels,
+          faces:           item.faces,        // códigos (V,M,D...)
           procedimento_id: item.procedimentoId,
           valor_cobrado:   item.valor,
-          status_item:     'Aprovado'
+          status_item:     'Aprovado',
+          status_visual:   item.statusVisual || 'a_realizar'
         };
       });
       var rItens = await _sb.from('orcamento_itens').insert(bulk);
@@ -853,10 +902,124 @@ const OdontogramaMod = (function () {
     verHistViz(_histVizIdx + delta);
   }
 
+  /* ══════════════════════════════════════════════════════════════════
+     STATUS PILLS
+  ══════════════════════════════════════════════════════════════════ */
+  function setStatusViz(status) {
+    _statusSel = status;
+    ['a_realizar', 'executado', 'existente'].forEach(function (s) {
+      var btn = sid('odoStatBtn_' + s);
+      if (btn) btn.classList.toggle('odoStatusPillAtivo', s === status);
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     ESTADO VISUAL ACUMULADO — carregar histórico do paciente
+  ══════════════════════════════════════════════════════════════════ */
+  async function _carregarEstadoPaciente() {
+    _estadoPaciente = {};
+    if (!_pacienteId || !_sb) { _aplicarEstadoNoOdontograma(); return; }
+
+    var r = await _sb.from('orcamentos')
+      .select('id,orcamento_itens(dente_numero,faces,status_visual,odonto_procedimentos(tipo_visual))')
+      .eq('paciente_id', _pacienteId);
+
+    if (r.error || !r.data) { _aplicarEstadoNoOdontograma(); return; }
+
+    r.data.forEach(function (orc) {
+      (orc.orcamento_itens || []).forEach(function (item) {
+        var d  = item.dente_numero;
+        var tv = (item.odonto_procedimentos && item.odonto_procedimentos.tipo_visual) || 'nenhum';
+        var sv = item.status_visual || 'a_realizar';
+        if (tv === 'nenhum') return;
+        if (!_estadoPaciente[d]) _estadoPaciente[d] = [];
+        _estadoPaciente[d].push({
+          tipo_visual: tv,
+          faces: _normalizarFaces(item.faces),
+          cor: _COR_STATUS[sv] || _COR_STATUS.a_realizar
+        });
+      });
+    });
+
+    _aplicarEstadoNoOdontograma();
+  }
+
+  /* Converte labels antigos ("Vestibular, Mesial") para códigos ("V,M") */
+  function _normalizarFaces(faces) {
+    if (!faces) return '';
+    return faces.split(',').map(function (f) {
+      var t = f.trim();
+      return _LABEL_TO_CODE[t] || t;
+    }).join(',');
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     RENDERIZAÇÃO SVG NOS DENTES
+  ══════════════════════════════════════════════════════════════════ */
+  function _gerarSVG(tipo, faces, cor) {
+    var s = '';
+    if (tipo === 'ausente') {
+      s += '<line x1="10" y1="10" x2="90" y2="90" stroke="' + cor + '" stroke-width="10" stroke-linecap="round"/>';
+      s += '<line x1="90" y1="10" x2="10" y2="90" stroke="' + cor + '" stroke-width="10" stroke-linecap="round"/>';
+    } else if (tipo === 'extracao') {
+      s += '<line x1="10" y1="10" x2="90" y2="90" stroke="' + cor + '" stroke-width="8" stroke-linecap="round"/>';
+    } else if (tipo === 'canal') {
+      s += '<line x1="50" y1="5" x2="50" y2="95" stroke="' + cor + '" stroke-width="6" stroke-linecap="round"/>';
+    } else if (tipo === 'coroa') {
+      s += '<rect x="6" y="6" width="88" height="58" rx="4" fill="none" stroke="' + cor + '" stroke-width="5"/>';
+    } else {
+      var faceList = faces ? faces.split(',').map(function (f) { return f.trim(); }) : ['O'];
+      faceList.forEach(function (fc) {
+        var pos = _FACE_POS[fc] || _FACE_POS['O'];
+        if (tipo === 'carie') {
+          s += '<circle cx="' + pos.cx + '" cy="' + pos.cy + '" r="11" fill="' + cor + '"/>';
+        } else if (tipo === 'restauracao') {
+          s += '<rect x="' + (pos.cx - 10) + '" y="' + (pos.cy - 10) + '" width="20" height="20" rx="2" fill="' + cor + '"/>';
+        } else if (tipo === 'provisorio') {
+          s += '<circle cx="' + pos.cx + '" cy="' + pos.cy + '" r="11" fill="none" stroke="' + cor + '" stroke-width="4"/>';
+        }
+      });
+    }
+    return s;
+  }
+
+  function _aplicarEstadoNoOdontograma() {
+    /* Remove SVGs anteriores */
+    document.querySelectorAll('.odontoDenteSVG').forEach(function (el) { el.remove(); });
+
+    Object.keys(_estadoPaciente).forEach(function (denteNum) {
+      var simbolos = _estadoPaciente[denteNum];
+      if (!simbolos || !simbolos.length) return;
+
+      var graf = document.querySelector('.odontoDente[data-dente="' + denteNum + '"] .odontoDenteGraf');
+      if (!graf) return;
+
+      /* Ordem de renderização: face-específicos → contorno → linhas → ausente por último */
+      var prioridade = { carie: 0, restauracao: 0, provisorio: 0, coroa: 1, canal: 2, extracao: 2, ausente: 3 };
+      var ordenados  = simbolos.slice().sort(function (a, b) {
+        return (prioridade[a.tipo_visual] || 0) - (prioridade[b.tipo_visual] || 0);
+      });
+
+      var svgContent = ordenados.map(function (s) {
+        return _gerarSVG(s.tipo_visual, s.faces, s.cor);
+      }).join('');
+
+      if (!svgContent) return;
+
+      var svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svgEl.setAttribute('class', 'odontoDenteSVG');
+      svgEl.setAttribute('viewBox', '0 0 100 100');
+      svgEl.setAttribute('preserveAspectRatio', 'none');
+      svgEl.innerHTML = svgContent;
+      graf.appendChild(svgEl);
+    });
+  }
+
   return {
     init,
     selecionarDente, selecionarEspecialidade,
     abrirModalIntervencao, fecharModalIntervencao, gravarIntervencao, onFaceChkChange,
+    setStatusViz,
     removerItem, finalizarAtendimento,
     abrirBuscaPaciente, fecharBuscaPaciente, buscarPaciente, selecionarPaciente,
     trocarPaciente, lancarSelecao, abrirAnamnese, toggleHistItem,

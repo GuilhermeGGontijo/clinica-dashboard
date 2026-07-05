@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260705o">
+  <link rel="stylesheet" href="css/style.css?v=20260705p">
 </head>
 <body>
 
@@ -1745,7 +1745,20 @@
       <button class="bDel" onclick="OdontogramaMod.fecharModalIntervencao()"
               style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
     </div>
-    <div id="odoModalIntEsp" style="font-size:.75rem;color:var(--s5);margin-bottom:16px"></div>
+    <div id="odoModalIntEsp" style="font-size:.75rem;color:var(--s5);margin-bottom:14px"></div>
+
+    <!-- Status da intervenção -->
+    <div style="margin-bottom:14px">
+      <div style="font-size:.72rem;font-weight:800;color:var(--s6);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Status</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="odoStatusPill" id="odoStatBtn_a_realizar" data-status="a_realizar"
+                onclick="OdontogramaMod.setStatusViz('a_realizar')">🔴 A Realizar</button>
+        <button class="odoStatusPill" id="odoStatBtn_executado" data-status="executado"
+                onclick="OdontogramaMod.setStatusViz('executado')">🟢 Executado</button>
+        <button class="odoStatusPill" id="odoStatBtn_existente" data-status="existente"
+                onclick="OdontogramaMod.setStatusViz('existente')">🔵 Existente</button>
+      </div>
+    </div>
 
     <!-- Seletor de faces por checkbox -->
     <div style="margin-bottom:16px;border:1px solid var(--s3);border-radius:8px;padding:14px 16px">
@@ -1875,6 +1888,19 @@
     <div class="patFG" style="margin-bottom:12px">
       <label class="afLabel">Valor Base (R$) *</label>
       <input type="number" id="opValor" class="afInp" step="0.01" min="0" placeholder="0,00"/>
+    </div>
+    <div class="patFG" style="margin-bottom:14px">
+      <label class="afLabel">Tipo de Símbolo Visual (Odontograma)</label>
+      <select id="opTipoVisual" class="afInp">
+        <option value="nenhum">— Sem símbolo visual —</option>
+        <option value="carie">🔴 Cárie Ativa (círculo na face)</option>
+        <option value="restauracao">🟦 Restauração (quadrado na face)</option>
+        <option value="ausente">✕ Dente Ausente / Extraído (X no dente)</option>
+        <option value="extracao">╱ Necessidade de Extração (diagonal)</option>
+        <option value="canal">| Canal Tratado / Endodontia (linha vertical)</option>
+        <option value="provisorio">○ Tratamento Provisório (círculo vazio)</option>
+        <option value="coroa">□ Coroa / Prótese (retângulo externo)</option>
+      </select>
     </div>
     <label class="usuCheckRow" style="margin-bottom:16px">
       <input type="checkbox" id="opAtivo" checked/>
@@ -2609,9 +2635,9 @@
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260705i"></script>
-<script src="js/modules/odontograma.js?v=20260705l"></script>
+<script src="js/modules/odontograma.js?v=20260705m"></script>
 <script src="js/modules/anamnese-odonto.js?v=20260705b"></script>
-<script src="js/modules/admin-odonto-proc.js?v=20260705a"></script>
+<script src="js/modules/admin-odonto-proc.js?v=20260705b"></script>
 <script src="js/modules/estoque.js?v=20260705c"></script>
 <script src="js/modules/caixa.js?v=20260705b"></script>
 <script src="js/modules/auditoria.js?v=20260703f"></script>
