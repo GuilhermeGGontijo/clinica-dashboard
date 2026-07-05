@@ -2130,13 +2130,24 @@ body.sb-auditoria #secAuditoria { display: block !important; }
    PROCEDIMENTOS ODONTOLÓGICOS (OdontoProcMod)
 ══════════════════════════════════════════════════════════════════════ */
 #secAdminOdontoproc { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
-.opGrupo { margin-bottom: 24px; }
-.opGrupoLabel {
-  font-size: .72rem; font-weight: 800; text-transform: uppercase;
-  letter-spacing: .7px; color: var(--s5); padding: 4px 0 8px;
-  border-bottom: 1.5px solid var(--s2); margin-bottom: 10px;
+.opGrupo { margin-bottom: 20px; border: 1px solid var(--s2); border-radius: 10px; overflow: hidden; }
+.opGrupoHdr {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--s1); padding: 10px 14px; gap: 10px;
+  border-bottom: 1px solid var(--s2);
 }
-.opGrupoTabela { overflow-x: auto; border-radius: 8px; border: 1px solid var(--s2); }
+.opGrupoHdrInfo { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.opGrupoNome {
+  font-size: .85rem; font-weight: 800; color: var(--s8); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.opGrupoStatus { font-size: .72rem; font-weight: 700; padding: 2px 8px;
+  border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.opGrupoStatus.ativo  { background: var(--g1); color: var(--g7); }
+.opGrupoStatus.inativo{ background: var(--s2); color: var(--s5); }
+.opGrupoAcoes { display: flex; gap: 6px; flex-shrink: 0; }
+.opGrupoTabela { overflow-x: auto; }
+.opGrupoVazio { padding: 18px 16px; font-size: .8rem; color: var(--s4); font-style: italic; }
 
 /* Botão Odontograma no Prontuário */
 .prnBtnOdonto {
