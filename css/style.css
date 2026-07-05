@@ -1783,8 +1783,9 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 /* ── Dente individual ── */
 .odontoDente {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  cursor: default;
+  cursor: pointer; border-radius: 6px; padding: 2px; transition: background .12s;
 }
+.odontoDente:hover { background: var(--b1); }
 .odontoDente.deciduo .odontoDenteGraf { width: 32px; height: 32px; }
 .odontoDenteNum {
   font-size: .62rem; color: var(--s5); font-weight: 700;
@@ -1859,6 +1860,59 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .odontoPacItem:hover { background: var(--s1); }
 .odontoPacItemNome { font-weight: 600; color: var(--s8); margin-bottom: 2px; }
 .odontoPacItemMeta { font-size: .78rem; color: var(--s5); }
+
+/* ── Dente selecionado ── */
+.odontoDente.selecionado { background: var(--b1); outline: 2px solid var(--b5); outline-offset: 1px; }
+
+/* ── Imagem anatômica do dente ── */
+.odontoDenteImg { width: 32px; height: 34px; object-fit: contain; display: block; pointer-events: none; }
+.odontoDente.deciduo .odontoDenteImg { width: 26px; height: 28px; }
+
+/* ── Info do dente selecionado (topo do painel lateral) ── */
+.odoDenteInfoBox {
+  background: var(--s1); border: 1px solid var(--s2);
+  border-radius: 8px; padding: 10px 12px;
+  margin-bottom: 12px; min-height: 38px;
+  display: flex; align-items: center;
+}
+.odoDenteSelLabel { font-weight: 700; color: var(--b6); font-size: .88rem; }
+.odoHint          { color: var(--s4); font-size: .8rem; }
+
+/* ── Títulos de seção no painel lateral ── */
+.odoSideTitulo {
+  font-size: .68rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--s5); margin-bottom: 7px;
+}
+
+/* ── Container de chips ── */
+.odoChipLista { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+
+/* ── Chip de especialidade ── */
+.odoChip {
+  background: var(--w); border: 1.5px solid var(--s3); border-radius: 20px;
+  padding: 4px 12px; font-size: .78rem; font-weight: 600; color: var(--s7);
+  cursor: pointer; transition: all .15s; line-height: 1.3;
+}
+.odoChip:hover { background: var(--b1); border-color: var(--b4); color: var(--b7); }
+.odoChipAtivo  { background: var(--b5) !important; border-color: var(--b5) !important; color: #fff !important; }
+
+/* ── Chip de intervenção (com valor abaixo) ── */
+.odoChipInt {
+  display: flex; flex-direction: column; align-items: flex-start;
+  border-radius: 8px; padding: 6px 12px; width: 100%;
+}
+.odoChipVal { font-size: .7rem; color: var(--g6); font-weight: 700; }
+.odoChipInt:hover .odoChipVal { color: var(--b6); }
+.odoChipAtivo .odoChipVal     { color: rgba(255,255,255,.8) !important; }
+
+/* ── Modal: checkboxes de face ── */
+.odoFaceCheck {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .84rem; color: var(--s7); cursor: pointer;
+  padding: 5px 6px; border-radius: 4px; transition: background .1s;
+}
+.odoFaceCheck:hover { background: var(--s1); }
+.odoFaceCheck input { width: 15px; height: 15px; cursor: pointer; accent-color: var(--b5); }
 
 /* ══════════════════════════════════════════════════════════════════════
    CAIXA DO DIA (CaixaMod)

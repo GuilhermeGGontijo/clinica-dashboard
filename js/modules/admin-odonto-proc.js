@@ -117,9 +117,9 @@ const OdontoProcMod = (function () {
         + '<span class="opGrupoStatus ' + statusCls + '">' + statusTxt + '</span>'
         + '</div>'
         + '<div class="opGrupoAcoes">'
-        + '<button class="btn bG bSm" onclick="OdontoProcMod.abrirNovaIntervencao(' + esp.id + ')">+ Intervenção</button>'
-        + '<button class="btn bSm" onclick="OdontoProcMod.editarEspecialidade(' + esp.id + ')">✏️</button>'
-        + '<button class="btn bSm bDel" onclick="OdontoProcMod.excluirEspecialidade(' + esp.id + ')">🗑</button>'
+        + '<button class="btn bG bSm" onclick="OdontoProcMod.abrirNovaIntervencao(\'' + esp.id + '\')">+ Intervenção</button>'
+        + '<button class="btn bSm" onclick="OdontoProcMod.editarEspecialidade(\'' + esp.id + '\')">✏️</button>'
+        + '<button class="btn bSm bDel" onclick="OdontoProcMod.excluirEspecialidade(\'' + esp.id + '\')">🗑</button>'
         + '</div>'
         + '</div>';
 
@@ -145,8 +145,8 @@ const OdontoProcMod = (function () {
             + '<td><span class="' + (iAtivo ? 'recebStPago' : 'recebStPend') + '">'
             + (iAtivo ? '✅ Ativa' : '⏸ Inativa') + '</span></td>'
             + '<td style="white-space:nowrap">'
-            + '<button class="btn bSm" style="margin-right:6px" onclick="OdontoProcMod.editarIntervencao(' + inv.id + ')">✏️ Editar</button>'
-            + '<button class="btn bSm bDel" onclick="OdontoProcMod.excluirIntervencao(' + inv.id + ')">🗑</button>'
+            + '<button class="btn bSm" style="margin-right:6px" onclick="OdontoProcMod.editarIntervencao(\'' + inv.id + '\')">✏️ Editar</button>'
+            + '<button class="btn bSm bDel" onclick="OdontoProcMod.excluirIntervencao(\'' + inv.id + '\')">🗑</button>'
             + '</td></tr>';
         });
         html += '</tbody></table></div>';
@@ -316,7 +316,7 @@ const OdontoProcMod = (function () {
     var nome   = ((sid('opNome')  || {}).value || '').trim();
     var valor  = parseFloat((sid('opValor') || {}).value);
     var ativo  = (sid('opAtivo') || {}).checked !== false;
-    var espId  = parseInt((sid('opEspId') || {}).value) || null;
+    var espId  = ((sid('opEspId') || {}).value || '').trim() || null;
 
     if (!nome)                     { toast('Informe o nome da intervenção', 'warn'); return; }
     if (isNaN(valor) || valor < 0) { toast('Informe um valor válido', 'warn');       return; }

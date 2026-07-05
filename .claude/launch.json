@@ -4,8 +4,8 @@
     {
       "name": "clinica-dashboard",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-p", "3399", "-s", "C:\\Users\\Usuario\\Documents\\GitHub\\clinica-dashboard"],
-      "port": 3399
+      "runtimeArgs": ["serve", "-p", "3400", "-s", "C:\\Users\\Usuario\\Documents\\GitHub\\clinica-dashboard"],
+      "port": 3400
     }
   ]
 }

@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260703t">
+  <link rel="stylesheet" href="css/style.css?v=20260705a">
 </head>
 <body>
 
@@ -845,22 +845,31 @@
 
     </div>
 
-    <!-- ── Painel Direito: Orçamento ── -->
+    <!-- ── Painel Direito: Fluxo Hierárquico + Orçamento ── -->
     <div class="odontoPainelOrcamento">
-      <div class="odontoOrcTitle">📋 Orçamento em Andamento</div>
 
-      <div class="odontoOrcProcRow">
-        <label class="afLabel" style="font-size:.75rem;margin:0">Procedimento:</label>
-        <select id="odontoProcSel" class="afInp" style="font-size:.8rem;flex:1">
-          <option value="">— Carregando procedimentos —</option>
-        </select>
+      <!-- Dente selecionado -->
+      <div id="odoDenteInfo" class="odoDenteInfoBox">
+        <span class="odoHint">👆 Clique em um dente para começar</span>
       </div>
 
-      <button class="btn bG" style="width:100%;margin-bottom:10px;font-size:.85rem"
-              onclick="OdontogramaMod.lancarSelecao()">
-        ➕ Lançar Faces Selecionadas
-      </button>
+      <!-- Especialidades -->
+      <div id="odoEspPanel" style="display:none">
+        <div class="odoSideTitulo">Especialidade</div>
+        <div id="odoEspLista" class="odoChipLista"></div>
+      </div>
 
+      <!-- Intervenções -->
+      <div id="odoIntPanel" style="display:none">
+        <div class="odoSideTitulo">Intervenção</div>
+        <div id="odoIntLista" class="odoChipLista"></div>
+      </div>
+
+      <!-- Divider -->
+      <div style="border-top:1px solid var(--s2);margin:12px 0 10px"></div>
+
+      <!-- Orçamento -->
+      <div class="odontoOrcTitle">📋 Orçamento</div>
       <div class="odontoItensWrap">
         <table class="odontoItensTabela">
           <thead>
@@ -883,7 +892,8 @@
         <span id="odontoTotal" class="odontoTotalVal">R$ 0,00</span>
       </div>
 
-      <button id="odontoBtnFinalizar" class="btn bG" style="width:100%;margin-top:8px;background:var(--g6);font-size:.88rem;font-weight:700"
+      <button id="odontoBtnFinalizar" class="btn bG" disabled
+              style="width:100%;margin-top:8px;background:var(--g6);font-size:.88rem;font-weight:700"
               onclick="OdontogramaMod.finalizarAtendimento()">
         ✅ Finalizar e Enviar para Caixa
       </button>
@@ -909,6 +919,51 @@
            oninput="OdontogramaMod.buscarPaciente(this.value)"
            style="margin-bottom:8px"/>
     <div id="odontoBuscaPacRes" class="odontoBuscaRes"></div>
+  </div>
+</div>
+
+<!-- ════ MODAL: Intervenção Odontológica ════ -->
+<div id="odontoModalIntervencao" class="ovl" style="display:none;align-items:center"
+     onclick="if(event.target===this)OdontogramaMod.fecharModalIntervencao()">
+  <div class="mBox" style="max-width:460px;width:96%;padding:24px 22px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <h3 id="odoModalIntTitulo" style="color:var(--s9);font-size:.95rem;font-weight:800;margin:0">Intervenção</h3>
+      <button class="bDel" onclick="OdontogramaMod.fecharModalIntervencao()"
+              style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
+    </div>
+    <div id="odoModalIntEsp" style="font-size:.75rem;color:var(--s5);margin-bottom:16px"></div>
+
+    <!-- Faces afetadas -->
+    <div style="margin-bottom:16px;border:1px solid var(--s3);border-radius:8px;padding:14px">
+      <div style="font-size:.72rem;font-weight:800;color:var(--s6);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">Faces Afetadas</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <label class="odoFaceCheck"><input type="checkbox" id="odoFace_V"/> Vestibular</label>
+        <label class="odoFaceCheck"><input type="checkbox" id="odoFace_L"/> Lingual/Palatina</label>
+        <label class="odoFaceCheck"><input type="checkbox" id="odoFace_M"/> Mesial</label>
+        <label class="odoFaceCheck"><input type="checkbox" id="odoFace_D"/> Distal</label>
+        <label class="odoFaceCheck"><input type="checkbox" id="odoFace_O"/> Oclusal</label>
+      </div>
+    </div>
+
+    <!-- Valores (readonly — sem descontos) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
+      <div class="patFG">
+        <label class="afLabel">Valor Clínica (R$)</label>
+        <input type="number" id="odoModalValorClinica" class="afInp" readonly
+               style="background:var(--s1);cursor:not-allowed;color:var(--s7)"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Valor Paciente (R$)</label>
+        <input type="number" id="odoModalValorPaciente" class="afInp" readonly
+               style="background:var(--s1);cursor:not-allowed;color:var(--s7)"/>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn bSm" style="background:var(--s1);border:1px solid var(--s2);color:var(--s7)"
+              onclick="OdontogramaMod.fecharModalIntervencao()">Cancelar</button>
+      <button class="btn bG bSm" onclick="OdontogramaMod.gravarIntervencao()">✅ Gravar</button>
+    </div>
   </div>
 </div>
 
@@ -2209,8 +2264,8 @@
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260703i"></script>
-<script src="js/modules/odontograma.js?v=20260703a"></script>
-<script src="js/modules/admin-odonto-proc.js?v=20260703c"></script>
+<script src="js/modules/odontograma.js?v=20260705a"></script>
+<script src="js/modules/admin-odonto-proc.js?v=20260705a"></script>
 <script src="js/modules/caixa.js?v=20260703h"></script>
 <script src="js/modules/auditoria.js?v=20260703f"></script>
 <script src="js/modules/unidades.js?v=20260702b"></script>
