@@ -465,12 +465,17 @@ const OdontogramaMod = (function () {
   /* stub de compatibilidade */
   function lancarSelecao() {}
 
+  function abrirAnamnese() {
+    if (!_pacienteId) { toast('Selecione um paciente antes de abrir a Anamnese.', 'warn'); return; }
+    if (typeof AnamneseMod !== 'undefined') AnamneseMod.abrir(_pacienteId, _pacienteNome);
+  }
+
   return {
     init,
     selecionarDente, selecionarEspecialidade,
     abrirModalIntervencao, fecharModalIntervencao, gravarIntervencao, toggleFaceModal,
     removerItem, finalizarAtendimento,
     abrirBuscaPaciente, fecharBuscaPaciente, buscarPaciente, selecionarPaciente,
-    trocarPaciente, lancarSelecao
+    trocarPaciente, lancarSelecao, abrirAnamnese
   };
 })();

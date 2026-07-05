@@ -2457,4 +2457,70 @@ body.sb-auditoria #secAuditoria { display: block !important; }
   .mBox{padding:14px 12px}
   main{padding:4px 4px 62px}
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   ANAMNESE ODONTOLÓGICA
+══════════════════════════════════════════════════════════════════ */
+
+/* Cada bloco de pergunta */
+.anamPergunta {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--s2);
+}
+.anamPergunta:last-child { border-bottom: none; }
+
+/* Label da pergunta */
+.anamPergLabel {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--s9);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+/* Row de radio buttons */
+.anamRadioRow {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 8px;
+}
+.anamRadioLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--s7);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid var(--s2);
+  transition: background .12s, border-color .12s;
+  user-select: none;
+}
+.anamRadioLabel:hover { background: var(--s1); border-color: var(--s4); }
+.anamRadioLabel input[type="radio"] {
+  accent-color: var(--g6);
+  width: 15px; height: 15px;
+  cursor: pointer;
+}
+
+/* Input condicional (aparece quando SIM é selecionado) */
+.anamCondicional {
+  margin-top: 2px;
+  transition: opacity .15s;
+}
+
+/* Textarea de obs */
+.anamTextarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+/* Highlight ao selecionar SIM */
+.anamRadioLabel:has(input:checked) {
+  background: var(--g1);
+  border-color: var(--g6);
+  color: var(--g9);
+}
 </style>
