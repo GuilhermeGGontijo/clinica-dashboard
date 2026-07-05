@@ -113,12 +113,15 @@ const OdontogramaMod = (function () {
     var rI = await _sb.from('odonto_procedimentos')
       .select('id,nome_intervencao,valor_base,especialidade_id,tipo_visual')
       .eq('ativo', true).order('nome_intervencao');
-    // Fallback: coluna tipo_visual ainda não existe no banco (migração pendente)
+    // Fallback: coluna tipo_visual ainda não existe (migração pendente)
     if (rI.error) {
       rI = await _sb.from('odonto_procedimentos')
         .select('id,nome_intervencao,valor_base,especialidade_id')
         .eq('ativo', true).order('nome_intervencao');
     }
+
+    if (rE.error) { console.error('[Odontograma] especialidades:', rE.error); }
+    if (rI.error) { console.error('[Odontograma] procedimentos:', rI.error); }
 
     var esps = rE.error ? [] : (rE.data || []);
     var invs = rI.error ? [] : (rI.data || []);
@@ -129,6 +132,11 @@ const OdontogramaMod = (function () {
         procs: invs.filter(function (i) { return i.especialidade_id === e.id; })
       };
     });
+
+    // Notificar se falhou completamente (ex.: Supabase fora do ar)
+    if (!esps.length && (rE.error || rI.error)) {
+      toast('Erro ao carregar especialidades. Recarregue a página.', 'error');
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -228,7 +236,9 @@ const OdontogramaMod = (function () {
     var espLista = sid('odoEspLista');
     if (espLista) {
       if (!_especialidades.length) {
-        espLista.innerHTML = '<span class="odoHint">Nenhuma especialidade cadastrada</span>';
+        espLista.innerHTML = '<span class="odoHint">Nenhuma especialidade carregada. </span>'
+          + '<button class="btn bSm" style="font-size:.72rem;padding:3px 10px;margin-top:4px"'
+          + ' onclick="OdontogramaMod.recarregarEspecialidades()">🔄 Tentar novamente</button>';
       } else {
         espLista.innerHTML = _especialidades.map(function (esp) {
           var ativo = esp.id === _espSel ? ' odoChipAtivo' : '';
@@ -261,6 +271,11 @@ const OdontogramaMod = (function () {
 
   function selecionarEspecialidade(espId) {
     _espSel = espId;
+    _atualizarPainelLateral();
+  }
+
+  async function recarregarEspecialidades() {
+    await _carregarEspecialidades();
     _atualizarPainelLateral();
   }
 
@@ -417,12 +432,11 @@ const OdontogramaMod = (function () {
     });
 
     /* Aplica símbolo SVG imediatamente no dente */
-    if (tipoVisual !== 'nenhum') {
-      var cor = _COR_STATUS[_statusSel] || _COR_STATUS.a_realizar;
-      if (!_estadoPaciente[_denteSel]) _estadoPaciente[_denteSel] = [];
-      _estadoPaciente[_denteSel].push({ tipo_visual: tipoVisual, faces: facesStr, cor: cor });
-      _aplicarEstadoNoOdontograma();
-    }
+    var cor = _COR_STATUS[_statusSel] || _COR_STATUS.a_realizar;
+    if (!_estadoPaciente[_denteSel]) _estadoPaciente[_denteSel] = [];
+    // tipo_visual='nenhum' usa marcador genérico 'tratado' (ponto cinza)
+    _estadoPaciente[_denteSel].push({ tipo_visual: tipoVisual || 'tratado', faces: facesStr, cor: cor });
+    _aplicarEstadoNoOdontograma();
 
     /* Colorir indicadores de face no grid (legado) */
     facesSel.forEach(function (face) {
@@ -943,10 +957,10 @@ const OdontogramaMod = (function () {
         var d  = item.dente_numero;
         var tv = (item.odonto_procedimentos && item.odonto_procedimentos.tipo_visual) || 'nenhum';
         var sv = item.status_visual || 'a_realizar';
-        if (tv === 'nenhum') return;
+        // 'nenhum' usa marcador genérico 'tratado' — aparece no dente mesmo sem símbolo específico
         if (!_estadoPaciente[d]) _estadoPaciente[d] = [];
         _estadoPaciente[d].push({
-          tipo_visual: tv,
+          tipo_visual: tv === 'nenhum' ? 'tratado' : tv,
           faces: _normalizarFaces(item.faces),
           cor: _COR_STATUS[sv] || _COR_STATUS.a_realizar
         });
@@ -970,7 +984,10 @@ const OdontogramaMod = (function () {
   ══════════════════════════════════════════════════════════════════ */
   function _gerarSVG(tipo, faces, cor) {
     var s = '';
-    if (tipo === 'ausente') {
+    if (tipo === 'tratado') {
+      // Marcador genérico: pequeno ponto cinza no centro — indica procedimento sem símbolo específico
+      s += '<circle cx="50" cy="50" r="7" fill="#9ca3af" opacity="0.8"/>';
+    } else if (tipo === 'ausente') {
       s += '<line x1="10" y1="10" x2="90" y2="90" stroke="' + cor + '" stroke-width="10" stroke-linecap="round"/>';
       s += '<line x1="90" y1="10" x2="10" y2="90" stroke="' + cor + '" stroke-width="10" stroke-linecap="round"/>';
     } else if (tipo === 'extracao') {
@@ -1029,7 +1046,7 @@ const OdontogramaMod = (function () {
 
   return {
     init,
-    selecionarDente, selecionarEspecialidade,
+    selecionarDente, selecionarEspecialidade, recarregarEspecialidades,
     abrirModalIntervencao, fecharModalIntervencao, gravarIntervencao, onFaceChkChange,
     setStatusViz,
     removerItem, finalizarAtendimento,
