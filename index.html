@@ -1392,14 +1392,24 @@
 
   <!-- Sub-abas -->
   <div class="estSubTabs">
-    <button class="estAba estAbaAtiva" data-aba="produtos"       onclick="EstoqueMod.trocarAba('produtos')">📦 Produtos</button>
+    <button class="estAba estAbaAtiva" data-aba="categorias"     onclick="EstoqueMod.trocarAba('categorias')">🗂️ Categorias</button>
+    <button class="estAba"             data-aba="produtos"       onclick="EstoqueMod.trocarAba('produtos')">📦 Produtos</button>
     <button class="estAba"             data-aba="movimentacoes"  onclick="EstoqueMod.trocarAba('movimentacoes')">🔄 Movimentações</button>
     <button class="estAba"             data-aba="pedidos"        onclick="EstoqueMod.trocarAba('pedidos')">🛒 Pedidos de Compra</button>
     <button class="estAba"             data-aba="vinculos"       onclick="EstoqueMod.trocarAba('vinculos')">🔗 Materiais por Proc.</button>
   </div>
 
+  <!-- ABA: CATEGORIAS -->
+  <div class="estSection" data-aba="categorias">
+    <div class="estSecHdr">
+      <div class="estSecTitulo">Categorias de produtos</div>
+      <button class="btn bG bSm" onclick="EstoqueMod.abrirModalCategoria()">+ Nova Categoria</button>
+    </div>
+    <div id="estCatListWrap"><div class="loadingState">Carregando...</div></div>
+  </div>
+
   <!-- ABA: PRODUTOS -->
-  <div class="estSection" data-aba="produtos">
+  <div class="estSection" data-aba="produtos" style="display:none">
     <div class="estSecHdr">
       <div class="estSecTitulo">Produtos cadastrados</div>
       <button class="btn bG bSm" onclick="EstoqueMod.abrirModalProduto()">+ Novo Produto</button>
@@ -1522,6 +1532,24 @@
 </main>
 
 <!-- ════ MODAIS: ESTOQUE ════ -->
+
+<!-- Modal: Categoria -->
+<div class="modal" id="modalEstCategoria" style="display:none">
+  <div class="modalBox" style="max-width:420px;width:95%">
+    <div class="modalHdr">
+      <h3 id="estCatModalTitulo">🗂️ Nova Categoria</h3>
+      <button class="bDel" onclick="EstoqueMod.fecharModalCategoria()">✕</button>
+    </div>
+    <div class="patFG"><label class="afLabel">Nome da Categoria *</label>
+      <input type="text" id="estCatNome" class="afInp" placeholder="Ex: Descartáveis, Medicamentos..."/></div>
+    <div class="patFG"><label class="afLabel">Descrição (opcional)</label>
+      <input type="text" id="estCatDesc" class="afInp" placeholder="Breve descrição da categoria"/></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn bGh bSm" onclick="EstoqueMod.fecharModalCategoria()">Cancelar</button>
+      <button class="btn bG bSm" id="estBtnSalvarCat" onclick="EstoqueMod.salvarCategoria()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal: Produto -->
 <div class="modal" id="modalEstProduto" style="display:none">
@@ -2549,7 +2577,7 @@
 <script src="js/modules/odontograma.js?v=20260705i"></script>
 <script src="js/modules/anamnese-odonto.js?v=20260705b"></script>
 <script src="js/modules/admin-odonto-proc.js?v=20260705a"></script>
-<script src="js/modules/estoque.js?v=20260705a"></script>
+<script src="js/modules/estoque.js?v=20260705b"></script>
 <script src="js/modules/caixa.js?v=20260705b"></script>
 <script src="js/modules/auditoria.js?v=20260703f"></script>
 <script src="js/modules/unidades.js?v=20260702b"></script>

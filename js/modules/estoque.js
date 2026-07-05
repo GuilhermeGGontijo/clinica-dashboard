@@ -8,7 +8,7 @@ const EstoqueMod = (function () {
   'use strict';
 
   /* ─── Estado ─── */
-  var _aba        = 'produtos';
+  var _aba        = 'categorias';
   var _produtos   = [];
   var _categorias = [];
   var _movs       = [];
@@ -58,7 +58,7 @@ const EstoqueMod = (function () {
   async function init () {
     if (!_sb) return;
     await _carregarCategorias();
-    trocarAba('produtos');
+    trocarAba('categorias');
   }
 
   function trocarAba (aba) {
@@ -69,25 +69,143 @@ const EstoqueMod = (function () {
     document.querySelectorAll('.estSection').forEach(function (el) {
       el.style.display = el.dataset.aba === aba ? '' : 'none';
     });
-    if (aba === 'produtos')     _carregarProdutos();
+    if (aba === 'categorias')    _renderCategorias();
+    if (aba === 'produtos')      _carregarProdutos();
     if (aba === 'movimentacoes') _carregarMovimentacoes();
-    if (aba === 'pedidos')      _carregarPedidos();
-    if (aba === 'vinculos')     _carregarVinculos();
+    if (aba === 'pedidos')       _carregarPedidos();
+    if (aba === 'vinculos')      _carregarVinculos();
   }
 
   /* ══════════════════════════════════════════════════════════════════
      CATEGORIAS
   ══════════════════════════════════════════════════════════════════ */
   async function _carregarCategorias () {
-    var r = await _sb.from('estoque_categorias').select('id,nome').eq('ativo', true).order('nome');
+    var r = await _sb.from('estoque_categorias').select('id,nome,descricao,ativo').order('nome');
     _categorias = r.data || [];
   }
 
   function _opsCategorias () {
     return '<option value="">— Categoria —</option>'
-      + _categorias.map(function (c) {
+      + _categorias.filter(function (c) { return c.ativo; }).map(function (c) {
           return '<option value="' + c.id + '">' + esc(c.nome) + '</option>';
         }).join('');
+  }
+
+  function _renderCategorias () {
+    var wrap = sid('estCatListWrap');
+    if (!wrap) return;
+
+    var ativas   = _categorias.filter(function (c) { return c.ativo; });
+    var inativas = _categorias.filter(function (c) { return !c.ativo; });
+
+    if (!_categorias.length) {
+      wrap.innerHTML = '<div class="estVazio">🗂️ Nenhuma categoria cadastrada. Clique em "+ Nova Categoria" para começar.</div>';
+      return;
+    }
+
+    function _linhas (lista) {
+      return lista.map(function (c) {
+        return '<tr>'
+          + '<td><strong>' + esc(c.nome) + '</strong>'
+          + (c.descricao ? '<br><small style="color:var(--s4)">' + esc(c.descricao) + '</small>' : '') + '</td>'
+          + '<td>' + (c.ativo
+              ? '<span class="estBadge estBadgeGreen">Ativa</span>'
+              : '<span class="estBadge estBadgeGray">Inativa</span>') + '</td>'
+          + '<td class="estAcoesCell">'
+          + '<button class="btn bSm" onclick="EstoqueMod.abrirModalCategoria(\'' + c.id + '\')">✏️ Editar</button> '
+          + (c.ativo
+              ? '<button class="btn bSm bDng" onclick="EstoqueMod.desativarCategoria(\'' + c.id + '\')">Desativar</button>'
+              : '<button class="btn bSm estBtnAprova" onclick="EstoqueMod.reativarCategoria(\'' + c.id + '\')">Reativar</button>')
+          + '</td></tr>';
+      }).join('');
+    }
+
+    var html = '<div class="estTableWrap"><table class="estTable">'
+      + '<thead><tr><th>Categoria</th><th>Status</th><th>Ações</th></tr></thead>'
+      + '<tbody>' + _linhas(ativas);
+
+    if (inativas.length) {
+      html += '<tr><td colspan="3" style="padding:6px 12px;background:var(--s1);font-size:.73rem;color:var(--s5);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Inativas</td></tr>';
+      html += _linhas(inativas);
+    }
+
+    html += '</tbody></table></div>';
+    wrap.innerHTML = html;
+  }
+
+  function abrirModalCategoria (id) {
+    _editId = id || null;
+    var m = sid('modalEstCategoria');
+    if (!m) return;
+
+    if (id) {
+      var cat = _categorias.find(function (c) { return c.id === id; });
+      if (cat) {
+        _vl('estCatNome', cat.nome || '');
+        _vl('estCatDesc', cat.descricao || '');
+      }
+    } else {
+      _vl('estCatNome', '');
+      _vl('estCatDesc', '');
+    }
+
+    var titulo = sid('estCatModalTitulo');
+    if (titulo) titulo.textContent = id ? '✏️ Editar Categoria' : '🗂️ Nova Categoria';
+    m.style.display = 'flex';
+  }
+
+  function fecharModalCategoria () {
+    var m = sid('modalEstCategoria');
+    if (m) m.style.display = 'none';
+    _editId = null;
+  }
+
+  async function salvarCategoria () {
+    if (_salvando) return;
+    var nome = (_gv('estCatNome') || '').trim();
+    if (!nome) { toast('Informe o nome da categoria', 'warn'); return; }
+
+    _salvando = true;
+    var btn = sid('estBtnSalvarCat');
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+
+    try {
+      var payload = { nome: nome, descricao: (_gv('estCatDesc') || '').trim() || null };
+      var r;
+      if (_editId) {
+        r = await _sb.from('estoque_categorias').update(payload).eq('id', _editId);
+      } else {
+        r = await _sb.from('estoque_categorias').insert({ ...payload, ativo: true });
+      }
+      if (r.error) throw r.error;
+
+      toast(_editId ? '✅ Categoria atualizada!' : '✅ Categoria criada!', 'success');
+      fecharModalCategoria();
+      await _carregarCategorias();
+      _renderCategorias();
+    } catch (err) {
+      toast('Erro: ' + err.message, 'error');
+    } finally {
+      _salvando = false;
+      if (btn) { btn.disabled = false; btn.textContent = '💾 Salvar'; }
+    }
+  }
+
+  async function desativarCategoria (id) {
+    if (!confirm('Desativar esta categoria? Os produtos vinculados não serão afetados.')) return;
+    var r = await _sb.from('estoque_categorias').update({ ativo: false }).eq('id', id);
+    if (r.error) { toast('Erro: ' + r.error.message, 'error'); return; }
+    toast('Categoria desativada', 'info');
+    await _carregarCategorias();
+    _renderCategorias();
+  }
+
+  async function reativarCategoria (id) {
+    var r = await _sb.from('estoque_categorias').update({ ativo: true }).eq('id', id);
+    if (r.error) { toast('Erro: ' + r.error.message, 'error'); return; }
+    toast('Categoria reativada', 'success');
+    await _carregarCategorias();
+    _renderCategorias();
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -924,6 +1042,12 @@ const EstoqueMod = (function () {
   return {
     init:                init,
     trocarAba:           trocarAba,
+    // categorias
+    abrirModalCategoria: abrirModalCategoria,
+    fecharModalCategoria:fecharModalCategoria,
+    salvarCategoria:     salvarCategoria,
+    desativarCategoria:  desativarCategoria,
+    reativarCategoria:   reativarCategoria,
     // produtos
     abrirModalProduto:   abrirModalProduto,
     fecharModalProduto:  fecharModalProduto,
