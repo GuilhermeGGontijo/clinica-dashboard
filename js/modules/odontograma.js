@@ -113,6 +113,12 @@ const OdontogramaMod = (function () {
     var rI = await _sb.from('odonto_procedimentos')
       .select('id,nome_intervencao,valor_base,especialidade_id,tipo_visual')
       .eq('ativo', true).order('nome_intervencao');
+    // Fallback: coluna tipo_visual ainda não existe no banco (migração pendente)
+    if (rI.error) {
+      rI = await _sb.from('odonto_procedimentos')
+        .select('id,nome_intervencao,valor_base,especialidade_id')
+        .eq('ativo', true).order('nome_intervencao');
+    }
 
     var esps = rE.error ? [] : (rE.data || []);
     var invs = rI.error ? [] : (rI.data || []);
@@ -923,6 +929,12 @@ const OdontogramaMod = (function () {
     var r = await _sb.from('orcamentos')
       .select('id,orcamento_itens(dente_numero,faces,status_visual,odonto_procedimentos(tipo_visual))')
       .eq('paciente_id', _pacienteId);
+    // Fallback: colunas ainda não existem (migração pendente)
+    if (r.error) {
+      r = await _sb.from('orcamentos')
+        .select('id,orcamento_itens(dente_numero,faces)')
+        .eq('paciente_id', _pacienteId);
+    }
 
     if (r.error || !r.data) { _aplicarEstadoNoOdontograma(); return; }
 
