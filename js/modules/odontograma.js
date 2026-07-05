@@ -50,6 +50,7 @@ const OdontogramaMod = (function () {
     _atualizarTotal();
     _mostrarSelecaoPaciente();
     _atualizarPainelLateral();
+    _carregarHistoricoPaciente();
   }
 
   /* ── Carregar especialidades + intervenções em paralelo ── */
@@ -275,6 +276,145 @@ const OdontogramaMod = (function () {
   }
 
   /* ══════════════════════════════════════════════════════════════════
+     HISTÓRICO DO PACIENTE
+  ══════════════════════════════════════════════════════════════════ */
+  async function _carregarHistoricoPaciente() {
+    var cont = sid('odoHistConteudo');
+    if (!cont) return;
+    if (!_pacienteId || !_sb) {
+      cont.innerHTML = '<div class="odoHistVazio">Selecione um paciente para ver o histórico</div>';
+      return;
+    }
+    cont.innerHTML = '<div class="odoHistVazio">Carregando...</div>';
+
+    var rOrc = await _sb.from('orcamentos')
+      .select('id,data_criacao,valor_total,status_geral,orcamento_itens(dente_numero,faces,valor_cobrado,odonto_procedimentos(nome_intervencao))')
+      .eq('paciente_id', _pacienteId)
+      .order('data_criacao', { ascending: false })
+      .limit(20);
+
+    var rAnam = await _sb.from('anamnese_odonto')
+      .select('id,data_avaliacao,respostas')
+      .eq('paciente_id', _pacienteId)
+      .order('data_avaliacao', { ascending: false })
+      .limit(10);
+
+    _renderHistoricoPaciente(rOrc.data || [], rAnam.data || []);
+  }
+
+  function _fmtData(str) {
+    if (!str) return '—';
+    var d = new Date(str);
+    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function _renderHistoricoPaciente(orcamentos, anamneses) {
+    var cont = sid('odoHistConteudo');
+    if (!cont) return;
+
+    if (!orcamentos.length && !anamneses.length) {
+      cont.innerHTML = '<div class="odoHistVazio">Nenhum histórico encontrado para este paciente</div>';
+      return;
+    }
+
+    var html = '';
+
+    /* ── Orçamentos ── */
+    if (orcamentos.length) {
+      html += '<div class="odoHistSecao">💰 Orçamentos</div>';
+      orcamentos.forEach(function (orc, i) {
+        var itemId = 'odoHistOrc_' + i;
+        var itens  = orc.orcamento_itens || [];
+        var total  = 'R$ ' + (Number(orc.valor_total || 0)).toFixed(2).replace('.', ',');
+        var data   = _fmtData(orc.data_criacao);
+        var status = orc.status_geral || 'Finalizado';
+
+        html += '<div class="odoHistItem">';
+        html += '<div class="odoHistItemHdr" onclick="OdontogramaMod.toggleHistItem(\'' + itemId + '\')">'
+          + '<span class="odoHistArrow" id="arr_' + itemId + '">▶</span>'
+          + '<span class="odoHistItemData">' + data
+          + '<br><span class="odoHistItemSub"><span class="odoHistStatus">' + esc(status) + '</span></span></span>'
+          + '<span class="odoHistItemVal">' + total + '</span>'
+          + '</div>';
+
+        html += '<div class="odoHistItemBody" id="' + itemId + '">';
+        if (itens.length) {
+          itens.forEach(function (it) {
+            var proc = (it.odonto_procedimentos && it.odonto_procedimentos.nome_intervencao)
+              ? it.odonto_procedimentos.nome_intervencao : '—';
+            var val  = 'R$ ' + (Number(it.valor_cobrado || 0)).toFixed(2).replace('.', ',');
+            html += '<div class="odoHistLinha">'
+              + '<span class="odoHistDente">D.' + esc(String(it.dente_numero)) + '</span>'
+              + '<span class="odoHistProc">' + esc(proc)
+              + (it.faces ? '<br><span style="color:var(--s4);font-size:.65rem">' + esc(it.faces) + '</span>' : '')
+              + '</span>'
+              + '<span class="odoHistPreco">' + val + '</span>'
+              + '</div>';
+          });
+        } else {
+          html += '<div class="odoHistVazio" style="padding:8px 0;font-size:.72rem">Sem itens</div>';
+        }
+        html += '</div></div>';
+      });
+    }
+
+    /* ── Anamneses ── */
+    if (anamneses.length) {
+      html += '<div class="odoHistSecao" style="margin-top:6px">📋 Anamneses</div>';
+      anamneses.forEach(function (an, i) {
+        var itemId = 'odoHistAnam_' + i;
+        var data   = _fmtData(an.data_avaliacao);
+        var resp   = an.respostas || {};
+
+        html += '<div class="odoHistItem">';
+        html += '<div class="odoHistItemHdr" onclick="OdontogramaMod.toggleHistItem(\'' + itemId + '\')">'
+          + '<span class="odoHistArrow" id="arr_' + itemId + '">▶</span>'
+          + '<span class="odoHistItemData">' + data + '</span>'
+          + '</div>';
+
+        html += '<div class="odoHistItemBody" id="' + itemId + '">';
+
+        /* Motivo */
+        if (resp.motivo_consulta) {
+          html += '<div class="odoHistAnamResp"><span class="odoHistAnamLabel">Motivo: </span>' + esc(resp.motivo_consulta) + '</div>';
+        }
+        /* Perguntas sim/nao */
+        var campos = [
+          { k: 'doenca_saude',  l: 'Doenças' },
+          { k: 'medicacao',     l: 'Medicação' },
+          { k: 'alergia',       l: 'Alergia' },
+          { k: 'anestesia',     l: 'Anestesia' },
+          { k: 'cardiaco',      l: 'Cardíaco' },
+          { k: 'diabetes',      l: 'Diabetes' },
+          { k: 'habito',        l: 'Hábitos' }
+        ];
+        campos.forEach(function (c) {
+          var v = resp[c.k];
+          if (!v || !v.resposta) return;
+          var txt = v.resposta === 'SIM'
+            ? '<strong style="color:var(--r6)">SIM</strong>' + (v.detalhe ? ' — ' + esc(v.detalhe) : '')
+            : '<span style="color:var(--g6)">NÃO</span>';
+          html += '<div class="odoHistAnamResp"><span class="odoHistAnamLabel">' + c.l + ': </span>' + txt + '</div>';
+        });
+        if (resp.outras_info) {
+          html += '<div class="odoHistAnamResp"><span class="odoHistAnamLabel">Obs: </span>' + esc(resp.outras_info) + '</div>';
+        }
+        html += '</div></div>';
+      });
+    }
+
+    cont.innerHTML = html;
+  }
+
+  function toggleHistItem(id) {
+    var body = sid(id);
+    var arr  = sid('arr_' + id);
+    if (!body) return;
+    var open = body.classList.toggle('open');
+    if (arr) arr.classList.toggle('open', open);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
      CARRINHO
   ══════════════════════════════════════════════════════════════════ */
   function _renderItens() {
@@ -393,6 +533,7 @@ const OdontogramaMod = (function () {
     fecharBuscaPaciente();
     _mostrarSelecaoPaciente();
     toast('Paciente: ' + nome, 'success');
+    _carregarHistoricoPaciente();
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -453,6 +594,7 @@ const OdontogramaMod = (function () {
       _itens = [];
       _renderItens();
       _atualizarTotal();
+      _carregarHistoricoPaciente();
 
     } catch (err) {
       toast('Erro ao finalizar: ' + err.message, 'error');
@@ -476,6 +618,6 @@ const OdontogramaMod = (function () {
     abrirModalIntervencao, fecharModalIntervencao, gravarIntervencao, toggleFaceModal,
     removerItem, finalizarAtendimento,
     abrirBuscaPaciente, fecharBuscaPaciente, buscarPaciente, selecionarPaciente,
-    trocarPaciente, lancarSelecao, abrirAnamnese
+    trocarPaciente, lancarSelecao, abrirAnamnese, toggleHistItem
   };
 })();

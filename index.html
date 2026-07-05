@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260705g">
+  <link rel="stylesheet" href="css/style.css?v=20260705h">
 </head>
 <body>
 
@@ -819,7 +819,15 @@
 
   <div class="odontoLayout">
 
-    <!-- ── Painel Esquerdo: Arcadas ── -->
+    <!-- ── Painel Histórico (esquerda) ── -->
+    <div id="odoHistoricoPanel" class="odoHistPanel">
+      <div class="odoHistTitulo">📅 Histórico</div>
+      <div id="odoHistConteudo" class="odoHistConteudo">
+        <div class="odoHistVazio">Selecione um paciente para ver o histórico</div>
+      </div>
+    </div>
+
+    <!-- ── Painel Central: Arcadas ── -->
     <div class="odontoPainelArcada">
 
       <div class="odontoLegenda">
@@ -2317,7 +2325,7 @@
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260703i"></script>
-<script src="js/modules/odontograma.js?v=20260705e"></script>
+<script src="js/modules/odontograma.js?v=20260705f"></script>
 <script src="js/modules/anamnese-odonto.js?v=20260705b"></script>
 <script src="js/modules/admin-odonto-proc.js?v=20260705a"></script>
 <script src="js/modules/caixa.js?v=20260703h"></script>
