@@ -2399,8 +2399,8 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 @media(max-width:1024px){
   /* Unit bar — botão dropdown menor */
   .unitDropBtn{min-width:150px}
-  /* Odontograma stack antes dos 900px */
-  .odontoLayout{grid-template-columns:1fr}
+  /* Odontograma — 3 colunas compactas */
+  .odontoLayout{grid-template-columns:180px 1fr 260px}
   .odontoPainelOrcamento{position:relative;top:auto}
   /* KPI grid — minimums menores */
   .kpiGrid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
