@@ -102,10 +102,12 @@ const OdontogramaMod = (function () {
     lbl.textContent = num;
     w.appendChild(lbl);
 
-    /* Imagem anatômica (placeholder) */
+    /* Imagem anatômica — PNG real para permanentes, placeholder para decíduos */
     var img = document.createElement('img');
     img.className = 'odontoDenteImg';
-    img.src = 'assets/tooth-placeholder.png';
+    img.src = deciduo
+      ? 'assets/tooth-placeholder.png'
+      : 'assets/images/toothImageFront' + num + '.png';
     img.alt = 'Dente ' + num;
     img.draggable = false;
     img.onerror = function () { this.style.display = 'none'; };
