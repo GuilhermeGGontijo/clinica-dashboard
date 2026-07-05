@@ -1905,14 +1905,61 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .odoChipInt:hover .odoChipVal { color: var(--b6); }
 .odoChipAtivo .odoChipVal     { color: rgba(255,255,255,.8) !important; }
 
-/* ── Modal: checkboxes de face ── */
-.odoFaceCheck {
-  display: flex; align-items: center; gap: 8px;
-  font-size: .84rem; color: var(--s7); cursor: pointer;
-  padding: 5px 6px; border-radius: 4px; transition: background .1s;
+/* ── Modal: seletor visual de faces ── */
+.odoFacePickArea {
+  position: relative;
+  width: 230px; height: 230px;
+  margin: 0 auto;
 }
-.odoFaceCheck:hover { background: var(--s1); }
-.odoFaceCheck input { width: 15px; height: 15px; cursor: pointer; accent-color: var(--b5); }
+.odoFacePickLbl {
+  position: absolute;
+  font-size: .66rem; font-weight: 700;
+  color: var(--s6); text-align: center;
+  line-height: 1.25; pointer-events: none;
+}
+.odoFacePickLbl.lblTop    { top: 4px; left: 50%; transform: translateX(-50%); }
+.odoFacePickLbl.lblBottom { bottom: 4px; left: 50%; transform: translateX(-50%); }
+.odoFacePickLbl.lblLeft   { top: 50%; left: 4px; transform: translateY(-50%); writing-mode: vertical-lr; text-orientation: mixed; }
+.odoFacePickLbl.lblRight  { top: 50%; right: 4px; transform: translateY(-50%); writing-mode: vertical-lr; text-orientation: mixed; }
+
+.odoFacePickCruzeta {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140px; height: 140px;
+}
+
+/* Faces da cruzeta do modal (clicáveis, maiores que as do odontograma) */
+.odFacePick {
+  position: absolute;
+  border: 2px solid #94a3b8;
+  background: #ecf0f1;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, filter .1s;
+}
+.odFacePick:hover:not(.selecionada) { background: #cbd5e1; border-color: #64748b; filter: brightness(0.95); }
+.odFacePick.selecionada             { background: #f1c40f !important; border-color: #d97706 !important; }
+.odFacePick.top    { top:0; left:25%; width:50%; height:25%; clip-path:polygon(20% 0,80% 0,100% 100%,0 100%); }
+.odFacePick.bottom { bottom:0; left:25%; width:50%; height:25%; clip-path:polygon(0 0,100% 0,80% 100%,20% 100%); }
+.odFacePick.left   { top:25%; left:0; width:25%; height:50%; clip-path:polygon(0 20%,100% 0,100% 100%,0 80%); }
+.odFacePick.right  { top:25%; right:0; width:25%; height:50%; clip-path:polygon(0 0,100% 20%,100% 80%,0 100%); }
+.odFacePick.center {
+  top:25%; left:25%; width:50%; height:50%;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.odFacePick.center.selecionada { background: #f1c40f !important; }
+.odFacePickCenterLbl {
+  font-size: .58rem; font-weight: 700; color: var(--s5);
+  pointer-events: none; user-select: none; line-height: 1;
+}
+
+/* Texto de faces selecionadas */
+.odoFacesSelText {
+  margin-top: 10px; font-size: .78rem;
+  color: var(--s5); min-height: 18px;
+  font-style: italic;
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    CAIXA DO DIA (CaixaMod)

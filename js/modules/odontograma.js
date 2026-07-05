@@ -218,9 +218,12 @@ const OdontogramaMod = (function () {
     var vc = sid('odoModalValorClinica');  if (vc) vc.value = val;
     var vp = sid('odoModalValorPaciente'); if (vp) vp.value = val;
 
-    FACES.forEach(function (f) {
-      var cb = sid('odoFace_' + f.c); if (cb) cb.checked = false;
+    /* Limpar seleção da cruzeta visual */
+    document.querySelectorAll('.odFacePick').forEach(function (el) {
+      el.classList.remove('selecionada');
     });
+    var txt = sid('odoFacesSelText');
+    if (txt) txt.textContent = 'Nenhuma face selecionada';
 
     var m = sid('odontoModalIntervencao'); if (m) m.style.display = 'flex';
   }
@@ -230,12 +233,25 @@ const OdontogramaMod = (function () {
     _intAtual = null;
   }
 
+  function toggleFaceModal(el) {
+    el.classList.toggle('selecionada');
+    /* Atualizar texto descritivo */
+    var sels = Array.from(document.querySelectorAll('.odFacePick.selecionada'))
+      .map(function (e) {
+        var face = FACES.find(function (f) { return f.c === e.dataset.face; });
+        return face ? face.l : '';
+      }).filter(Boolean);
+    var txt = sid('odoFacesSelText');
+    if (txt) txt.textContent = sels.length ? sels.join(' · ') : 'Nenhuma face selecionada';
+  }
+
   function gravarIntervencao() {
     if (!_intAtual) return;
     var facesSel = FACES.filter(function (f) {
-      var cb = sid('odoFace_' + f.c); return cb && cb.checked;
+      var el = document.querySelector('.odFacePick[data-face="' + f.c + '"]');
+      return el && el.classList.contains('selecionada');
     });
-    if (!facesSel.length) { toast('Selecione ao menos uma face afetada', 'warn'); return; }
+    if (!facesSel.length) { toast('Clique em pelo menos uma face na cruzeta', 'warn'); return; }
 
     _itens.push({
       dente:            _denteSel,
@@ -452,7 +468,7 @@ const OdontogramaMod = (function () {
   return {
     init,
     selecionarDente, selecionarEspecialidade,
-    abrirModalIntervencao, fecharModalIntervencao, gravarIntervencao,
+    abrirModalIntervencao, fecharModalIntervencao, gravarIntervencao, toggleFaceModal,
     removerItem, finalizarAtendimento,
     abrirBuscaPaciente, fecharBuscaPaciente, buscarPaciente, selecionarPaciente,
     trocarPaciente, lancarSelecao
