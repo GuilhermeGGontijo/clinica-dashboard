@@ -580,14 +580,38 @@ const OdontogramaMod = (function () {
       var rItens = await _sb.from('orcamento_itens').insert(bulk);
       if (rItens.error) throw rItens.error;
 
-      /* 3. Lançar recebimento pendente no caixa */
+      /* 3. Criar agendamento virtual para integrar com Caixa do Dia e Recebimentos */
+      var _agNow  = new Date();
+      var _agData = _agNow.toISOString().split('T')[0];
+      var _agHH   = String(_agNow.getHours()).padStart(2, '0');
+      var _agMM   = String(_agNow.getMinutes()).padStart(2, '0');
+      var _agHFH  = String((_agNow.getHours() + 1) % 24).padStart(2, '0');
+      var _descProc = _itens.map(function (it) {
+        return 'D.' + it.dente + ' — ' + it.procedimentoNome;
+      }).join(' | ');
+
+      var rAg = await _sb.from('agendamentos').insert({
+        unidade_id:       CU,
+        paciente_id:      _pacienteId,
+        profissional_id:  uid,
+        criado_por:       uid,
+        data_agendamento: _agData,
+        hora_inicio:      _agHH + ':' + _agMM,
+        hora_fim:         _agHFH + ':' + _agMM,
+        valor_cobrado:    total,
+        status:           'Finalizado',
+        observacoes:      '🦷 Odontograma: ' + _descProc
+      }).select('id').single();
+      if (rAg.error) throw rAg.error;
+
+      /* 4. Lançar recebimento pendente vinculado ao agendamento */
       var rReceb = await _sb.from('recebimentos').insert({
+        agendamento_id:   rAg.data.id,
         unidade_id:       CU,
         valor:            total,
         status:           'PENDENTE',
-        data_recebimento: new Date().toISOString().split('T')[0],
-        observacoes:      'Odontograma — Orç. #' + String(rOrc.data.id).slice(0, 8).toUpperCase()
-                        + ' | Paciente: ' + _pacienteNome,
+        data_recebimento: _agData,
+        observacoes:      '🦷 Orç. #' + String(rOrc.data.id).slice(0, 8).toUpperCase(),
         criado_por:       uid
       });
       if (rReceb.error) throw rReceb.error;

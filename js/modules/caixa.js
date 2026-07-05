@@ -78,7 +78,7 @@ const CaixaMod = (function () {
 
     /* 1. Apenas campos base — sem joins que podem falhar */
     var rAg = await _sb.from('agendamentos')
-      .select('id,hora_inicio,valor_cobrado,status,paciente_id,profissional_id,procedimento_id,criado_por')
+      .select('id,hora_inicio,valor_cobrado,status,paciente_id,profissional_id,procedimento_id,observacoes,criado_por')
       .gte('data_agendamento', hoje)
       .lte('data_agendamento', hoje)
       .eq('unidade_id', CU)
@@ -219,7 +219,7 @@ const CaixaMod = (function () {
 
       var hora    = (ag.hora_inicio  || '').substring(0, 5);
       var pac     = (ag.pacientes   && ag.pacientes.nome_completo) || '—';
-      var proc    = (ag.procedimento && ag.procedimento.nome)      || '—';
+      var proc    = (ag.procedimento && ag.procedimento.nome) || ag.observacoes || '—';
       var prof    = (ag.profissional && ag.profissional.nome)      || '—';
       var recepNome = (ag.criador    && ag.criador.nome)           || '—';
       var valor   = pago

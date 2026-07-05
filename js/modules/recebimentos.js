@@ -133,7 +133,7 @@ const RecebMod = (function () {
 
     /* 1. Apenas campos base — sem joins que podem falhar */
     var q = _sb.from('agendamentos')
-      .select('id,data_agendamento,hora_inicio,status,forma_pagamento,convenio_id,numero_guia,valor_cobrado,paciente_id,profissional_id,procedimento_id')
+      .select('id,data_agendamento,hora_inicio,status,forma_pagamento,convenio_id,numero_guia,valor_cobrado,paciente_id,profissional_id,procedimento_id,observacoes')
       .eq('unidade_id', CU)
       .neq('status', 'Cancelado')
       .order('data_agendamento', { ascending: false });
@@ -303,7 +303,7 @@ const RecebMod = (function () {
       html += '<tr class="' + (estorn ? 'recebRowEstornado' : '') + '">'
         + '<td class="recebTdData">' + dtFmt + '<br><small class="recebHora">' + (ag.hora_inicio || '').substring(0,5) + '</small></td>'
         + '<td>' + esc((ag.paciente     && ag.paciente.nome_completo) || '—') + '</td>'
-        + '<td>' + esc((ag.procedimento && ag.procedimento.nome)      || '—') + '</td>'
+        + '<td>' + esc((ag.procedimento && ag.procedimento.nome) || ag.observacoes || '—') + '</td>'
         + '<td>' + esc((ag.profissional && ag.profissional.nome)      || '—') + '</td>'
         + '<td class="recebValor' + (estorn ? ' recebValorEstorn' : '') + '">' + (valor > 0 ? 'R$ ' + valor.toFixed(2).replace('.', ',') : '—') + '</td>'
         + '<td>' + forma + '</td>'
@@ -324,7 +324,7 @@ const RecebMod = (function () {
            || _pendentesAlert.find(function (a) { return a.id === agId; });
     if (!ag) {
       var r = await _sb.from('agendamentos')
-        .select('id,data_agendamento,hora_inicio,status,forma_pagamento,convenio_id,valor_cobrado,paciente_id,procedimento_id')
+        .select('id,data_agendamento,hora_inicio,status,forma_pagamento,convenio_id,valor_cobrado,paciente_id,procedimento_id,observacoes')
         .eq('id', agId).single();
       if (r.error || !r.data) { toast('Agendamento não encontrado.', 'err'); return; }
       ag = r.data;
@@ -368,7 +368,7 @@ const RecebMod = (function () {
       var d = new Date(ag.data_agendamento + 'T00:00:00');
       info.textContent = ((ag.paciente && ag.paciente.nome_completo) || '—')
         + ' — ' + d.toLocaleDateString('pt-BR') + ' ' + (ag.hora_inicio || '').substring(0,5)
-        + ' — ' + ((ag.procedimento && ag.procedimento.nome) || '—');
+        + ' — ' + ((ag.procedimento && ag.procedimento.nome) || ag.observacoes || '—');
     }
 
     onFormaChange();
