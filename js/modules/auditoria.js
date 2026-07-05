@@ -173,12 +173,89 @@ const AuditoriaMod = (function () {
       }
     }
 
+    /* ── 7. Orçamentos odontológicos (recebimentos ODONTO:) ── */
+    var qOdonto = _sb.from('recebimentos')
+      .select('id,valor,status,forma_pagamento,observacoes,data_recebimento,criado_por')
+      .eq('unidade_id', CU)
+      .like('observacoes', 'ODONTO:%');
+    if (ini) qOdonto = qOdonto.gte('data_recebimento', ini);
+    if (fim) qOdonto = qOdonto.lte('data_recebimento', fim);
+    var rOdonto = await qOdonto;
+    var oRecbs = (!rOdonto.error && rOdonto.data) ? rOdonto.data : [];
+
+    if (oRecbs.length) {
+      var orcIds3 = oRecbs.map(function (rb) {
+        var m = rb.observacoes.match(/^ODONTO:([^\s|]+)/i);
+        return m ? m[1] : null;
+      }).filter(Boolean).filter(function (v, i, a) { return a.indexOf(v) === i; });
+
+      var orcMap3 = {};
+      if (orcIds3.length) {
+        var rOrcs3 = await _sb.from('orcamentos').select('id,paciente_id,profissional_id').in('id', orcIds3);
+        (rOrcs3.data || []).forEach(function (o) { orcMap3[o.id] = o; });
+      }
+
+      var oPacIds3 = Object.values(orcMap3).map(function (o) { return o.paciente_id; }).filter(Boolean)
+        .filter(function (v, i, a) { return a.indexOf(v) === i; });
+      var oPacMap3 = {};
+      if (oPacIds3.length) {
+        var rOP3 = await _sb.from('pacientes').select('id,nome_completo').in('id', oPacIds3);
+        (rOP3.data || []).forEach(function (p) { oPacMap3[p.id] = p.nome_completo; });
+      }
+
+      var oProfIds3 = Object.values(orcMap3).map(function (o) { return o.profissional_id; }).filter(Boolean)
+        .filter(function (v, i, a) { return a.indexOf(v) === i; });
+      var oProfMap3 = {};
+      if (oProfIds3.length) {
+        var rOPr3 = await _sb.from('perfis_usuarios').select('id,nome').in('id', oProfIds3);
+        (rOPr3.data || []).forEach(function (p) { oProfMap3[p.id] = p.nome; });
+      }
+
+      var oCreatIds3 = oRecbs.map(function (rb) { return rb.criado_por; }).filter(Boolean)
+        .filter(function (v, i, a) { return a.indexOf(v) === i; });
+      var oCreatMap3 = {};
+      if (oCreatIds3.length) {
+        var rOCr3 = await _sb.from('perfis_usuarios').select('id,nome').in('id', oCreatIds3);
+        (rOCr3.data || []).forEach(function (p) { oCreatMap3[p.id] = p.nome; });
+      }
+
+      var oNorm = oRecbs.map(function (rb) {
+        var m = rb.observacoes.match(/^ODONTO:([^\s|]+)\s*\|\s*(.*)$/i);
+        var orcId   = m ? m[1] : null;
+        var descProc = m && m[2] ? m[2].substring(0, 80) : 'Odontologia';
+        var orc     = orcId ? (orcMap3[orcId] || {}) : {};
+        return {
+          _tipo:            'odonto',
+          data_agendamento: rb.data_recebimento,
+          hora_inicio:      null,
+          status:           'Realizado',
+          valor_cobrado:    rb.valor,
+          paciente_id:      orc.paciente_id || null,
+          pacientes:        { nome_completo: oPacMap3[orc.paciente_id] || '—' },
+          profissional:     { nome: oProfMap3[orc.profissional_id] || '—' },
+          procedimento:     { nome: '🦷 ' + descProc },
+          criador:          { nome: oCreatMap3[rb.criado_por] || '—' },
+          recebimentos:     [{ id: rb.id, valor: rb.valor, status: rb.status,
+                               forma_pagamento: rb.forma_pagamento,
+                               data_recebimento: rb.data_recebimento }]
+        };
+      });
+
+      _dados = _dados.concat(oNorm);
+      _dados.sort(function (a, b) {
+        return new Date(b.data_agendamento) - new Date(a.data_agendamento);
+      });
+    }
+
+    /* ── Filtro de status (inclui odonto) ── */
     if (stFilt === 'RECEBIDO') {
       _dados = _dados.filter(function (ag) {
+        if (ag._tipo === 'odonto') return ag.recebimentos[0] && ag.recebimentos[0].status === 'RECEBIDO';
         return ag.recebimentos && ag.recebimentos.some(function (rb) { return rb.status === 'RECEBIDO'; });
       });
     } else if (stFilt === 'PENDENTE') {
       _dados = _dados.filter(function (ag) {
+        if (ag._tipo === 'odonto') return !ag.recebimentos[0] || ag.recebimentos[0].status !== 'RECEBIDO';
         return !ag.recebimentos || !ag.recebimentos.some(function (rb) { return rb.status === 'RECEBIDO'; });
       });
     }
@@ -188,6 +265,12 @@ const AuditoriaMod = (function () {
      CÁLCULO DE REPASSE POR ATENDIMENTO
   ══════════════════════════════════════════════════════════════════ */
   function _calcRepasse (ag) {
+    if (ag._tipo === 'odonto') {
+      var rb0 = ag.recebimentos && ag.recebimentos[0];
+      var isPago = rb0 && rb0.status === 'RECEBIDO';
+      var vb = parseFloat(ag.valor_cobrado) || 0;
+      return { valorBase: vb, repasse: 0, retido: vb, percRepasse: 0, receb: isPago ? rb0 : null };
+    }
     var receb = ag.recebimentos && ag.recebimentos.find(function (rb) { return rb.status === 'RECEBIDO'; });
     var valorBase = receb
       ? (parseFloat(receb.valor) || 0)
