@@ -16,6 +16,8 @@ const OdontogramaMod = (function () {
   var _itens          = [];     // carrinho de orçamento
   var _especialidades = [];     // [{id, nome, procs:[{id, nome_intervencao, valor_base}]}]
   var _finalizando    = false;
+  var _histOrcamentos = [];     // cache do histórico carregado
+  var _histVizIdx     = 0;      // índice atual na visualização histórica
 
   /* ── Numeração FDI ── */
   var PERM_SUP = [18,17,16,15,14,13,12,11, 21,22,23,24,25,26,27,28];
@@ -394,6 +396,8 @@ const OdontogramaMod = (function () {
     var cont = sid('odoHistConteudo');
     if (!cont) return;
 
+    _histOrcamentos = orcamentos; // salva para visualização
+
     if (!orcamentos.length && !anamneses.length) {
       cont.innerHTML = '<div class="odoHistVazio">Nenhum histórico encontrado para este paciente</div>';
       return;
@@ -412,11 +416,12 @@ const OdontogramaMod = (function () {
         var status = orc.status_geral || 'Finalizado';
 
         html += '<div class="odoHistItem">';
-        html += '<div class="odoHistItemHdr" onclick="OdontogramaMod.toggleHistItem(\'' + itemId + '\')">'
-          + '<span class="odoHistArrow" id="arr_' + itemId + '">▶</span>'
-          + '<span class="odoHistItemData">' + data
+        html += '<div class="odoHistItemHdr">'
+          + '<span class="odoHistArrow" id="arr_' + itemId + '" onclick="OdontogramaMod.toggleHistItem(\'' + itemId + '\')">▶</span>'
+          + '<span class="odoHistItemData" onclick="OdontogramaMod.toggleHistItem(\'' + itemId + '\')" style="cursor:pointer;flex:1">' + data
           + '<br><span class="odoHistItemSub"><span class="odoHistStatus">' + esc(status) + '</span></span></span>'
           + '<span class="odoHistItemVal">' + total + '</span>'
+          + '<button class="odoHistVizBtn" onclick="OdontogramaMod.verHistViz(' + i + ')" title="Visualizar odontograma histórico">👁</button>'
           + '</div>';
 
         html += '<div class="odoHistItemBody" id="' + itemId + '">';
@@ -698,6 +703,127 @@ const OdontogramaMod = (function () {
     if (typeof AnamneseMod !== 'undefined') AnamneseMod.abrir(_pacienteId, _pacienteNome);
   }
 
+  /* ══════════════════════════════════════════════════════════════════
+     VISUALIZAÇÃO HISTÓRICA — ODONTOGRAMA SOMENTE LEITURA
+  ══════════════════════════════════════════════════════════════════ */
+  function _htmlMiniDente(num, deciduo, procs) {
+    var marcado = procs && procs.length > 0;
+    var tooltipParts = marcado
+      ? procs.map(function (p) { return p.proc + (p.faces ? ' (' + p.faces + ')' : ''); })
+      : ['Dente ' + num];
+    var tooltip = tooltipParts.join(' | ');
+    var cls = 'odoHVDente' + (marcado ? ' odoHVDenteMarcado' : '') + (deciduo ? ' odoHVDeciduo' : '');
+    var imgSrc = deciduo ? 'assets/tooth-placeholder.png' : ('assets/images/toothImageFront' + num + '.png');
+    return '<div class="' + cls + '" title="' + esc(tooltip) + '">'
+      + '<div class="odoHVNum">' + num + '</div>'
+      + '<img src="' + imgSrc + '" class="odoHVImg" alt="" onerror="this.style.display=\'none\'">'
+      + (marcado ? '<div class="odoHVMarca">' + procs.length + '</div>' : '')
+      + '</div>';
+  }
+
+  function _buildHistVizBody(orc) {
+    var itens = orc.orcamento_itens || [];
+    var denteMap = {};
+    itens.forEach(function (it) {
+      var d = it.dente_numero;
+      if (!denteMap[d]) denteMap[d] = [];
+      denteMap[d].push({
+        proc: (it.odonto_procedimentos && it.odonto_procedimentos.nome_intervencao)
+          ? it.odonto_procedimentos.nome_intervencao : '—',
+        faces: it.faces || '',
+        valor: Number(it.valor_cobrado || 0)
+      });
+    });
+
+    var html = '<div class="odoHVArcadas">';
+
+    html += '<div class="odoHVArcadaLabel">ARCADA SUPERIOR — PERMANENTE</div>';
+    html += '<div class="odoHVLinha">'
+      + PERM_SUP.map(function (n) { return _htmlMiniDente(n, false, denteMap[n]); }).join('') + '</div>';
+
+    html += '<div class="odoHVArcadaLabel odoHVLabelGap">ARCADA SUPERIOR — DECÍDUA</div>';
+    html += '<div class="odoHVLinha odoHVLinhaDecidua">'
+      + DEC_SUP.map(function (n) { return _htmlMiniDente(n, true, denteMap[n]); }).join('') + '</div>';
+
+    html += '<div class="odoHVSep"></div>';
+
+    html += '<div class="odoHVLinha odoHVLinhaDecidua">'
+      + DEC_INF.map(function (n) { return _htmlMiniDente(n, true, denteMap[n]); }).join('') + '</div>';
+    html += '<div class="odoHVArcadaLabel">ARCADA INFERIOR — DECÍDUA</div>';
+
+    html += '<div class="odoHVLinha">'
+      + PERM_INF.map(function (n) { return _htmlMiniDente(n, false, denteMap[n]); }).join('') + '</div>';
+    html += '<div class="odoHVArcadaLabel">ARCADA INFERIOR — PERMANENTE</div>';
+
+    html += '</div>'; // odoHVArcadas
+
+    html += '<div class="odoHVLegenda">'
+      + '<span class="odoHVLegNormal"><span class="odoHVLegBox"></span> Sem procedimento</span>'
+      + '<span class="odoHVLegMarcado"><span class="odoHVLegBox odoHVLegBoxMarcado"></span> Com procedimento</span>'
+      + '</div>';
+
+    if (itens.length) {
+      html += '<div class="odoHVSecTitulo">📋 Procedimentos deste atendimento</div>';
+      html += '<div class="odoHVTableWrap"><table class="odoHVTable">'
+        + '<thead><tr><th>Dente</th><th>Procedimento</th><th>Faces</th><th>Valor</th></tr></thead>'
+        + '<tbody>';
+      itens.forEach(function (it) {
+        var proc = (it.odonto_procedimentos && it.odonto_procedimentos.nome_intervencao)
+          ? it.odonto_procedimentos.nome_intervencao : '—';
+        html += '<tr>'
+          + '<td><span class="odoHVDentePill">D.' + esc(String(it.dente_numero)) + '</span></td>'
+          + '<td>' + esc(proc) + '</td>'
+          + '<td class="odoHVFacesTd">' + esc(it.faces || '—') + '</td>'
+          + '<td><strong>R$ ' + Number(it.valor_cobrado || 0).toFixed(2).replace('.', ',') + '</strong></td>'
+          + '</tr>';
+      });
+      html += '</tbody></table></div>';
+    } else {
+      html += '<div class="odoHVVazio">Nenhum procedimento registrado neste atendimento.</div>';
+    }
+
+    return html;
+  }
+
+  function verHistViz(idx) {
+    if (!_histOrcamentos.length) return;
+    _histVizIdx = Math.max(0, Math.min(idx, _histOrcamentos.length - 1));
+    var orc = _histOrcamentos[_histVizIdx];
+    var m = sid('modalOdoHistViz');
+    if (!m) return;
+
+    var total  = 'R$ ' + Number(orc.valor_total || 0).toFixed(2).replace('.', ',');
+    var status = orc.status_geral || 'Finalizado';
+    var data   = _fmtData(orc.data_criacao);
+
+    var meta = sid('odoHVMeta');
+    if (meta) meta.innerHTML = data + ' &nbsp;·&nbsp; <strong>' + esc(status) + '</strong> &nbsp;·&nbsp; <span class="odoHVTotal">' + total + '</span>';
+
+    var nav = sid('odoHVNav');
+    if (nav) {
+      var total_orc = _histOrcamentos.length;
+      nav.innerHTML = '<button class="odoHVNavBtn" onclick="OdontogramaMod.histVizNavegar(-1)" '
+        + (_histVizIdx <= 0 ? 'disabled' : '') + '>◀ Anterior</button>'
+        + '<span class="odoHVNavPos">' + (_histVizIdx + 1) + ' de ' + total_orc + '</span>'
+        + '<button class="odoHVNavBtn" onclick="OdontogramaMod.histVizNavegar(1)" '
+        + (_histVizIdx >= total_orc - 1 ? 'disabled' : '') + '>Próximo ▶</button>';
+    }
+
+    var corpo = sid('odoHVCorpo');
+    if (corpo) corpo.innerHTML = _buildHistVizBody(orc);
+
+    m.style.display = 'flex';
+  }
+
+  function fecharHistViz() {
+    var m = sid('modalOdoHistViz');
+    if (m) m.style.display = 'none';
+  }
+
+  function histVizNavegar(delta) {
+    verHistViz(_histVizIdx + delta);
+  }
+
   return {
     init,
     selecionarDente, selecionarEspecialidade,
@@ -705,6 +831,7 @@ const OdontogramaMod = (function () {
     removerItem, finalizarAtendimento,
     abrirBuscaPaciente, fecharBuscaPaciente, buscarPaciente, selecionarPaciente,
     trocarPaciente, lancarSelecao, abrirAnamnese, toggleHistItem,
-    buscarProcedimento, selecionarProcBusca, fecharDropBusca, limparBusca
+    buscarProcedimento, selecionarProcBusca, fecharDropBusca, limparBusca,
+    verHistViz, fecharHistViz, histVizNavegar
   };
 })();

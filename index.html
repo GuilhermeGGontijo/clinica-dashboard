@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260705m">
+  <link rel="stylesheet" href="css/style.css?v=20260705n">
 </head>
 <body>
 
@@ -1897,6 +1897,24 @@
   </div>
 </div>
 
+<!-- ════ MODAL: ODONTOGRAMA HISTÓRICO — SOMENTE LEITURA ════ -->
+<div id="modalOdoHistViz" class="modal" style="display:none" onclick="if(event.target===this)OdontogramaMod.fecharHistViz()">
+  <div class="modalBox" style="max-width:860px;width:98%">
+    <div class="modalHdr">
+      <div>
+        <h3 style="color:var(--s9);font-size:1rem;font-weight:800;margin:0 0 4px">🦷 Odontograma Histórico — Visualização</h3>
+        <div id="odoHVMeta" style="font-size:.78rem;color:var(--s5)"></div>
+      </div>
+      <button class="bDel" onclick="OdontogramaMod.fecharHistViz()" style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
+    </div>
+    <div id="odoHVNav" style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px;padding:10px 0;border-top:1px solid var(--s2);border-bottom:1px solid var(--s2)"></div>
+    <div id="odoHVCorpo"></div>
+    <div style="margin-top:18px;padding:8px 12px;background:#fef9c3;border:1px solid #fde047;border-radius:8px;font-size:.74rem;color:#713f12;text-align:center">
+      🔒 Este registro é somente leitura — para editar, abra o módulo de odontograma com o paciente selecionado.
+    </div>
+  </div>
+</div>
+
 <!-- ════ MODAL: ATENDIMENTO ════ -->
 <div id="modalAtend" class="ovl" onclick="if(event.target===this)AtendMod.fecharModal()">
   <div class="mBox atdModal">
@@ -2589,7 +2607,7 @@
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260705i"></script>
-<script src="js/modules/odontograma.js?v=20260705j"></script>
+<script src="js/modules/odontograma.js?v=20260705k"></script>
 <script src="js/modules/anamnese-odonto.js?v=20260705b"></script>
 <script src="js/modules/admin-odonto-proc.js?v=20260705a"></script>
 <script src="js/modules/estoque.js?v=20260705b"></script>

@@ -1866,6 +1866,178 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
   background: var(--g1);
   color: var(--g9);
 }
+.odoHistVizBtn {
+  background: #ecfdf5;
+  border: 1.5px solid #6ee7b7;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: .85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .12s;
+  line-height: 1;
+}
+.odoHistVizBtn:hover { background: #d1fae5; border-color: #34d399; }
+
+/* ── Visualização Histórica: mini-odontograma ── */
+.odoHVArcadas {
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 14px 10px 8px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+}
+.odoHVArcadaLabel {
+  font-size: .58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #4b7c5a;
+  text-align: center;
+  margin: 4px 0 3px;
+}
+.odoHVLabelGap { margin-top: 2px; }
+.odoHVLinha {
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 3px;
+  margin-bottom: 3px;
+}
+.odoHVLinhaDecidua { gap: 4px; }
+.odoHVSep {
+  height: 1px;
+  background: #86efac;
+  margin: 6px 0;
+}
+.odoHVDente {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 34px;
+  min-width: 30px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
+  background: #f9fafb;
+  padding: 2px 1px 3px;
+  position: relative;
+  cursor: default;
+}
+.odoHVDeciduo { width: 28px; min-width: 24px; }
+.odoHVDenteMarcado {
+  background: #dcfce7;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 1.5px #86efac;
+}
+.odoHVNum {
+  font-size: .52rem;
+  font-weight: 800;
+  color: #64748b;
+  line-height: 1.1;
+  margin-bottom: 1px;
+}
+.odoHVDenteMarcado .odoHVNum { color: #166534; }
+.odoHVImg {
+  width: 20px;
+  height: 28px;
+  object-fit: contain;
+}
+.odoHVDeciduo .odoHVImg { width: 16px; height: 22px; }
+.odoHVMarca {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #16a34a;
+  color: #fff;
+  font-size: .5rem;
+  font-weight: 900;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.odoHVLegenda {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  font-size: .72rem;
+  color: var(--s6);
+  margin: 8px 0 12px;
+}
+.odoHVLegBox {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1.5px solid #d1d5db;
+  background: #f9fafb;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.odoHVLegBoxMarcado { background: #dcfce7; border-color: #16a34a; }
+.odoHVSecTitulo {
+  font-size: .78rem;
+  font-weight: 800;
+  color: var(--s8);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1.5px solid var(--s2);
+}
+.odoHVTableWrap { overflow-x: auto; }
+.odoHVTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .74rem;
+}
+.odoHVTable th {
+  text-align: left;
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--s5);
+  border-bottom: 1.5px solid var(--s2);
+  padding: 4px 8px 6px;
+}
+.odoHVTable td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--s1);
+  vertical-align: middle;
+  color: var(--s8);
+}
+.odoHVTable tr:last-child td { border-bottom: none; }
+.odoHVTable tr:hover td { background: var(--s0); }
+.odoHVDentePill {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 800;
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: .68rem;
+}
+.odoHVFacesTd { color: var(--s5); font-size: .68rem; }
+.odoHVVazio { font-size: .75rem; color: var(--s4); text-align: center; padding: 16px 0; font-style: italic; }
+.odoHVTotal { color: #16a34a; font-weight: 800; }
+.odoHVNav { display: flex; align-items: center; gap: 12px; }
+.odoHVNavBtn {
+  background: var(--w);
+  border: 1.5px solid var(--s3);
+  border-radius: 7px;
+  padding: 5px 14px;
+  font-size: .76rem;
+  font-weight: 700;
+  color: var(--s7);
+  cursor: pointer;
+  transition: background .12s;
+}
+.odoHVNavBtn:hover:not(:disabled) { background: var(--s1); border-color: var(--s5); }
+.odoHVNavBtn:disabled { opacity: .4; cursor: default; }
+.odoHVNavPos { font-size: .76rem; color: var(--s6); font-weight: 700; min-width: 60px; text-align: center; }
 
 /* ── Arcadas ── */
 .odontoPainelArcada {
