@@ -154,10 +154,16 @@ const OdontogramaMod = (function () {
       if (infoEl) infoEl.innerHTML = '<span class="odoHint">👆 Clique em um dente para começar</span>';
       if (espPanel) espPanel.style.display = 'none';
       if (intPanel) intPanel.style.display = 'none';
+      var buscaPanelHide = sid('odoBuscaPanel');
+      if (buscaPanelHide) buscaPanelHide.style.display = 'none';
       return;
     }
 
     if (infoEl) infoEl.innerHTML = '<span class="odoDenteSelLabel">🦷 Dente #' + _denteSel + ' selecionado</span>';
+
+    /* Busca rápida */
+    var buscaPanel = sid('odoBuscaPanel');
+    if (buscaPanel) buscaPanel.style.display = 'block';
 
     /* Especialidades */
     if (espPanel) espPanel.style.display = 'block';
@@ -198,6 +204,80 @@ const OdontogramaMod = (function () {
   function selecionarEspecialidade(espId) {
     _espSel = espId;
     _atualizarPainelLateral();
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     BUSCA RÁPIDA DE PROCEDIMENTOS
+  ══════════════════════════════════════════════════════════════════ */
+  function buscarProcedimento(query) {
+    var clear = sid('odoBuscaClear');
+    var drop  = sid('odoBuscaDrop');
+    if (!drop) return;
+
+    if (clear) clear.style.display = query ? '' : 'none';
+
+    if (!query || query.trim().length < 1) {
+      drop.style.display = 'none';
+      return;
+    }
+
+    var q = query.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    var resultados = [];
+    _especialidades.forEach(function (esp) {
+      esp.procs.forEach(function (proc) {
+        var nome = proc.nome_intervencao.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        if (nome.includes(q)) {
+          resultados.push({ proc: proc, esp: esp });
+        }
+      });
+    });
+
+    if (!resultados.length) {
+      drop.innerHTML = '<div class="odoBuscaVazio">Nenhum procedimento encontrado para "' + esc(query) + '"</div>';
+    } else {
+      drop.innerHTML = resultados.map(function (r) {
+        var val   = 'R$ ' + Number(r.proc.valor_base).toFixed(2).replace('.', ',');
+        var nomeHL = _highlight(r.proc.nome_intervencao, query);
+        return '<div class="odoBuscaItem" onmousedown="OdontogramaMod.selecionarProcBusca(\'' + r.proc.id + '\',\'' + r.esp.id + '\')">'
+          + '<div class="odoBuscaItemNome">' + nomeHL + '</div>'
+          + '<div class="odoBuscaItemMeta">'
+          + '<span class="odoBuscaItemEsp">' + esc(r.esp.nome) + '</span>'
+          + '<span class="odoBuscaItemVal">' + val + '</span>'
+          + '</div></div>';
+      }).join('');
+    }
+
+    drop.style.display = 'block';
+  }
+
+  function _highlight(texto, query) {
+    var idx = texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+                   .indexOf(query.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''));
+    if (idx < 0) return esc(texto);
+    return esc(texto.substring(0, idx))
+      + '<mark class="odoBuscaDestaque">' + esc(texto.substring(idx, idx + query.length)) + '</mark>'
+      + esc(texto.substring(idx + query.length));
+  }
+
+  function selecionarProcBusca(invId, espId) {
+    limparBusca();
+    _espSel = espId;
+    _atualizarPainelLateral();
+    abrirModalIntervencao(invId);
+  }
+
+  function fecharDropBusca() {
+    var drop = sid('odoBuscaDrop');
+    if (drop) drop.style.display = 'none';
+  }
+
+  function limparBusca() {
+    var input = sid('odoBuscaInput');
+    var drop  = sid('odoBuscaDrop');
+    var clear = sid('odoBuscaClear');
+    if (input) input.value = '';
+    if (drop)  drop.style.display  = 'none';
+    if (clear) clear.style.display = 'none';
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -624,6 +704,7 @@ const OdontogramaMod = (function () {
     abrirModalIntervencao, fecharModalIntervencao, gravarIntervencao, toggleFaceModal,
     removerItem, finalizarAtendimento,
     abrirBuscaPaciente, fecharBuscaPaciente, buscarPaciente, selecionarPaciente,
-    trocarPaciente, lancarSelecao, abrirAnamnese, toggleHistItem
+    trocarPaciente, lancarSelecao, abrirAnamnese, toggleHistItem,
+    buscarProcedimento, selecionarProcBusca, fecharDropBusca, limparBusca
   };
 })();

@@ -2037,6 +2037,42 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .odoChipInt:hover .odoChipVal { color: var(--b6); }
 .odoChipAtivo .odoChipVal     { color: rgba(255,255,255,.8) !important; }
 
+/* ── Busca rápida de procedimentos ── */
+.odoBuscaWrap { position: relative; margin-bottom: 14px; }
+.odoBuscaInp {
+  width: 100%; box-sizing: border-box;
+  padding: 8px 32px 8px 10px;
+  border: 1.5px solid var(--s3); border-radius: 8px;
+  font-size: .82rem; background: var(--w); color: var(--s8);
+  transition: border-color .15s;
+}
+.odoBuscaInp:focus { outline: none; border-color: var(--b5); box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+.odoBuscaClear {
+  position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--s4); font-size: .82rem; padding: 2px 4px; line-height: 1;
+  border-radius: 4px; transition: color .12s;
+}
+.odoBuscaClear:hover { color: var(--r6); }
+.odoBuscaDrop {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--w); border: 1.5px solid var(--s3);
+  border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.16);
+  z-index: 50; max-height: 260px; overflow-y: auto;
+}
+.odoBuscaItem {
+  padding: 9px 12px; cursor: pointer;
+  border-bottom: 1px solid var(--s1); transition: background .1s;
+}
+.odoBuscaItem:last-child { border-bottom: none; }
+.odoBuscaItem:hover { background: var(--b1); }
+.odoBuscaItemNome { font-size: .83rem; font-weight: 700; color: var(--s8); }
+.odoBuscaItemMeta { font-size: .73rem; color: var(--s5); margin-top: 2px; display: flex; gap: 8px; align-items: center; }
+.odoBuscaItemEsp  { font-style: italic; }
+.odoBuscaItemVal  { color: var(--g6); font-weight: 700; }
+.odoBuscaVazio    { padding: 12px; font-size: .8rem; color: var(--s4); text-align: center; }
+.odoBuscaDestaque { background: rgba(59,130,246,.12); color: var(--b7); border-radius: 2px; }
+
 /* ── Modal: seletor visual de faces ── */
 .odoFacePickArea {
   position: relative;
