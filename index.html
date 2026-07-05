@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260705d">
+  <link rel="stylesheet" href="css/style.css?v=20260705e">
 </head>
 <body>
 
@@ -902,62 +902,6 @@
   </div>
 </div>
 
-<!-- ════ MODAL: Intervenção Odontológica ════ -->
-<div id="odontoModalIntervencao" class="ovl" style="display:none;align-items:center"
-     onclick="if(event.target===this)OdontogramaMod.fecharModalIntervencao()">
-  <div class="mBox" style="max-width:460px;width:96%;padding:24px 22px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <h3 id="odoModalIntTitulo" style="color:var(--s9);font-size:.95rem;font-weight:800;margin:0">Intervenção</h3>
-      <button class="bDel" onclick="OdontogramaMod.fecharModalIntervencao()"
-              style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
-    </div>
-    <div id="odoModalIntEsp" style="font-size:.75rem;color:var(--s5);margin-bottom:16px"></div>
-
-    <!-- Seletor visual de faces -->
-    <div style="margin-bottom:16px;border:1px solid var(--s3);border-radius:8px;padding:16px 14px;text-align:center">
-      <div style="font-size:.72rem;font-weight:800;color:var(--s6);margin-bottom:14px;text-transform:uppercase;letter-spacing:.05em">Clique nas faces afetadas</div>
-      <div class="odoFacePickArea">
-        <!-- Labels posicionadas ao redor -->
-        <div class="odoFacePickLbl lblTop">Vestibular</div>
-        <div class="odoFacePickLbl lblBottom">Lingual/<br>Palatina</div>
-        <div class="odoFacePickLbl lblLeft">Mesial</div>
-        <div class="odoFacePickLbl lblRight">Distal</div>
-        <!-- Cruzeta interativa -->
-        <div class="odoFacePickCruzeta">
-          <div class="odFacePick top"    data-face="V" onclick="OdontogramaMod.toggleFaceModal(this)" title="Vestibular"></div>
-          <div class="odFacePick bottom" data-face="L" onclick="OdontogramaMod.toggleFaceModal(this)" title="Lingual/Palatina"></div>
-          <div class="odFacePick left"   data-face="M" onclick="OdontogramaMod.toggleFaceModal(this)" title="Mesial"></div>
-          <div class="odFacePick right"  data-face="D" onclick="OdontogramaMod.toggleFaceModal(this)" title="Distal"></div>
-          <div class="odFacePick center" data-face="O" onclick="OdontogramaMod.toggleFaceModal(this)" title="Oclusal/Incisal">
-            <span class="odFacePickCenterLbl">Ocl</span>
-          </div>
-        </div>
-      </div>
-      <div id="odoFacesSelText" class="odoFacesSelText">Nenhuma face selecionada</div>
-    </div>
-
-    <!-- Valores (readonly — sem descontos) -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
-      <div class="patFG">
-        <label class="afLabel">Valor Clínica (R$)</label>
-        <input type="number" id="odoModalValorClinica" class="afInp" readonly
-               style="background:var(--s1);cursor:not-allowed;color:var(--s7)"/>
-      </div>
-      <div class="patFG">
-        <label class="afLabel">Valor Paciente (R$)</label>
-        <input type="number" id="odoModalValorPaciente" class="afInp" readonly
-               style="background:var(--s1);cursor:not-allowed;color:var(--s7)"/>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="btn bSm" style="background:var(--s1);border:1px solid var(--s2);color:var(--s7)"
-              onclick="OdontogramaMod.fecharModalIntervencao()">Cancelar</button>
-      <button class="btn bG bSm" onclick="OdontogramaMod.gravarIntervencao()">✅ Gravar</button>
-    </div>
-  </div>
-</div>
-
 <!-- ════ SEÇÃO: RECEBIMENTOS ════ -->
 <div id="secRecebimentos">
   <div class="recebHdr">
@@ -1499,6 +1443,60 @@
 </div>
 
 </main>
+
+<!-- ════ MODAL: Intervenção Odontológica ════ -->
+<div id="odontoModalIntervencao" class="ovl" style="display:none;align-items:center"
+     onclick="if(event.target===this)OdontogramaMod.fecharModalIntervencao()">
+  <div class="mBox" style="max-width:460px;width:96%;padding:24px 22px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <h3 id="odoModalIntTitulo" style="color:var(--s9);font-size:.95rem;font-weight:800;margin:0">Intervenção</h3>
+      <button class="bDel" onclick="OdontogramaMod.fecharModalIntervencao()"
+              style="font-size:1.1rem;padding:2px 8px;line-height:1.2">✕</button>
+    </div>
+    <div id="odoModalIntEsp" style="font-size:.75rem;color:var(--s5);margin-bottom:16px"></div>
+
+    <!-- Seletor visual de faces -->
+    <div style="margin-bottom:16px;border:1px solid var(--s3);border-radius:8px;padding:16px 14px;text-align:center">
+      <div style="font-size:.72rem;font-weight:800;color:var(--s6);margin-bottom:14px;text-transform:uppercase;letter-spacing:.05em">Clique nas faces afetadas</div>
+      <div class="odoFacePickArea">
+        <div class="odoFacePickLbl lblTop">Vestibular</div>
+        <div class="odoFacePickLbl lblBottom">Lingual/<br>Palatina</div>
+        <div class="odoFacePickLbl lblLeft">Mesial</div>
+        <div class="odoFacePickLbl lblRight">Distal</div>
+        <div class="odoFacePickCruzeta">
+          <div class="odFacePick top"    data-face="V" onclick="OdontogramaMod.toggleFaceModal(this)" title="Vestibular"></div>
+          <div class="odFacePick bottom" data-face="L" onclick="OdontogramaMod.toggleFaceModal(this)" title="Lingual/Palatina"></div>
+          <div class="odFacePick left"   data-face="M" onclick="OdontogramaMod.toggleFaceModal(this)" title="Mesial"></div>
+          <div class="odFacePick right"  data-face="D" onclick="OdontogramaMod.toggleFaceModal(this)" title="Distal"></div>
+          <div class="odFacePick center" data-face="O" onclick="OdontogramaMod.toggleFaceModal(this)" title="Oclusal/Incisal">
+            <span class="odFacePickCenterLbl">Ocl</span>
+          </div>
+        </div>
+      </div>
+      <div id="odoFacesSelText" class="odoFacesSelText">Nenhuma face selecionada</div>
+    </div>
+
+    <!-- Valores (readonly) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
+      <div class="patFG">
+        <label class="afLabel">Valor Clínica (R$)</label>
+        <input type="number" id="odoModalValorClinica" class="afInp" readonly
+               style="background:var(--s1);cursor:not-allowed;color:var(--s7)"/>
+      </div>
+      <div class="patFG">
+        <label class="afLabel">Valor Paciente (R$)</label>
+        <input type="number" id="odoModalValorPaciente" class="afInp" readonly
+               style="background:var(--s1);cursor:not-allowed;color:var(--s7)"/>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn bSm" style="background:var(--s1);border:1px solid var(--s2);color:var(--s7)"
+              onclick="OdontogramaMod.fecharModalIntervencao()">Cancelar</button>
+      <button class="btn bG bSm" onclick="OdontogramaMod.gravarIntervencao()">✅ Gravar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════ MODAL: Busca de Paciente (Odontograma) ════ -->
 <div id="odontoModalPaciente" class="ovl"
