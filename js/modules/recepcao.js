@@ -243,6 +243,11 @@ const RecepMod = (function () {
       ? '<button class="btn rcpBtnPrn" onclick="RecepMod.abrirProntuario(\'' + pacId + '\')">📋 Prontuário</button>'
       : '';
 
+    /* Botão odontograma */
+    var btnOdo = pacId
+      ? '<button class="btn rcpBtnOdo" onclick="RecepMod.abrirOdontograma(\'' + pacId + '\',\'' + esc(pacNome) + '\')">🦷 Odontograma</button>'
+      : '';
+
     /* Badge + botão de pagamento */
     var pagBadge = pago
       ? '<span class="rcpPagBadge rcpPagBadgePago">✅ Pago</span>'
@@ -269,7 +274,7 @@ const RecepMod = (function () {
       +   '<div class="rcpStatusBtns">' + statusBtns + '</div>'
       +   '<div class="rcpPagRow">' + pagBadge + btnPag + '</div>'
       + '</div>'
-      + '<div class="rcpCardAcoes">' + btnPrn + '</div>'
+      + '<div class="rcpCardAcoes">' + btnPrn + btnOdo + '</div>'
       + '</div>';
   }
 
@@ -297,6 +302,12 @@ const RecepMod = (function () {
   function abrirProntuario (pacienteId) {
     window._prnPacienteId = pacienteId;
     switchSidebar('prontuario');
+  }
+
+  /* ── Abrir odontograma com paciente pré-selecionado ── */
+  function abrirOdontograma (pacienteId, pacNome) {
+    window._odoPreloadPaciente = { id: pacienteId, nome: pacNome };
+    switchSidebar('odontograma');
   }
 
   /* ── Refresh ── */
@@ -430,6 +441,6 @@ const RecepMod = (function () {
     });
   }
 
-  return { init, setStatus, avancarStatus, abrirProntuario, atualizar, destruir,
+  return { init, setStatus, avancarStatus, abrirProntuario, abrirOdontograma, atualizar, destruir,
            abrirPagamento, fecharPagamento, confirmarPagamento, verificarPendenciaPaciente };
 })();
