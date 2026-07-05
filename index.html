@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260705n">
+  <link rel="stylesheet" href="css/style.css?v=20260705o">
 </head>
 <body>
 
@@ -1747,25 +1747,11 @@
     </div>
     <div id="odoModalIntEsp" style="font-size:.75rem;color:var(--s5);margin-bottom:16px"></div>
 
-    <!-- Seletor visual de faces -->
-    <div style="margin-bottom:16px;border:1px solid var(--s3);border-radius:8px;padding:16px 14px;text-align:center">
-      <div style="font-size:.72rem;font-weight:800;color:var(--s6);margin-bottom:14px;text-transform:uppercase;letter-spacing:.05em">Clique nas faces afetadas</div>
-      <div class="odoFacePickArea">
-        <div class="odoFacePickLbl lblTop">Vestibular</div>
-        <div class="odoFacePickLbl lblBottom">Lingual/<br>Palatina</div>
-        <div class="odoFacePickLbl lblLeft">Mesial</div>
-        <div class="odoFacePickLbl lblRight">Distal</div>
-        <div class="odoFacePickCruzeta">
-          <div class="odFacePick top"    data-face="V" onclick="OdontogramaMod.toggleFaceModal(this)" title="Vestibular"></div>
-          <div class="odFacePick bottom" data-face="L" onclick="OdontogramaMod.toggleFaceModal(this)" title="Lingual/Palatina"></div>
-          <div class="odFacePick left"   data-face="M" onclick="OdontogramaMod.toggleFaceModal(this)" title="Mesial"></div>
-          <div class="odFacePick right"  data-face="D" onclick="OdontogramaMod.toggleFaceModal(this)" title="Distal"></div>
-          <div class="odFacePick center" data-face="O" onclick="OdontogramaMod.toggleFaceModal(this)" title="Oclusal/Incisal">
-            <span class="odFacePickCenterLbl">Ocl</span>
-          </div>
-        </div>
-      </div>
-      <div id="odoFacesSelText" class="odoFacesSelText">Nenhuma face selecionada</div>
+    <!-- Seletor de faces por checkbox -->
+    <div style="margin-bottom:16px;border:1px solid var(--s3);border-radius:8px;padding:14px 16px">
+      <div style="font-size:.72rem;font-weight:800;color:var(--s6);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Faces afetadas</div>
+      <div id="odoFacesCheckboxes" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      <div id="odoFacesSelText" class="odoFacesSelText" style="margin-top:10px">Nenhuma face selecionada</div>
     </div>
 
     <!-- Valores (readonly) -->
@@ -2623,7 +2609,7 @@
 <script src="js/modules/financeiro-db.js?v=20260629a"></script>
 <script src="js/modules/convenios.js?v=20260630a"></script>
 <script src="js/modules/recebimentos.js?v=20260705i"></script>
-<script src="js/modules/odontograma.js?v=20260705k"></script>
+<script src="js/modules/odontograma.js?v=20260705l"></script>
 <script src="js/modules/anamnese-odonto.js?v=20260705b"></script>
 <script src="js/modules/admin-odonto-proc.js?v=20260705a"></script>
 <script src="js/modules/estoque.js?v=20260705c"></script>

@@ -2364,10 +2364,27 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 
 /* Texto de faces selecionadas */
 .odoFacesSelText {
-  margin-top: 10px; font-size: .78rem;
+  font-size: .78rem;
   color: var(--s5); min-height: 18px;
   font-style: italic;
 }
+
+/* ── Checkboxes de face (pill toggle) ── */
+.odoFaceChk {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px;
+  border: 1.5px solid var(--s3); border-radius: 20px;
+  cursor: pointer; user-select: none;
+  font-size: .82rem; font-weight: 600; color: var(--s6);
+  background: var(--s0);
+  transition: background .13s, border-color .13s, color .13s;
+}
+.odoFaceChk:hover { background: var(--s2); border-color: var(--s4); }
+.odoFaceChk input[type=checkbox] { display: none; }
+.odoFaceChk:has(input:checked) {
+  background: #f0fdf4; border-color: #22c55e; color: #15803d;
+}
+.odoFaceChk:has(input:checked):hover { background: #dcfce7; }
 
 /* ══════════════════════════════════════════════════════════════════════
    CAIXA DO DIA (CaixaMod)

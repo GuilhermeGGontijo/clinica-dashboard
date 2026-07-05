@@ -33,6 +33,30 @@ const OdontogramaMod = (function () {
     { c:'O', l:'Oclusal',          css:'center' }
   ];
 
+  /* Dentes anteriores (incisivos + caninos permanentes e decíduos) que têm face Incisal */
+  var DENTES_INCISAL = [11,12,13,21,22,23,31,32,33,41,42,43,
+                         51,52,53,61,62,63,71,72,73,81,82,83];
+
+  var FACES_OCLUSAL = [
+    { c:'V', l:'Vestibular'       },
+    { c:'L', l:'Lingual/Palatina' },
+    { c:'M', l:'Mesial'           },
+    { c:'D', l:'Distal'           },
+    { c:'O', l:'Oclusal'          }
+  ];
+
+  var FACES_INCISAL = [
+    { c:'V', l:'Vestibular'       },
+    { c:'L', l:'Lingual/Palatina' },
+    { c:'M', l:'Mesial'           },
+    { c:'D', l:'Distal'           },
+    { c:'I', l:'Incisal'          }
+  ];
+
+  function _facesParaDente(num) {
+    return DENTES_INCISAL.indexOf(num) >= 0 ? FACES_INCISAL : FACES_OCLUSAL;
+  }
+
   /* ══════════════════════════════════════════════════════════════════
      INIT
   ══════════════════════════════════════════════════════════════════ */
@@ -303,10 +327,18 @@ const OdontogramaMod = (function () {
     var vc = sid('odoModalValorClinica');  if (vc) vc.value = val;
     var vp = sid('odoModalValorPaciente'); if (vp) vp.value = val;
 
-    /* Limpar seleção da cruzeta visual */
-    document.querySelectorAll('.odFacePick').forEach(function (el) {
-      el.classList.remove('selecionada');
-    });
+    /* Renderiza checkboxes de faces conforme o tipo de dente */
+    var faces = _facesParaDente(_denteSel);
+    var wrap  = sid('odoFacesCheckboxes');
+    if (wrap) {
+      wrap.innerHTML = faces.map(function (f) {
+        return '<label class="odoFaceChk">'
+          + '<input type="checkbox" class="odoFaceChkInput" value="' + f.c
+          + '" data-label="' + esc(f.l) + '" onchange="OdontogramaMod.onFaceChkChange()">'
+          + '<span>' + esc(f.l) + '</span>'
+          + '</label>';
+      }).join('');
+    }
     var txt = sid('odoFacesSelText');
     if (txt) txt.textContent = 'Nenhuma face selecionada';
 
@@ -318,25 +350,22 @@ const OdontogramaMod = (function () {
     _intAtual = null;
   }
 
-  function toggleFaceModal(el) {
-    el.classList.toggle('selecionada');
-    /* Atualizar texto descritivo */
-    var sels = Array.from(document.querySelectorAll('.odFacePick.selecionada'))
-      .map(function (e) {
-        var face = FACES.find(function (f) { return f.c === e.dataset.face; });
-        return face ? face.l : '';
-      }).filter(Boolean);
+  function onFaceChkChange() {
+    var checked = Array.from(document.querySelectorAll('.odoFaceChkInput:checked'))
+      .map(function (el) { return el.dataset.label; });
     var txt = sid('odoFacesSelText');
-    if (txt) txt.textContent = sels.length ? sels.join(' · ') : 'Nenhuma face selecionada';
+    if (txt) txt.textContent = checked.length ? checked.join(' · ') : 'Nenhuma face selecionada';
   }
 
   function gravarIntervencao() {
     if (!_intAtual) return;
-    var facesSel = FACES.filter(function (f) {
-      var el = document.querySelector('.odFacePick[data-face="' + f.c + '"]');
-      return el && el.classList.contains('selecionada');
+    var inputs = Array.from(document.querySelectorAll('.odoFaceChkInput:checked'));
+    if (!inputs.length) { toast('Selecione pelo menos uma face', 'warn'); return; }
+
+    var faces = _facesParaDente(_denteSel);
+    var facesSel = inputs.map(function (el) {
+      return faces.find(function (f) { return f.c === el.value; }) || { c: el.value, l: el.dataset.label };
     });
-    if (!facesSel.length) { toast('Clique em pelo menos uma face na cruzeta', 'warn'); return; }
 
     _itens.push({
       dente:            _denteSel,
@@ -347,7 +376,7 @@ const OdontogramaMod = (function () {
       valor:            Number(_intAtual.valor_base)
     });
 
-    /* Colorir faces na cruzeta do dente */
+    /* Colorir indicadores visuais no grid do odontograma */
     facesSel.forEach(function (face) {
       var el = document.querySelector('.odFace[data-dente="' + _denteSel + '"][data-face="' + face.c + '"]');
       if (el) { el.classList.remove('selecionada'); el.classList.add('finalizada'); }
@@ -827,7 +856,7 @@ const OdontogramaMod = (function () {
   return {
     init,
     selecionarDente, selecionarEspecialidade,
-    abrirModalIntervencao, fecharModalIntervencao, gravarIntervencao, toggleFaceModal,
+    abrirModalIntervencao, fecharModalIntervencao, gravarIntervencao, onFaceChkChange,
     removerItem, finalizarAtendimento,
     abrirBuscaPaciente, fecharBuscaPaciente, buscarPaciente, selecionarPaciente,
     trocarPaciente, lancarSelecao, abrirAnamnese, toggleHistItem,
