@@ -497,6 +497,7 @@ body.sb-admin-convenios #secAdminConvenios{display:block!important}
 body.sb-admin-odonto-proc #secAdminOdontoproc{display:block!important}
 body.sb-recebimentos #secRecebimentos{display:block!important}
 body.sb-odontograma #secOdontograma{display:block!important}
+body.sb-estoque #secEstoque{display:block!important}
 body.sb-fin-dashboard #printHeader{display:block!important}
 body.sb-fin-dashboard .finDashLayout{display:flex!important;gap:20px;align-items:flex-start}
 body.sb-fin-dashboard #slCadastro,body.sb-fin-dashboard .topGrid,
@@ -2650,4 +2651,211 @@ body.sb-auditoria #secAuditoria { display: block !important; }
   border-color: var(--g6);
   color: var(--g9);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   MÓDULO DE ESTOQUE
+═══════════════════════════════════════════════════════════════════ */
+#secEstoque {
+  padding: 0;
+}
+.estModHdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 20px 24px 0;
+}
+.estModTitulo {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--s9);
+}
+.estModSub {
+  font-size: .8rem;
+  color: var(--s5);
+  margin-top: 2px;
+}
+.estModActs { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Sub-abas */
+.estSubTabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--s2);
+  margin: 16px 24px 0;
+  overflow-x: auto;
+}
+.estAba {
+  padding: 9px 20px;
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--s5);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.estAba:hover { color: var(--s8); }
+.estAbaAtiva {
+  color: var(--g7);
+  border-bottom-color: var(--g6);
+}
+
+/* Conteúdo de cada aba */
+.estSection { padding: 18px 24px 32px; }
+
+/* Cabeçalho interno da aba */
+.estSecHdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.estSecTitulo { font-size: .95rem; font-weight: 800; color: var(--s8); }
+
+/* Tabela */
+.estTableWrap {
+  overflow-x: auto;
+  border-radius: var(--Rs);
+  border: 1px solid var(--s2);
+}
+.estTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .82rem;
+}
+.estTable thead tr {
+  background: var(--s1);
+}
+.estTable th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: .76rem;
+  font-weight: 700;
+  color: var(--s6);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-bottom: 1px solid var(--s2);
+  white-space: nowrap;
+}
+.estTable td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--s1);
+  color: var(--s8);
+  vertical-align: middle;
+}
+.estTable tbody tr:last-child td { border-bottom: none; }
+.estTable tbody tr:hover td { background: var(--s1); }
+.estRowAlerta td { background: #fef9c3 !important; }
+.estTableSm th, .estTableSm td { padding: 6px 10px; }
+
+/* Badges */
+.estBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+.estBadgeGreen  { background: var(--g1);  color: var(--g8);  }
+.estBadgeRed    { background: #fee2e2;    color: #991b1b;    }
+.estBadgeYellow { background: #fef9c3;    color: #854d0e;    }
+.estBadgeBlue   { background: var(--b1);  color: var(--b8);  }
+.estBadgeGray   { background: var(--s1);  color: var(--s6);  }
+
+/* Tipo movimentação */
+.estMovTipo {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: .75rem;
+  font-weight: 700;
+}
+.estTipoEnt { background: var(--g1); color: var(--g8); }
+.estTipoSai { background: #fee2e2;   color: #991b1b;   }
+.estTipoAj  { background: var(--b1); color: var(--b8); }
+.estTipoTr  { background: #f3e8ff;   color: #6b21a8;   }
+
+/* Botões ação inline */
+.estAcoesCell { white-space: nowrap; }
+.estBtnEnt { background: var(--g1) !important; color: var(--g8) !important; border-color: var(--g3) !important; }
+.estBtnSai { background: #fee2e2 !important;   color: #991b1b !important;   border-color: #fca5a5 !important; }
+.estBtnAprova  { background: var(--g1) !important; color: var(--g8) !important; border-color: var(--g4) !important; }
+.estBtnRejeita { background: #fee2e2 !important;   color: #991b1b !important;   border-color: #fca5a5 !important; }
+.estBtnRecebe  { background: var(--b1) !important; color: var(--b8) !important; border-color: var(--b4) !important; }
+
+/* Estado vazio */
+.estVazio {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--s5);
+  font-size: .88rem;
+  background: var(--s0);
+  border-radius: var(--Rs);
+  border: 1px dashed var(--s3);
+}
+.estVazioSm {
+  padding: 10px 14px;
+  text-align: center;
+  color: var(--s4);
+  font-size: .8rem;
+}
+
+/* Cards de vínculos procedimento → material */
+.estVincProcCard {
+  background: var(--s0);
+  border: 1px solid var(--s2);
+  border-radius: var(--Rs);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.estVincProcHdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--s1);
+  border-bottom: 1px solid var(--s2);
+}
+.estVincProcNome { font-weight: 700; font-size: .88rem; color: var(--s8); }
+.estVincCodigo {
+  font-size: .72rem;
+  background: var(--b1);
+  color: var(--b7);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.estVincItens { padding: 8px 16px; }
+.estVincItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--s1);
+  font-size: .83rem;
+}
+.estVincItem:last-child { border-bottom: none; }
+.estVincQtd { color: var(--g7); font-weight: 600; margin-left: auto; margin-right: 8px; }
+.estVincVazio { padding: 8px 16px; font-size: .8rem; color: var(--s4); }
+
+/* Itens do pedido em construção */
+.estPedItemRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: var(--s0);
+  border: 1px solid var(--s2);
+  border-radius: var(--Rs);
+}
+.estPedItemRow .patFG { flex: 1; min-width: 140px; margin: 0; }
 </style>

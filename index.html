@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260705h">
+  <link rel="stylesheet" href="css/style.css?v=20260705j">
 </head>
 <body>
 
@@ -114,6 +114,10 @@
     </div>
     <div class="sbItem" data-mod="caixa" onclick="switchSidebar('caixa')">
       <span class="sbItemIco">🏦</span><span class="sbItemLbl">Caixa do Dia</span>
+    </div>
+
+    <div class="sbItem" data-mod="estoque" onclick="switchSidebar('estoque')">
+      <span class="sbItemIco">📦</span><span class="sbItemLbl">Estoque</span>
     </div>
 
     <div class="sbItem" data-mod="relatorios" onclick="switchSidebar('relatorios')">
@@ -1373,6 +1377,67 @@
 
 </div>
 
+<!-- ════ SEÇÃO: ESTOQUE ════ -->
+<div id="secEstoque">
+
+  <div class="estModHdr">
+    <div>
+      <div class="estModTitulo">📦 Gestão de Estoque</div>
+      <div class="estModSub">Produtos · Movimentações · Pedidos de Compra · Materiais por Procedimento</div>
+    </div>
+    <div class="estModActs" id="estModActsWrap">
+      <!-- botões dinâmicos por aba -->
+    </div>
+  </div>
+
+  <!-- Sub-abas -->
+  <div class="estSubTabs">
+    <button class="estAba estAbaAtiva" data-aba="produtos"       onclick="EstoqueMod.trocarAba('produtos')">📦 Produtos</button>
+    <button class="estAba"             data-aba="movimentacoes"  onclick="EstoqueMod.trocarAba('movimentacoes')">🔄 Movimentações</button>
+    <button class="estAba"             data-aba="pedidos"        onclick="EstoqueMod.trocarAba('pedidos')">🛒 Pedidos de Compra</button>
+    <button class="estAba"             data-aba="vinculos"       onclick="EstoqueMod.trocarAba('vinculos')">🔗 Materiais por Proc.</button>
+  </div>
+
+  <!-- ABA: PRODUTOS -->
+  <div class="estSection" data-aba="produtos">
+    <div class="estSecHdr">
+      <div class="estSecTitulo">Produtos cadastrados</div>
+      <button class="btn bG bSm" onclick="EstoqueMod.abrirModalProduto()">+ Novo Produto</button>
+    </div>
+    <div id="estProdListWrap"><div class="loadingState">Carregando...</div></div>
+  </div>
+
+  <!-- ABA: MOVIMENTAÇÕES -->
+  <div class="estSection" data-aba="movimentacoes" style="display:none">
+    <div class="estSecHdr">
+      <div class="estSecTitulo">Histórico de movimentações</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn bSm estBtnEnt" onclick="EstoqueMod.abrirModalMov('ENTRADA',null)">📥 Entrada Manual</button>
+        <button class="btn bSm estBtnSai" onclick="EstoqueMod.abrirModalMov('SAIDA',null)">📤 Saída Manual</button>
+      </div>
+    </div>
+    <div id="estMovListWrap"><div class="loadingState">Carregando...</div></div>
+  </div>
+
+  <!-- ABA: PEDIDOS -->
+  <div class="estSection" data-aba="pedidos" style="display:none">
+    <div class="estSecHdr">
+      <div class="estSecTitulo">Pedidos de compra</div>
+      <button class="btn bG bSm" onclick="EstoqueMod.abrirModalPedido()">+ Novo Pedido</button>
+    </div>
+    <div id="estPedListWrap"><div class="loadingState">Carregando...</div></div>
+  </div>
+
+  <!-- ABA: VÍNCULOS -->
+  <div class="estSection" data-aba="vinculos" style="display:none">
+    <div class="estSecHdr">
+      <div class="estSecTitulo">Materiais vinculados a procedimentos odontológicos</div>
+    </div>
+    <div id="estVincListWrap"><div class="loadingState">Carregando...</div></div>
+  </div>
+
+</div>
+
 <!-- ════ SEÇÃO: AUDITORIA FINANCEIRA ════ -->
 <div id="secAuditoria">
 
@@ -1455,6 +1520,162 @@
 </div>
 
 </main>
+
+<!-- ════ MODAIS: ESTOQUE ════ -->
+
+<!-- Modal: Produto -->
+<div class="modal" id="modalEstProduto" style="display:none">
+  <div class="modalBox" style="max-width:520px;width:95%">
+    <div class="modalHdr">
+      <h3 id="estProdModalTitulo">📦 Novo Produto</h3>
+      <button class="bDel" onclick="EstoqueMod.fecharModalProduto()">✕</button>
+    </div>
+    <div class="patFG"><label class="afLabel">Nome do Produto *</label>
+      <input type="text" id="estProdNome" class="afInp" placeholder="Ex: Luva de nitrila tamanho M"/></div>
+    <div class="patFG"><label class="afLabel">Descrição</label>
+      <input type="text" id="estProdDesc" class="afInp" placeholder="Detalhes opcionais"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="patFG"><label class="afLabel">Categoria</label>
+        <select id="estProdCateg" class="afInp"></select></div>
+      <div class="patFG"><label class="afLabel">Unidade de Medida *</label>
+        <select id="estProdUM" class="afInp">
+          <option value="unidade">Unidade</option>
+          <option value="caixa">Caixa</option>
+          <option value="pacote">Pacote</option>
+          <option value="frasco">Frasco</option>
+          <option value="ml">mL</option>
+          <option value="mg">mg</option>
+          <option value="g">g</option>
+          <option value="kg">kg</option>
+          <option value="par">Par</option>
+          <option value="rolo">Rolo</option>
+        </select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div class="patFG"><label class="afLabel">Unid./Embalagem</label>
+        <input type="number" id="estProdUPE" class="afInp" placeholder="1" min="0.001" step="0.001"/></div>
+      <div class="patFG"><label class="afLabel">Estoque Mínimo</label>
+        <input type="number" id="estProdMin" class="afInp" placeholder="0" min="0" step="0.001"/></div>
+      <div class="patFG"><label class="afLabel">Custo Unitário (R$)</label>
+        <input type="number" id="estProdCusto" class="afInp" placeholder="0,00" min="0" step="0.01"/></div>
+    </div>
+    <div class="patFG"><label class="afLabel">Validade (opcional)</label>
+      <input type="date" id="estProdValidade" class="afInp"/></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn bGh bSm" onclick="EstoqueMod.fecharModalProduto()">Cancelar</button>
+      <button class="btn bG bSm" id="estBtnSalvarProd" onclick="EstoqueMod.salvarProduto()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Movimentação (Entrada/Saída Manual) -->
+<div class="modal" id="modalEstMov" style="display:none">
+  <div class="modalBox" style="max-width:460px;width:95%">
+    <div class="modalHdr">
+      <h3 id="estMovTituloModal">📥 Registrar Entrada</h3>
+      <button class="bDel" onclick="EstoqueMod.fecharModalMov()">✕</button>
+    </div>
+    <div class="patFG"><label class="afLabel">Produto *</label>
+      <select id="estMovProduto" class="afInp"></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="patFG"><label class="afLabel">Quantidade *</label>
+        <input type="number" id="estMovQtd" class="afInp" placeholder="0" min="0.001" step="0.001"/></div>
+      <div class="patFG"><label class="afLabel">Custo Unitário (R$)</label>
+        <input type="number" id="estMovCusto" class="afInp" placeholder="0,00" min="0" step="0.01"/></div>
+    </div>
+    <div class="patFG"><label class="afLabel">Observações</label>
+      <input type="text" id="estMovObs" class="afInp" placeholder="Motivo, referência..."/></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn bGh bSm" onclick="EstoqueMod.fecharModalMov()">Cancelar</button>
+      <button class="btn bG bSm" id="estBtnSalvarMov" onclick="EstoqueMod.salvarMov()">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Novo Pedido de Compra -->
+<div class="modal" id="modalEstPedido" style="display:none">
+  <div class="modalBox" style="max-width:620px;width:95%">
+    <div class="modalHdr">
+      <h3>🛒 Novo Pedido de Compra</h3>
+      <button class="bDel" onclick="EstoqueMod.fecharModalPedido()">✕</button>
+    </div>
+    <!-- Linha para adicionar item -->
+    <div class="estPedItemRow">
+      <div class="patFG" style="flex:2;min-width:180px"><label class="afLabel">Produto</label>
+        <select id="estPedItemProd" class="afInp"></select></div>
+      <div class="patFG" style="width:100px"><label class="afLabel">Quantidade</label>
+        <input type="number" id="estPedItemQtd" class="afInp" placeholder="0" min="0.001" step="0.001"/></div>
+      <div class="patFG" style="width:110px"><label class="afLabel">Custo Est. (R$)</label>
+        <input type="number" id="estPedItemCusto" class="afInp" placeholder="0,00" min="0" step="0.01"/></div>
+      <div class="patFG" style="width:auto"><label class="afLabel">&nbsp;</label>
+        <button class="btn bG bSm" onclick="EstoqueMod.addItemPedido()">+ Adicionar</button></div>
+    </div>
+    <!-- Lista de itens adicionados -->
+    <div id="estPedItensWrap" style="margin-bottom:14px">
+      <div class="estVazioSm">Nenhum item adicionado</div>
+    </div>
+    <div class="patFG"><label class="afLabel">Observações</label>
+      <textarea id="estPedObs" class="afInp" rows="2" placeholder="Fornecedor preferido, urgência..."></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn bGh bSm" onclick="EstoqueMod.fecharModalPedido()">Cancelar</button>
+      <button class="btn bG bSm" id="estBtnSalvarPed" onclick="EstoqueMod.salvarPedido()">📤 Enviar Pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Aprovar / Rejeitar Pedido -->
+<div class="modal" id="modalEstAprovar" style="display:none">
+  <div class="modalBox" style="max-width:400px;width:95%">
+    <div class="modalHdr">
+      <h3 id="estAprovarTitulo">✅ Aprovar Pedido</h3>
+      <button class="bDel" onclick="EstoqueMod.fecharModalAprovar()">✕</button>
+    </div>
+    <div class="patFG"><label class="afLabel">Observações (opcional)</label>
+      <textarea id="estAprovarObs" class="afInp" rows="3" placeholder="Justificativa, notas de aprovação..."></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn bGh bSm" onclick="EstoqueMod.fecharModalAprovar()">Cancelar</button>
+      <button class="btn bG bSm" id="estBtnConfAprovar" onclick="EstoqueMod.confirmarAprovacao()">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Registrar Recebimento -->
+<div class="modal" id="modalEstReceber" style="display:none">
+  <div class="modalBox" style="max-width:600px;width:95%">
+    <div class="modalHdr">
+      <h3>📦 Registrar Recebimento de Mercadorias</h3>
+      <button class="bDel" onclick="EstoqueMod.fecharModalReceber()">✕</button>
+    </div>
+    <p style="font-size:.82rem;color:var(--s5);margin:0 0 12px">
+      Informe as quantidades efetivamente recebidas. O estoque será atualizado automaticamente.
+    </p>
+    <div id="estReceberItensWrap"><div class="loadingState">Carregando itens...</div></div>
+    <div class="patFG" style="margin-top:12px"><label class="afLabel">Observações</label>
+      <input type="text" id="estReceberObs" class="afInp" placeholder="Número NF, fornecedor..."/></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn bGh bSm" onclick="EstoqueMod.fecharModalReceber()">Cancelar</button>
+      <button class="btn bG bSm" id="estBtnConfReceber" onclick="EstoqueMod.confirmarRecebimento()">📦 Confirmar Recebimento</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Vincular Material a Procedimento -->
+<div class="modal" id="modalEstVinculo" style="display:none">
+  <div class="modalBox" style="max-width:420px;width:95%">
+    <div class="modalHdr">
+      <h3 id="estVincTitulo">🔗 Vincular Material</h3>
+      <button class="bDel" onclick="EstoqueMod.fecharModalVinculo()">✕</button>
+    </div>
+    <div class="patFG"><label class="afLabel">Material / Produto *</label>
+      <select id="estVincProduto" class="afInp"></select></div>
+    <div class="patFG"><label class="afLabel">Quantidade por uso *</label>
+      <input type="number" id="estVincQtd" class="afInp" placeholder="1" min="0.001" step="0.001"/></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn bGh bSm" onclick="EstoqueMod.fecharModalVinculo()">Cancelar</button>
+      <button class="btn bG bSm" onclick="EstoqueMod.salvarVinculo()">🔗 Vincular</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════ MODAL: Intervenção Odontológica ════ -->
 <div id="odontoModalIntervencao" class="ovl" style="display:none;align-items:center"
@@ -2328,11 +2549,12 @@
 <script src="js/modules/odontograma.js?v=20260705i"></script>
 <script src="js/modules/anamnese-odonto.js?v=20260705b"></script>
 <script src="js/modules/admin-odonto-proc.js?v=20260705a"></script>
+<script src="js/modules/estoque.js?v=20260705a"></script>
 <script src="js/modules/caixa.js?v=20260705b"></script>
 <script src="js/modules/auditoria.js?v=20260703f"></script>
 <script src="js/modules/unidades.js?v=20260702b"></script>
 <script src="js/modules/usuarios.js?v=20260703g"></script>
-<script src="js/core/main.js?v=20260703e"></script>
+<script src="js/core/main.js?v=20260705j"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');

@@ -142,6 +142,7 @@ function switchSidebar(mod){
   if(mod==='admin-convenios'){ setTimeout(function(){ ConveniosMod.init(); },50); }
   if(mod==='recebimentos'){   setTimeout(function(){ RecebMod.init();       },50); }
   if(mod==='odontograma'){   setTimeout(function(){ OdontogramaMod.init(); },50); }
+  if(mod==='estoque'){       setTimeout(function(){ EstoqueMod.init();     },50); }
   if(mod==='caixa'){         setTimeout(function(){ CaixaMod.init();       },50); }
   if(mod==='auditoria'){     setTimeout(function(){ AuditoriaMod.init();   },50); }
   if(mod==='admin-unidades'){   setTimeout(function(){ UnidadesMod.init();        },50); }
