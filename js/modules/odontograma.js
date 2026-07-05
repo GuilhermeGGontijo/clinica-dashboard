@@ -440,7 +440,6 @@ const OdontogramaMod = (function () {
       /* 3. Lançar recebimento pendente no caixa */
       var rReceb = await _sb.from('recebimentos').insert({
         unidade_id:       CU,
-        paciente_id:      _pacienteId,
         valor:            total,
         status:           'PENDENTE',
         data_recebimento: new Date().toISOString().split('T')[0],
