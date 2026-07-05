@@ -189,7 +189,92 @@ const RecebMod = (function () {
       _dados.forEach(function (ag) { ag.profissional = profMap[ag.profissional_id] || null; });
     }
 
-    /* 6. Filtro de status */
+    /* 6. Orçamentos odontológicos (recebimentos com prefixo ODONTO:) */
+    var qOdonto = _sb.from('recebimentos')
+      .select('id,valor,status,forma_pagamento,observacoes,data_recebimento,criado_por')
+      .eq('unidade_id', CU)
+      .like('observacoes', 'ODONTO:%')
+      .order('data_recebimento', { ascending: false });
+    if (ini) qOdonto = qOdonto.gte('data_recebimento', ini);
+    if (fim) qOdonto = qOdonto.lte('data_recebimento', fim);
+    var rOdonto = await qOdonto.limit(200);
+
+    if (!rOdonto.error && rOdonto.data && rOdonto.data.length) {
+      var orcIdRgx = /^ODONTO:([0-9a-f-]{36})/i;
+      var orcIds2 = rOdonto.data.map(function (rb) {
+        var m = orcIdRgx.exec(rb.observacoes || '');
+        return m ? m[1] : null;
+      }).filter(Boolean).filter(function (v, i, a) { return a.indexOf(v) === i; });
+
+      var orcMap2 = {};
+      if (orcIds2.length) {
+        var rOrcs2 = await _sb.from('orcamentos')
+          .select('id,paciente_id,profissional_id,valor_total').in('id', orcIds2);
+        (rOrcs2.data || []).forEach(function (o) { orcMap2[o.id] = o; });
+      }
+
+      var odPacIds2 = Object.values(orcMap2).map(function(o){ return o.paciente_id; }).filter(Boolean)
+        .filter(function (v, i, a) { return a.indexOf(v) === i; });
+      var odPacMap2 = {};
+      if (odPacIds2.length) {
+        var rOP2 = await _sb.from('pacientes').select('id,nome_completo').in('id', odPacIds2);
+        (rOP2.data || []).forEach(function (p) { odPacMap2[p.id] = p.nome_completo; });
+      }
+
+      var odProfIds2 = Object.values(orcMap2).map(function(o){ return o.profissional_id; }).filter(Boolean)
+        .filter(function (v, i, a) { return a.indexOf(v) === i; });
+      var odProfMap2 = {};
+      if (odProfIds2.length) {
+        var rOPf2 = await _sb.from('perfis_usuarios').select('id,nome').in('id', odProfIds2);
+        (rOPf2.data || []).forEach(function (p) { odProfMap2[p.id] = p.nome; });
+      }
+
+      var odItensMap2 = {};
+      if (orcIds2.length) {
+        var rOI2 = await _sb.from('orcamento_itens')
+          .select('orcamento_id,dente_numero,odonto_procedimentos(nome_intervencao)')
+          .in('orcamento_id', orcIds2);
+        (rOI2.data || []).forEach(function (it) {
+          if (!odItensMap2[it.orcamento_id]) odItensMap2[it.orcamento_id] = [];
+          odItensMap2[it.orcamento_id].push(it);
+        });
+      }
+
+      var odRecords2 = rOdonto.data.map(function (rb) {
+        var m = orcIdRgx.exec(rb.observacoes || '');
+        var orcId = m ? m[1] : null;
+        var orc = orcId ? (orcMap2[orcId] || {}) : {};
+        var itens = orcId ? (odItensMap2[orcId] || []) : [];
+        var descProc = itens.length
+          ? itens.map(function (it) {
+              var np = (it.odonto_procedimentos && it.odonto_procedimentos.nome_intervencao) || '';
+              return 'D.' + it.dente_numero + (np ? ' ' + np : '');
+            }).join(', ')
+          : 'Atendimento Odontológico';
+        return {
+          id:              rb.id,
+          _tipo:           'odonto',
+          _recebId:        rb.id,
+          data_agendamento: rb.data_recebimento,
+          hora_inicio:     null,
+          status:          'Realizado',
+          paciente_id:     orc.paciente_id,
+          paciente:        { nome_completo: odPacMap2[orc.paciente_id] || '—' },
+          profissional:    { nome: odProfMap2[orc.profissional_id] || '—' },
+          procedimento:    { nome: '🦷 ' + descProc },
+          valor_cobrado:   orc.valor_total || rb.valor,
+          observacoes:     rb.observacoes,
+          recebimentos:    [rb]
+        };
+      });
+
+      _dados = _dados.concat(odRecords2);
+      _dados.sort(function (a, b) {
+        return (b.data_agendamento || '').localeCompare(a.data_agendamento || '');
+      });
+    }
+
+    /* 7. Filtro de status */
     if (stFilt === 'PENDENTE') {
       _dados = _dados.filter(function (a) {
         return !a.recebimentos || !a.recebimentos.some(function(rb){ return rb.status === 'RECEBIDO'; });

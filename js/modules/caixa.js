@@ -14,6 +14,7 @@ const CaixaMod = (function () {
   var _atendHoje  = [];
   var _processando = false;
   var _editAgId   = null;
+  var _editRecebId = null; // recebimento_id para UPDATE (orçamentos odonto)
 
   var FORMAS = { DINHEIRO: 'Dinheiro', PIX: 'PIX', CREDITO: 'Crédito', DEBITO: 'Débito', CONVENIO: 'Convênio' };
 
@@ -150,6 +151,95 @@ const CaixaMod = (function () {
       (rCriad.data || []).forEach(function (p) { criadMap[p.id] = p.nome; });
       _atendHoje.forEach(function (ag) { ag.criador = { nome: criadMap[ag.criado_por] || null }; });
     }
+
+    /* 7. Orçamentos odontológicos do dia (recebimentos com prefixo ODONTO:) */
+    var rOdReceb = await _sb.from('recebimentos')
+      .select('id,valor,status,forma_pagamento,observacoes,criado_por')
+      .eq('unidade_id', CU)
+      .like('observacoes', 'ODONTO:%')
+      .eq('data_recebimento', hoje);
+
+    if (!rOdReceb.error && rOdReceb.data && rOdReceb.data.length) {
+      /* extrair orcamento_id do campo observacoes */
+      var orcIdRgx = /^ODONTO:([0-9a-f-]{36})/i;
+      var orcIds = rOdReceb.data.map(function (rb) {
+        var m = orcIdRgx.exec(rb.observacoes || '');
+        return m ? m[1] : null;
+      }).filter(Boolean).filter(function (v, i, a) { return a.indexOf(v) === i; });
+
+      if (orcIds.length) {
+        /* Orçamentos */
+        var rOrcs = await _sb.from('orcamentos')
+          .select('id,paciente_id,profissional_id,valor_total,data_criacao')
+          .in('id', orcIds);
+        var orcMap = {};
+        (rOrcs.data || []).forEach(function (o) { orcMap[o.id] = o; });
+
+        /* Pacientes */
+        var odPacIds = (rOrcs.data || []).map(function (o) { return o.paciente_id; }).filter(Boolean)
+          .filter(function (v, i, a) { return a.indexOf(v) === i; });
+        var odPacMap = {};
+        if (odPacIds.length) {
+          var rOdPac = await _sb.from('pacientes').select('id,nome_completo').in('id', odPacIds);
+          (rOdPac.data || []).forEach(function (p) { odPacMap[p.id] = p.nome_completo; });
+        }
+
+        /* Profissionais */
+        var odProfIds = (rOrcs.data || []).map(function (o) { return o.profissional_id; }).filter(Boolean)
+          .filter(function (v, i, a) { return a.indexOf(v) === i; });
+        var odProfMap = {};
+        if (odProfIds.length) {
+          var rOdProf = await _sb.from('perfis_usuarios').select('id,nome').in('id', odProfIds);
+          (rOdProf.data || []).forEach(function (p) { odProfMap[p.id] = p.nome; });
+        }
+
+        /* Itens (procedimentos por dente) */
+        var rOdItens = await _sb.from('orcamento_itens')
+          .select('orcamento_id,dente_numero,odonto_procedimentos(nome_intervencao)')
+          .in('orcamento_id', orcIds);
+        var odItensMap = {};
+        (rOdItens.data || []).forEach(function (it) {
+          if (!odItensMap[it.orcamento_id]) odItensMap[it.orcamento_id] = [];
+          odItensMap[it.orcamento_id].push(it);
+        });
+
+        /* Construir pseudo-registros e mesclar */
+        var odRecords = rOdReceb.data.map(function (rb) {
+          var m     = orcIdRgx.exec(rb.observacoes || '');
+          var orcId = m ? m[1] : null;
+          var orc   = orcId ? (orcMap[orcId] || {}) : {};
+          var itens = orcId ? (odItensMap[orcId] || []) : [];
+          var descProc = itens.length
+            ? itens.map(function (it) {
+                var np = (it.odonto_procedimentos && it.odonto_procedimentos.nome_intervencao) || '';
+                return 'D.' + it.dente_numero + (np ? ' ' + np : '');
+              }).join(', ')
+            : 'Atendimento Odontológico';
+          var horaStr = orc.data_criacao
+            ? new Date(orc.data_criacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            : '—';
+          return {
+            id:            rb.id,          /* usa recebimento_id como chave */
+            _tipo:         'odonto',
+            _recebId:      rb.id,
+            hora_inicio:   horaStr,
+            valor_cobrado: orc.valor_total || rb.valor,
+            status:        'Realizado',
+            paciente_id:   orc.paciente_id,
+            pacientes:     { nome_completo: odPacMap[orc.paciente_id] || '—' },
+            procedimento:  { nome: '🦷 ' + descProc },
+            profissional:  { nome: odProfMap[orc.profissional_id] || '—' },
+            criador:       { nome: odProfMap[orc.profissional_id] || '—' },
+            recebimentos:  [rb]
+          };
+        });
+
+        _atendHoje = _atendHoje.concat(odRecords);
+        _atendHoje.sort(function (a, b) {
+          return (a.hora_inicio || '').localeCompare(b.hora_inicio || '');
+        });
+      }
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -231,9 +321,12 @@ const CaixaMod = (function () {
         ? '<span class="cxStPago">✅ Recebido</span>'
         : '<span class="cxStPend">⏳ Pendente</span>';
 
+      var recebArg = ag._tipo === 'odonto'
+        ? '\'' + ag.id + '\',' + valor.toFixed(2) + ',\'' + ag._recebId + '\''
+        : '\'' + ag.id + '\',' + valor.toFixed(2);
       var acao = pago
         ? '<span style="color:var(--s4);font-size:.8rem">—</span>'
-        : '<button class="btn bG bSm" onclick="CaixaMod.abrirReceber(\'' + ag.id + '\',' + valor.toFixed(2) + ')">💰 Receber</button>';
+        : '<button class="btn bG bSm" onclick="CaixaMod.abrirReceber(' + recebArg + ')">💰 Receber</button>';
 
       html += '<tr class="' + (pago ? '' : 'cxRowPend') + '">'
         + '<td class="cxTdHora">' + hora + '</td>'
@@ -255,8 +348,9 @@ const CaixaMod = (function () {
   /* ══════════════════════════════════════════════════════════════════
      MODAL — RECEBER PAGAMENTO
   ══════════════════════════════════════════════════════════════════ */
-  function abrirReceber (agId, valor) {
-    _editAgId = agId;
+  function abrirReceber (agId, valor, recebId) {
+    _editAgId    = agId;
+    _editRecebId = recebId || null;
     var modal = sid('caixaModalPag');
     if (!modal) return;
     var el = sid('caixaPagValorLabel');
@@ -270,7 +364,8 @@ const CaixaMod = (function () {
   function fecharModal () {
     var modal = sid('caixaModalPag');
     if (modal) modal.classList.remove('open');
-    _editAgId = null;
+    _editAgId    = null;
+    _editRecebId = null;
   }
 
   async function confirmarPagamento () {
@@ -290,19 +385,31 @@ const CaixaMod = (function () {
       var ag    = _atendHoje.find(function (a) { return a.id === _editAgId; });
       var valor = ag ? (parseFloat(ag.valor_cobrado) || parseFloat(((ag.procedimento) || {}).valor_padrao) || 0) : 0;
 
-      var payload = {
-        agendamento_id:   _editAgId,
-        unidade_id:       CU,
-        forma_pagamento:  forma,
-        valor:            valor,
-        data_recebimento: _hoje(),
-        status:           'RECEBIDO',
-        criado_por:       userId,
-        caixa_turno_id:   _turnoId,
-        observacoes:      obs || null
-      };
-
-      var r = await _sb.from('recebimentos').insert(payload);
+      var r;
+      if (_editRecebId) {
+        /* Orçamento odontológico: atualiza recebimento PENDENTE existente */
+        r = await _sb.from('recebimentos').update({
+          forma_pagamento:  forma,
+          status:           'RECEBIDO',
+          data_recebimento: _hoje(),
+          criado_por:       userId,
+          caixa_turno_id:   _turnoId,
+          observacoes:      (ag && ag.procedimento ? ag.procedimento.nome + (obs ? ' | ' + obs : '') : obs) || null
+        }).eq('id', _editRecebId);
+      } else {
+        /* Agendamento normal: insere novo recebimento */
+        r = await _sb.from('recebimentos').insert({
+          agendamento_id:   _editAgId,
+          unidade_id:       CU,
+          forma_pagamento:  forma,
+          valor:            valor,
+          data_recebimento: _hoje(),
+          status:           'RECEBIDO',
+          criado_por:       userId,
+          caixa_turno_id:   _turnoId,
+          observacoes:      obs || null
+        });
+      }
       if (r.error) throw r.error;
 
       _comissao += COMISSAO_POR_ATEND;
