@@ -2010,68 +2010,136 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .odoDenteSelLabel { font-weight: 700; color: var(--b6); font-size: .88rem; }
 .odoHint          { color: var(--s4); font-size: .8rem; }
 
-/* ── Títulos de seção no painel lateral ── */
+/* ══ PAINEL LATERAL — 3 caixas com tonalidades de verde distintas ══ */
+
+/* ── Caixa 1: Busca Rápida — verde menta claro ── */
+#odoBuscaPanel {
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+  border-radius: 10px;
+  padding: 10px 12px 4px;
+  margin-bottom: 10px;
+}
+#odoBuscaPanel .odoSideTitulo {
+  color: #166534; font-size: .7rem;
+}
+
+/* ── Caixa 2: Especialidade — verde sálvia médio ── */
+#odoEspPanel {
+  background: #dcfce7;
+  border: 2px solid #4ade80;
+  border-radius: 10px;
+  padding: 10px 12px 6px;
+  margin-bottom: 10px;
+}
+#odoEspPanel .odoSideTitulo {
+  color: #14532d; font-size: .7rem;
+}
+
+/* ── Caixa 3: Intervenção — verde-azulado (teal) escuro ── */
+#odoIntPanel {
+  background: #ccfbf1;
+  border: 2px solid #2dd4bf;
+  border-radius: 10px;
+  padding: 10px 12px 6px;
+  margin-bottom: 10px;
+}
+#odoIntPanel .odoSideTitulo {
+  color: #134e4a; font-size: .7rem;
+}
+
+/* ── Título de seção (base) ── */
 .odoSideTitulo {
-  font-size: .68rem; font-weight: 800; text-transform: uppercase;
-  letter-spacing: .06em; color: var(--s5); margin-bottom: 7px;
+  font-size: .68rem; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--s5); margin-bottom: 8px;
 }
 
 /* ── Container de chips ── */
-.odoChipLista { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.odoChipLista { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
 
 /* ── Chip de especialidade ── */
 .odoChip {
-  background: var(--w); border: 1.5px solid var(--s3); border-radius: 20px;
-  padding: 4px 12px; font-size: .78rem; font-weight: 600; color: var(--s7);
+  background: rgba(255,255,255,.75); border: 1.5px solid #4ade80;
+  border-radius: 20px; padding: 5px 13px;
+  font-size: .79rem; font-weight: 700; color: #166534;
   cursor: pointer; transition: all .15s; line-height: 1.3;
 }
-.odoChip:hover { background: var(--b1); border-color: var(--b4); color: var(--b7); }
-.odoChipAtivo  { background: var(--b5) !important; border-color: var(--b5) !important; color: #fff !important; }
+.odoChip:hover {
+  background: #16a34a; border-color: #16a34a; color: #fff;
+}
+.odoChipAtivo {
+  background: #16a34a !important; border-color: #15803d !important;
+  color: #fff !important; box-shadow: 0 2px 8px rgba(22,163,74,.35);
+}
 
-/* ── Chip de intervenção (com valor abaixo) ── */
+/* ── Chip de intervenção ── */
 .odoChipInt {
   display: flex; flex-direction: column; align-items: flex-start;
-  border-radius: 8px; padding: 6px 12px; width: 100%;
+  border-radius: 8px; padding: 7px 13px; width: 100%;
+  background: rgba(255,255,255,.7); border: 1.5px solid #5eead4;
+  color: #134e4a;
 }
-.odoChipVal { font-size: .7rem; color: var(--g6); font-weight: 700; }
-.odoChipInt:hover .odoChipVal { color: var(--b6); }
-.odoChipAtivo .odoChipVal     { color: rgba(255,255,255,.8) !important; }
+.odoChipInt:hover {
+  background: #0f766e; border-color: #0f766e; color: #fff;
+}
+.odoChipInt:hover .odoChipVal { color: #99f6e4 !important; }
+.odoChipVal {
+  font-size: .72rem; color: #0d9488; font-weight: 800;
+  margin-top: 2px; letter-spacing: .01em;
+}
+.odoChipInt .odoChipNomeText {
+  font-size: .82rem; font-weight: 700; line-height: 1.3;
+}
 
-/* ── Busca rápida de procedimentos ── */
-.odoBuscaWrap { position: relative; margin-bottom: 14px; }
+/* ── Busca rápida — campo de input ── */
+.odoBuscaWrap { position: relative; margin-bottom: 6px; }
 .odoBuscaInp {
   width: 100%; box-sizing: border-box;
   padding: 8px 32px 8px 10px;
-  border: 1.5px solid var(--s3); border-radius: 8px;
-  font-size: .82rem; background: var(--w); color: var(--s8);
-  transition: border-color .15s;
+  border: 1.5px solid #86efac; border-radius: 8px;
+  font-size: .83rem; font-weight: 600;
+  background: rgba(255,255,255,.85); color: #166534;
+  transition: border-color .15s, box-shadow .15s;
 }
-.odoBuscaInp:focus { outline: none; border-color: var(--b5); box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+.odoBuscaInp::placeholder { color: #4ade80; font-weight: 500; }
+.odoBuscaInp:focus {
+  outline: none; border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22,163,74,.18);
+  background: #fff;
+}
 .odoBuscaClear {
   position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
   background: none; border: none; cursor: pointer;
-  color: var(--s4); font-size: .82rem; padding: 2px 4px; line-height: 1;
+  color: #4ade80; font-size: .82rem; padding: 2px 4px; line-height: 1;
   border-radius: 4px; transition: color .12s;
 }
-.odoBuscaClear:hover { color: var(--r6); }
+.odoBuscaClear:hover { color: #dc2626; }
+
+/* ── Dropdown de resultados ── */
 .odoBuscaDrop {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-  background: var(--w); border: 1.5px solid var(--s3);
-  border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.16);
+  background: #fff; border: 2px solid #4ade80;
+  border-radius: 10px; box-shadow: 0 10px 28px rgba(22,163,74,.18);
   z-index: 50; max-height: 260px; overflow-y: auto;
 }
 .odoBuscaItem {
-  padding: 9px 12px; cursor: pointer;
-  border-bottom: 1px solid var(--s1); transition: background .1s;
+  padding: 9px 13px; cursor: pointer;
+  border-bottom: 1px solid #dcfce7; transition: background .1s;
 }
 .odoBuscaItem:last-child { border-bottom: none; }
-.odoBuscaItem:hover { background: var(--b1); }
-.odoBuscaItemNome { font-size: .83rem; font-weight: 700; color: var(--s8); }
-.odoBuscaItemMeta { font-size: .73rem; color: var(--s5); margin-top: 2px; display: flex; gap: 8px; align-items: center; }
-.odoBuscaItemEsp  { font-style: italic; }
-.odoBuscaItemVal  { color: var(--g6); font-weight: 700; }
-.odoBuscaVazio    { padding: 12px; font-size: .8rem; color: var(--s4); text-align: center; }
-.odoBuscaDestaque { background: rgba(59,130,246,.12); color: var(--b7); border-radius: 2px; }
+.odoBuscaItem:hover { background: #f0fdf4; }
+.odoBuscaItemNome {
+  font-size: .84rem; font-weight: 700; color: #166534;
+  line-height: 1.3;
+}
+.odoBuscaItemMeta {
+  font-size: .74rem; color: #4b7a60; margin-top: 3px;
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.odoBuscaItemEsp  { font-style: italic; color: #6b7280; }
+.odoBuscaItemVal  { color: #0d9488; font-weight: 800; font-size: .76rem; }
+.odoBuscaVazio    { padding: 12px; font-size: .8rem; color: #9ca3af; text-align: center; }
+.odoBuscaDestaque { background: #bbf7d0; color: #14532d; border-radius: 3px; padding: 0 2px; font-weight: 900; }
 
 /* ── Modal: seletor visual de faces ── */
 .odoFacePickArea {
