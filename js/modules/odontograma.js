@@ -988,10 +988,13 @@ const OdontogramaMod = (function () {
       // Marcador genérico: pequeno ponto cinza no centro — indica procedimento sem símbolo específico
       s += '<circle cx="50" cy="50" r="7" fill="#9ca3af" opacity="0.8"/>';
     } else if (tipo === 'ausente') {
-      s += '<line x1="10" y1="10" x2="90" y2="90" stroke="' + cor + '" stroke-width="10" stroke-linecap="round"/>';
-      s += '<line x1="90" y1="10" x2="10" y2="90" stroke="' + cor + '" stroke-width="10" stroke-linecap="round"/>';
+      /* Dente ausente (já extraído / nunca existiu) — X cinza espesso */
+      s += '<line x1="10" y1="10" x2="90" y2="90" stroke="#9ca3af" stroke-width="10" stroke-linecap="round"/>';
+      s += '<line x1="90" y1="10" x2="10" y2="90" stroke="#9ca3af" stroke-width="10" stroke-linecap="round"/>';
     } else if (tipo === 'extracao') {
-      s += '<line x1="10" y1="10" x2="90" y2="90" stroke="' + cor + '" stroke-width="8" stroke-linecap="round"/>';
+      /* Indicação de extração — X vermelho igual ao símbolo dental padrão */
+      s += '<line x1="12" y1="12" x2="88" y2="88" stroke="' + cor + '" stroke-width="9" stroke-linecap="round"/>';
+      s += '<line x1="88" y1="12" x2="12" y2="88" stroke="' + cor + '" stroke-width="9" stroke-linecap="round"/>';
     } else if (tipo === 'canal') {
       s += '<line x1="50" y1="5" x2="50" y2="95" stroke="' + cor + '" stroke-width="6" stroke-linecap="round"/>';
     } else if (tipo === 'coroa') {
@@ -1001,9 +1004,11 @@ const OdontogramaMod = (function () {
       faceList.forEach(function (fc) {
         var pos = _FACE_POS[fc] || _FACE_POS['O'];
         if (tipo === 'carie') {
-          s += '<circle cx="' + pos.cx + '" cy="' + pos.cy + '" r="11" fill="' + cor + '"/>';
+          /* Cárie ativa — círculo sólido vermelho na face */
+          s += '<circle cx="' + pos.cx + '" cy="' + pos.cy + '" r="12" fill="' + cor + '"/>';
         } else if (tipo === 'restauracao') {
-          s += '<rect x="' + (pos.cx - 10) + '" y="' + (pos.cy - 10) + '" width="20" height="20" rx="2" fill="' + cor + '"/>';
+          /* Restauração realizada — círculo sólido azul na face (mesmo formato, cor diferente) */
+          s += '<circle cx="' + pos.cx + '" cy="' + pos.cy + '" r="12" fill="' + cor + '"/>';
         } else if (tipo === 'provisorio') {
           s += '<circle cx="' + pos.cx + '" cy="' + pos.cy + '" r="11" fill="none" stroke="' + cor + '" stroke-width="4"/>';
         }
