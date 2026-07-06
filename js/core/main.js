@@ -145,6 +145,7 @@ function switchSidebar(mod){
   if(mod==='estoque'){       setTimeout(function(){ EstoqueMod.init();     },50); }
   if(mod==='caixa'){         setTimeout(function(){ CaixaMod.init();       },50); }
   if(mod==='auditoria'){     setTimeout(function(){ AuditoriaMod.init();   },50); }
+  if(mod==='relatorios'){    setTimeout(function(){ RelatoriosMod.init();  },50); }
   if(mod==='admin-unidades'){   setTimeout(function(){ UnidadesMod.init();        },50); }
   if(mod==='admin-cadastro'){ setTimeout(function(){ UsuariosMod.init();         },50); }
   if(mod==='admin-controle'){ setTimeout(function(){ UsuariosMod.initControle(); },50); }

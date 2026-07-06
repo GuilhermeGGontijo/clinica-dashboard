@@ -3221,4 +3221,142 @@ body.sb-auditoria #secAuditoria { display: block !important; }
   border-radius: var(--Rs);
 }
 .estPedItemRow .patFG { flex: 1; min-width: 140px; margin: 0; }
+
+/* ══════════════════════════════════════════════════════════════
+   RELATÓRIOS
+══════════════════════════════════════════════════════════════ */
+.relKpis {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+@media (max-width: 1100px) { .relKpis { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 700px)  { .relKpis { grid-template-columns: repeat(2, 1fr); } }
+
+.relKpiG { border-left: 4px solid var(--g6); }
+.relKpiB { border-left: 4px solid var(--b5); }
+.relKpiY { border-left: 4px solid var(--a5); }
+.relKpiR { border-left: 4px solid var(--r6); }
+
+/* ── Filtros ── */
+.relFiltros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  background: var(--w);
+  border: 1px solid var(--s2);
+  border-radius: var(--R);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  box-shadow: var(--sh);
+}
+.relFiltGrp { display: flex; flex-direction: column; gap: 3px; }
+.relFiltLbl {
+  font-size: .67rem; font-weight: 700; color: var(--s5);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.relFiltInp, .relFiltSel {
+  font-size: .8rem; padding: 5px 8px;
+  border: 1.5px solid var(--s2); border-radius: 8px;
+  background: var(--bg); color: var(--s8); height: 32px;
+}
+.relFiltSel { min-width: 110px; }
+
+/* ── Botões header ── */
+.relBtnGroup { display: flex; gap: 8px; margin-left: auto; }
+
+/* ── Tabs ── */
+.relTabNav {
+  display: flex; gap: 6px;
+  border-bottom: 2px solid var(--s2);
+  margin-bottom: 12px; padding-bottom: 6px;
+}
+.relTab {
+  padding: 6px 18px; border: 1.5px solid var(--s2);
+  border-radius: 8px; background: var(--w);
+  color: var(--s6); cursor: pointer;
+  font-size: .8rem; font-weight: 700; transition: all .15s;
+}
+.relTab:hover { background: var(--s1); color: var(--s8); }
+.relTab.relTabAtivo { background: var(--p); color: #fff; border-color: var(--p); }
+
+/* ── Tabelas ── */
+.relTableWrap {
+  overflow-x: auto; background: var(--w);
+  border: 1px solid var(--s2); border-radius: var(--R); box-shadow: var(--sh);
+}
+.relTable { width: 100%; border-collapse: collapse; font-size: .79rem; }
+.relTable thead th {
+  padding: 9px 10px; text-align: left;
+  font-size: .68rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .05em;
+  color: var(--s5); background: var(--s1);
+  border-bottom: 1px solid var(--s2); white-space: nowrap;
+}
+.relTable tbody td {
+  padding: 8px 10px; border-bottom: 1px solid var(--s1);
+  color: var(--s7); vertical-align: middle;
+}
+.relTable tbody tr:last-child td { border-bottom: none; }
+.relTable tbody tr:hover td { background: var(--s1); }
+.relVazio { text-align: center; color: var(--s4); font-size: .8rem; padding: 24px !important; }
+
+/* ── Resumo box ── */
+.relResumo {
+  display: inline-block; min-width: 280px;
+  background: var(--w); border: 1px solid var(--s2);
+  border-radius: var(--R); padding: 12px 14px;
+  margin-bottom: 0; box-shadow: var(--sh);
+}
+.relResumoTit {
+  font-size: .72rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .05em;
+  color: var(--s5); margin-bottom: 8px;
+}
+
+/* ── Loading ── */
+.relCarregando { text-align: center; padding: 24px; color: var(--s4); font-size: .85rem; }
+
+/* ══════════════════════════════════════════════════════════════
+   IMPRESSÃO — RELATÓRIOS (body.rel-imprimindo)
+══════════════════════════════════════════════════════════════ */
+#relPrintArea { display: none; }
+
+@media print {
+  body.rel-imprimindo * { visibility: hidden !important; }
+  body.rel-imprimindo #relPrintArea,
+  body.rel-imprimindo #relPrintArea * { visibility: visible !important; }
+  body.rel-imprimindo #relPrintArea {
+    display: block !important;
+    position: absolute; top: 0; left: 0; width: 100%;
+    background: #fff; font-family: Arial, sans-serif;
+    font-size: 9pt; color: #111;
+  }
+  .relPrintHdr {
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 2pt solid #1e3a5f;
+    padding-bottom: 8pt; margin-bottom: 10pt;
+  }
+  .relPrintLogo { font-size: 14pt; font-weight: 900; color: #1e3a5f; flex-shrink: 0; }
+  .relPrintTit  { font-size: 12pt; font-weight: 800; color: #1e3a5f; }
+  .relPrintSub  { font-size: 9pt; color: #444; margin-top: 2pt; }
+  .relPrintGen  { font-size: 8pt; color: #888; margin-top: 2pt; }
+  .relPrintKpis { display: flex; gap: 8pt; margin-bottom: 10pt; }
+  .relPrintKpi  {
+    flex: 1; border: 1pt solid #ddd; border-radius: 3pt;
+    padding: 5pt 7pt; display: flex; flex-direction: column; align-items: center;
+  }
+  .relPkVal { font-size: 11pt; font-weight: 900; color: #1e3a5f; }
+  .relPkLbl { font-size: 7pt; color: #666; text-transform: uppercase; letter-spacing: .03em; margin-top: 1pt; }
+  .relPrintTable { width: 100%; border-collapse: collapse; font-size: 8pt; }
+  .relPrintTable thead th {
+    background: #1e3a5f; color: #fff;
+    padding: 4pt 5pt; text-align: left;
+    font-size: 7pt; text-transform: uppercase;
+  }
+  .relPrintTable tbody td { padding: 3pt 5pt; border-bottom: 1pt solid #eee; }
+  .relPrintTable tbody tr:nth-child(even) td { background: #f5f7fa; }
+}
 </style>
