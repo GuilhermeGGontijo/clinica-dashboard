@@ -168,7 +168,9 @@ const OdontogramaMod = (function () {
     lbl.textContent = num;
     w.appendChild(lbl);
 
-    /* Imagem anatômica — PNG real para permanentes, placeholder para decíduos */
+    /* Imagem anatômica — envolta em wrapper para receber SVG de símbolo */
+    var imgWrap = document.createElement('div');
+    imgWrap.className = 'odontoDenteImgWrap';
     var img = document.createElement('img');
     img.className = 'odontoDenteImg';
     img.src = deciduo
@@ -177,7 +179,8 @@ const OdontogramaMod = (function () {
     img.alt = 'Dente ' + num;
     img.draggable = false;
     img.onerror = function () { this.style.display = 'none'; };
-    w.appendChild(img);
+    imgWrap.appendChild(img);
+    w.appendChild(imgWrap);
 
     /* Cruzeta CSS (5 faces — indicador visual de estado) */
     var g = document.createElement('div');
@@ -1025,7 +1028,7 @@ const OdontogramaMod = (function () {
       var simbolos = _estadoPaciente[denteNum];
       if (!simbolos || !simbolos.length) return;
 
-      var graf = document.querySelector('.odontoDente[data-dente="' + denteNum + '"] .odontoDenteGraf');
+      var graf = document.querySelector('.odontoDente[data-dente="' + denteNum + '"] .odontoDenteImgWrap');
       if (!graf) return;
 
       /* Ordem de renderização: face-específicos → contorno → linhas → ausente por último */

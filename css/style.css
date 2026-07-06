@@ -2171,7 +2171,13 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .odontoDente.selecionado { background: var(--b1); outline: 2px solid var(--b5); outline-offset: 1px; }
 
 /* ── Imagem anatômica do dente ── */
-.odontoDenteImg { width: 37px; height: 40px; object-fit: contain; display: block; pointer-events: none; }
+.odontoDenteImgWrap {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 37px; height: 40px;
+}
+.odontoDente.deciduo .odontoDenteImgWrap { width: 26px; height: 29px; }
+.odontoDenteImg { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; }
 .odontoDente.deciduo .odontoDenteImg { width: 26px; height: 29px; }
 
 /* ── Info do dente selecionado (topo do painel lateral) ── */
