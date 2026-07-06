@@ -3365,6 +3365,39 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 /* ── Loading ── */
 .relCarregando { text-align: center; padding: 24px; color: var(--s4); font-size: .85rem; }
 
+/* ── Aviso tabela inexistente ── */
+.relAviso {
+  background: #fffbeb; border: 1.5px solid #f59e0b;
+  border-radius: var(--R); padding: 12px 16px;
+  font-size: .8rem; color: #78350f; margin-bottom: 14px;
+}
+.relAviso code { background: #fef3c7; padding: 1px 5px; border-radius: 4px; font-family: monospace; }
+.relAviso strong { font-weight: 700; }
+
+/* ── DRE cards ── */
+.relDRE {
+  display: flex; align-items: center; gap: 0;
+  flex-wrap: wrap; background: var(--w);
+  border: 1.5px solid var(--s2); border-radius: var(--R);
+  padding: 20px 16px; box-shadow: var(--sh); margin-bottom: 4px;
+}
+.relDREBloco {
+  flex: 1; min-width: 140px; text-align: center; padding: 10px 16px;
+}
+.relDREDestaque {
+  background: var(--s0); border-radius: var(--Rs);
+  border: 1.5px solid var(--s2);
+}
+.relDREIco  { font-size: 1.4rem; margin-bottom: 6px; }
+.relDRELabel { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--s5); margin-bottom: 4px; }
+.relDREValor { font-size: 1.15rem; font-weight: 800; color: var(--s8); }
+.relDRESep   { font-size: 1.6rem; font-weight: 300; color: var(--s3); padding: 0 4px; align-self: center; }
+
+/* ── Laboratório funil KPIs ── */
+.relLabFunil {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;
+}
+
 /* ══════════════════════════════════════════════════════════════
    IMPRESSÃO — RELATÓRIOS (body.rel-imprimindo)
 ══════════════════════════════════════════════════════════════ */

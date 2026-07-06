@@ -13,6 +13,8 @@ var RelatoriosMod = (function () {
   var _profissionais = [];
   var _convenios     = [];
   var _procedimentos = [];
+  var _dadosDRE = { custos: [], repasses: [] };
+  var _dadosLab = { recepcoes: [] };
 
   var FORMAS = {
     DINHEIRO: 'Dinheiro', PIX: 'PIX',
@@ -84,11 +86,15 @@ var RelatoriosMod = (function () {
         '<button class="relTab relTabAtivo" data-tab="financeiro"   onclick="RelatoriosMod.mudarTab(\'financeiro\')"  >💰 Financeiro</button>' +
         '<button class="relTab"             data-tab="atendimentos" onclick="RelatoriosMod.mudarTab(\'atendimentos\')">📅 Atendimentos</button>' +
         '<button class="relTab"             data-tab="producao"     onclick="RelatoriosMod.mudarTab(\'producao\')"    >👩‍⚕️ Produção</button>' +
+        '<button class="relTab"             data-tab="dre"          onclick="RelatoriosMod.mudarTab(\'dre\')"         >📈 DRE</button>' +
+        '<button class="relTab"             data-tab="laboratorio"  onclick="RelatoriosMod.mudarTab(\'laboratorio\')" >🔬 Laboratório</button>' +
       '</div>' +
 
       '<div id="relPanelFinanceiro"   class="relPanel"></div>' +
       '<div id="relPanelAtendimentos" class="relPanel" style="display:none"></div>' +
       '<div id="relPanelProducao"     class="relPanel" style="display:none"></div>' +
+      '<div id="relPanelDre"          class="relPanel" style="display:none"></div>' +
+      '<div id="relPanelLaboratorio"  class="relPanel" style="display:none"></div>' +
       '<div id="relPrintArea"></div>'
     );
   }
@@ -135,7 +141,11 @@ var RelatoriosMod = (function () {
     var kw = sid('relKpisWrap');
     if (kw) kw.innerHTML = '<div class="relCarregando">⏳ Carregando dados…</div>';
 
-    await _carregarDados(ini, fim);
+    await Promise.all([
+      _carregarDados(ini, fim),
+      _carregarDadosDRE(ini, fim),
+      _carregarDadosLab(ini, fim)
+    ]);
     _aplicarFiltros();
     _renderKPIs();
     _renderTab(_tab);
@@ -386,7 +396,7 @@ var RelatoriosMod = (function () {
   ════════════════════════════════════════════════════════════ */
   function mudarTab(tab) {
     _tab = tab;
-    ['financeiro', 'atendimentos', 'producao'].forEach(function (t) {
+    ['financeiro', 'atendimentos', 'producao', 'dre', 'laboratorio'].forEach(function (t) {
       var btn   = document.querySelector('.relTab[data-tab="' + t + '"]');
       var panel = sid('relPanel' + t.charAt(0).toUpperCase() + t.slice(1));
       if (btn)   btn.classList.toggle('relTabAtivo', t === tab);
@@ -398,6 +408,8 @@ var RelatoriosMod = (function () {
     if (tab === 'financeiro')        _renderFinanceiro();
     else if (tab === 'atendimentos') _renderAtendimentos();
     else if (tab === 'producao')     _renderProducao();
+    else if (tab === 'dre')         _renderDRE();
+    else if (tab === 'laboratorio') _renderLaboratorio();
   }
 
   /* ── Tab Financeiro ── */
@@ -517,6 +529,219 @@ var RelatoriosMod = (function () {
         '<th style="text-align:center">Faltantes</th><th style="text-align:center">Pac. Únicos</th>' +
         '<th style="text-align:center">Comparecimento</th><th style="text-align:right">Faturamento</th></tr></thead>' +
         '<tbody>' + linhas + '</tbody></table></div>';
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     DRE — carga e render
+  ════════════════════════════════════════════════════════════ */
+  async function _carregarDadosDRE(ini, fim) {
+    _dadosDRE = { custos: [], repasses: [] };
+    try {
+      var rc = await _sb.from('custos_operacionais')
+        .select('id,data_lancamento,categoria,descricao,valor')
+        .eq('unidade_id', CU)
+        .gte('data_lancamento', ini).lte('data_lancamento', fim);
+      if (!rc.error) _dadosDRE.custos = rc.data || [];
+    } catch (_e) {}
+    try {
+      var rr = await _sb.from('repasses_profissionais')
+        .select('id,profissional_id,periodo_ini,periodo_fim,valor_faturado,percentual_repasse,valor_repasse,status')
+        .eq('unidade_id', CU)
+        .gte('periodo_ini', ini).lte('periodo_fim', fim);
+      if (!rr.error && rr.data && rr.data.length) {
+        _dadosDRE.repasses = rr.data;
+        var pfIds = Object.keys(rr.data.reduce(function (m, r) {
+          if (r.profissional_id) m[r.profissional_id] = 1; return m;
+        }, {}));
+        if (pfIds.length) {
+          var rp = await _sb.from('perfis_usuarios').select('id,nome').in('id', pfIds);
+          var pm = {}; (rp.data || []).forEach(function (p) { pm[p.id] = p.nome; });
+          _dadosDRE.repasses.forEach(function (r) { r._profNome = pm[r.profissional_id] || '—'; });
+        }
+      }
+    } catch (_e) {}
+  }
+
+  function _renderDRE() {
+    var panel = sid('relPanelDre');
+    if (!panel) return;
+
+    var fat = 0;
+    _dadosFilt.forEach(function (d) { if (d.status === 'Realizado') fat += d.valor; });
+
+    var totalCustos   = _dadosDRE.custos.reduce(function (s, c) { return s + (parseFloat(c.valor) || 0); }, 0);
+    var totalRepasses = _dadosDRE.repasses.reduce(function (s, r) { return s + (parseFloat(r.valor_repasse) || 0); }, 0);
+    var lucro         = fat - totalCustos - totalRepasses;
+    var lucroColor    = lucro >= 0 ? 'var(--g6)' : 'var(--r6)';
+    var margemColor   = lucro >= 0 ? 'var(--g6)' : 'var(--r6)';
+    var margem        = fat > 0 ? Math.round(lucro / fat * 100) : 0;
+
+    var semDados = _dadosDRE.custos.length === 0 && _dadosDRE.repasses.length === 0;
+    var aviso = semDados
+      ? '<div class="relAviso">⚠️ As tabelas <code>custos_operacionais</code> e <code>repasses_profissionais</code> ainda não existem ou estão vazias no período selecionado. Execute <strong>setup-dre-lab.sql</strong> no Supabase SQL Editor e cadastre os dados.</div>'
+      : '';
+
+    var catMap = {};
+    _dadosDRE.custos.forEach(function (c) {
+      var cat = c.categoria || 'outros';
+      catMap[cat] = (catMap[cat] || 0) + (parseFloat(c.valor) || 0);
+    });
+    var catLinhas = Object.keys(catMap)
+      .sort(function (a, b) { return catMap[b] - catMap[a]; })
+      .map(function (k) {
+        return '<tr><td>' + esc(k) + '</td>' +
+          '<td style="text-align:right;font-weight:600">' + _brl(catMap[k]) + '</td></tr>';
+      }).join('');
+    if (catLinhas) {
+      catLinhas += '<tr style="background:var(--s1);font-weight:800"><td>Total</td>' +
+        '<td style="text-align:right">' + _brl(totalCustos) + '</td></tr>';
+    }
+
+    var repLinhas = _dadosDRE.repasses.map(function (r) {
+      var st = r.status === 'pago'
+        ? '<span style="color:var(--g6);font-weight:700">Pago</span>'
+        : '<span style="color:var(--a5);font-weight:700">Pendente</span>';
+      return '<tr>' +
+        '<td>' + esc(r._profNome || '—') + '</td>' +
+        '<td style="text-align:right">'    + _brl(r.valor_faturado)     + '</td>' +
+        '<td style="text-align:center">'   + (r.percentual_repasse || 0) + '%</td>' +
+        '<td style="text-align:right;font-weight:700">' + _brl(r.valor_repasse) + '</td>' +
+        '<td style="text-align:center">'   + st + '</td></tr>';
+    }).join('') || '<tr><td colspan="5" class="relVazio">Nenhum repasse cadastrado no período.</td></tr>';
+
+    panel.innerHTML = aviso +
+      '<div class="relDRE">' +
+        '<div class="relDREBloco">' +
+          '<div class="relDREIco">💰</div>' +
+          '<div class="relDRELabel">Faturamento Bruto</div>' +
+          '<div class="relDREValor" style="color:var(--g6)">' + _brl(fat) + '</div>' +
+        '</div>' +
+        '<div class="relDRESep">−</div>' +
+        '<div class="relDREBloco">' +
+          '<div class="relDREIco">📦</div>' +
+          '<div class="relDRELabel">Custos Operacionais</div>' +
+          '<div class="relDREValor" style="color:var(--r6)">' + _brl(totalCustos) + '</div>' +
+        '</div>' +
+        '<div class="relDRESep">−</div>' +
+        '<div class="relDREBloco">' +
+          '<div class="relDREIco">👩‍⚕️</div>' +
+          '<div class="relDRELabel">Repasses</div>' +
+          '<div class="relDREValor" style="color:var(--r6)">' + _brl(totalRepasses) + '</div>' +
+        '</div>' +
+        '<div class="relDRESep">=</div>' +
+        '<div class="relDREBloco relDREDestaque">' +
+          '<div class="relDREIco">📈</div>' +
+          '<div class="relDRELabel">Lucro Líquido</div>' +
+          '<div class="relDREValor" style="color:' + lucroColor + ';font-size:1.5rem">' + _brl(lucro) + '</div>' +
+          '<div style="font-size:.78rem;color:' + margemColor + ';font-weight:700;margin-top:4px">Margem: ' + margem + '%</div>' +
+        '</div>' +
+      '</div>' +
+      (catLinhas
+        ? '<div class="relResumo" style="margin-top:16px">' +
+            '<div class="relResumoTit">Custos por Categoria</div>' +
+            '<table class="relTable" style="min-width:280px">' +
+            '<thead><tr><th>Categoria</th><th style="text-align:right">Valor</th></tr></thead>' +
+            '<tbody>' + catLinhas + '</tbody></table>' +
+          '</div>'
+        : '') +
+      '<div class="relTableWrap" style="margin-top:16px">' +
+        '<div class="relResumoTit" style="margin-bottom:8px">Repasses por Profissional</div>' +
+        '<table class="relTable">' +
+        '<thead><tr><th>Profissional</th>' +
+        '<th style="text-align:right">Faturado</th>' +
+        '<th style="text-align:center">%</th>' +
+        '<th style="text-align:right">Repasse</th>' +
+        '<th style="text-align:center">Status</th></tr></thead>' +
+        '<tbody>' + repLinhas + '</tbody></table>' +
+      '</div>';
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     LABORATÓRIO — carga e render
+  ════════════════════════════════════════════════════════════ */
+  async function _carregarDadosLab(ini, fim) {
+    _dadosLab = { recepcoes: [] };
+    try {
+      var rl = await _sb.from('recepcao_lab')
+        .select('id,paciente_id,profissional_id,laboratorio,tipo_trabalho,data_entrada,data_prevista,data_retorno,status,valor')
+        .eq('unidade_id', CU)
+        .gte('data_entrada', ini).lte('data_entrada', fim)
+        .order('data_entrada', { ascending: false }).limit(500);
+      if (!rl.error && rl.data && rl.data.length) {
+        _dadosLab.recepcoes = rl.data;
+        var pacSet = {}, pfSet = {};
+        _dadosLab.recepcoes.forEach(function (r) {
+          if (r.paciente_id)     pacSet[r.paciente_id]     = 1;
+          if (r.profissional_id) pfSet[r.profissional_id]  = 1;
+        });
+        var ps = [];
+        var pacIds2 = Object.keys(pacSet);
+        var pfIds2  = Object.keys(pfSet);
+        if (pacIds2.length) ps.push(_sb.from('pacientes').select('id,nome_completo').in('id', pacIds2).then(function (rp) {
+          var m = {}; (rp.data || []).forEach(function (p) { m[p.id] = p.nome_completo; });
+          _dadosLab.recepcoes.forEach(function (r) { r._pacNome = m[r.paciente_id] || '—'; });
+        }));
+        if (pfIds2.length) ps.push(_sb.from('perfis_usuarios').select('id,nome').in('id', pfIds2).then(function (rp) {
+          var m = {}; (rp.data || []).forEach(function (p) { m[p.id] = p.nome; });
+          _dadosLab.recepcoes.forEach(function (r) { r._profNome = m[r.profissional_id] || '—'; });
+        }));
+        if (ps.length) await Promise.all(ps);
+      }
+    } catch (_e) {}
+  }
+
+  function _renderLaboratorio() {
+    var panel = sid('relPanelLaboratorio');
+    if (!panel) return;
+
+    var recs = _dadosLab.recepcoes;
+    var semDados = recs.length === 0;
+    var aviso = semDados
+      ? '<div class="relAviso">⚠️ A tabela <code>recepcao_lab</code> ainda não foi criada ou não há registros no período selecionado. Execute <strong>setup-dre-lab.sql</strong> no Supabase SQL Editor para habilitar este módulo.</div>'
+      : '';
+
+    var total    = recs.length;
+    var emProd   = recs.filter(function (r) { return r.status === 'em_producao';    }).length;
+    var aguard   = recs.filter(function (r) { return r.status === 'aguardando_laudo'; }).length;
+    var entregue = recs.filter(function (r) { return r.status === 'entregue';       }).length;
+    var refeito  = recs.filter(function (r) { return r.status === 'refeito';        }).length;
+
+    var slaList = recs.filter(function (r) { return r.data_entrada && r.data_retorno; })
+      .map(function (r) { return Math.round((new Date(r.data_retorno) - new Date(r.data_entrada)) / 86400000); });
+    var slaMedia = slaList.length
+      ? Math.round(slaList.reduce(function (s, v) { return s + v; }, 0) / slaList.length)
+      : null;
+
+    var TIPOS_LAB = { em_producao: '🔧 Em Produção', aguardando_laudo: '⏳ Aguardando', entregue: '✅ Entregue', refeito: '🔄 Refeito' };
+    var labLinhas = recs.map(function (r) {
+      return '<tr>' +
+        '<td>' + _fmtData(r.data_entrada) + '</td>' +
+        '<td>' + esc(r._pacNome  || '—') + '</td>' +
+        '<td>' + esc(r._profNome || '—') + '</td>' +
+        '<td>' + esc(r.laboratorio   || '—') + '</td>' +
+        '<td>' + esc(r.tipo_trabalho || '—') + '</td>' +
+        '<td>' + _fmtData(r.data_prevista) + '</td>' +
+        '<td>' + (TIPOS_LAB[r.status] || r.status || '—') + '</td>' +
+        '<td style="text-align:right">' + (r.valor ? _brl(r.valor) : '—') + '</td></tr>';
+    }).join('') || '<tr><td colspan="8" class="relVazio">Nenhum trabalho laboratorial no período.</td></tr>';
+
+    panel.innerHTML = aviso +
+      '<div class="relLabFunil">' +
+        _kpiCard('📥', 'Recebidos',       total,    '') +
+        _kpiCard('🔧', 'Em Produção',     emProd,   '') +
+        _kpiCard('⏳', 'Aguardando',      aguard,   '') +
+        _kpiCard('✅', 'Entregues',       entregue, 'relKpiG') +
+        _kpiCard('🔄', 'Refeitos',        refeito,  refeito > 0 ? 'relKpiR' : '') +
+        (slaMedia !== null ? _kpiCard('⏱', 'SLA Médio', slaMedia + 'd', '') : '') +
+      '</div>' +
+      '<div class="relTableWrap" style="margin-top:16px">' +
+        '<table class="relTable">' +
+        '<thead><tr>' +
+        '<th>Entrada</th><th>Paciente</th><th>Profissional</th><th>Laboratório</th>' +
+        '<th>Tipo</th><th>Previsão</th><th>Status</th><th style="text-align:right">Valor</th>' +
+        '</tr></thead>' +
+        '<tbody>' + labLinhas + '</tbody></table>' +
+      '</div>';
   }
 
   /* ════════════════════════════════════════════════════════════
