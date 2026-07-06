@@ -440,13 +440,6 @@ const OdontogramaMod = (function () {
     // tipo_visual='nenhum' usa marcador genérico 'tratado' (ponto cinza)
     _estadoPaciente[_denteSel].push({ tipo_visual: tipoVisual || 'tratado', faces: facesStr, cor: cor });
     _aplicarEstadoNoOdontograma();
-
-    /* Colorir indicadores de face no grid (legado) */
-    facesSel.forEach(function (face) {
-      var el = document.querySelector('.odFace[data-dente="' + _denteSel + '"][data-face="' + face.c + '"]');
-      if (el) { el.classList.remove('selecionada'); el.classList.add('finalizada'); }
-    });
-
     fecharModalIntervencao();
     _renderItens();
     _atualizarTotal();
@@ -466,7 +459,7 @@ const OdontogramaMod = (function () {
     cont.innerHTML = '<div class="odoHistVazio">Carregando...</div>';
 
     var rOrc = await _sb.from('orcamentos')
-      .select('id,data_criacao,valor_total,status_geral,orcamento_itens(dente_numero,faces,valor_cobrado,odonto_procedimentos(nome_intervencao))')
+      .select('id,data_criacao,valor_total,status_geral,orcamento_itens(dente_numero,faces,valor_cobrado,status_visual,odonto_procedimentos(nome_intervencao,tipo_visual))')
       .eq('paciente_id', _pacienteId)
       .order('data_criacao', { ascending: false })
       .limit(20);
@@ -815,10 +808,24 @@ const OdontogramaMod = (function () {
     var tooltip = tooltipParts.join(' | ');
     var cls = 'odoHVDente' + (marcado ? ' odoHVDenteMarcado' : '') + (deciduo ? ' odoHVDeciduo' : '');
     var imgSrc = deciduo ? 'assets/tooth-placeholder.png' : ('assets/images/toothImageFront' + num + '.png');
+
+    /* SVG de símbolo — empilha todos os procedimentos deste dente */
+    var svgContent = '';
+    if (marcado) {
+      procs.forEach(function (p) {
+        svgContent += _gerarSVG(p.tipo_visual || 'tratado', p.faces || '', p.cor || _COR_STATUS.executado);
+      });
+    }
+    var svgHtml = svgContent
+      ? '<svg class="odoHVSVG" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' + svgContent + '</svg>'
+      : '';
+
     return '<div class="' + cls + '" title="' + esc(tooltip) + '">'
       + '<div class="odoHVNum">' + num + '</div>'
+      + '<div class="odoHVImgWrap">'
       + '<img src="' + imgSrc + '" class="odoHVImg" alt="" onerror="this.style.display=\'none\'">'
-      + (marcado ? '<div class="odoHVMarca">' + procs.length + '</div>' : '')
+      + svgHtml
+      + '</div>'
       + '</div>';
   }
 
@@ -828,11 +835,14 @@ const OdontogramaMod = (function () {
     itens.forEach(function (it) {
       var d = it.dente_numero;
       if (!denteMap[d]) denteMap[d] = [];
+      var sv  = it.status_visual || 'executado';
+      var tv  = (it.odonto_procedimentos && it.odonto_procedimentos.tipo_visual) || 'nenhum';
       denteMap[d].push({
-        proc: (it.odonto_procedimentos && it.odonto_procedimentos.nome_intervencao)
-          ? it.odonto_procedimentos.nome_intervencao : '—',
-        faces: it.faces || '',
-        valor: Number(it.valor_cobrado || 0)
+        proc:        (it.odonto_procedimentos && it.odonto_procedimentos.nome_intervencao) || '—',
+        faces:       it.faces || '',
+        valor:       Number(it.valor_cobrado || 0),
+        tipo_visual: tv === 'nenhum' ? 'tratado' : tv,
+        cor:         _COR_STATUS[sv] || _COR_STATUS.executado
       });
     });
 

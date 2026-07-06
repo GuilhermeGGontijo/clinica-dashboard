@@ -1938,12 +1938,23 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
   margin-bottom: 1px;
 }
 .odoHVDenteMarcado .odoHVNum { color: #166534; }
+.odoHVImgWrap {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 28px;
+}
+.odoHVDeciduo .odoHVImgWrap { width: 16px; height: 22px; }
 .odoHVImg {
-  width: 20px;
-  height: 28px;
+  width: 100%; height: 100%;
   object-fit: contain;
 }
-.odoHVDeciduo .odoHVImg { width: 16px; height: 22px; }
+.odoHVSVG {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
 .odoHVMarca {
   position: absolute;
   top: -4px;
