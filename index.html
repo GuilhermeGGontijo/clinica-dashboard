@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" id="siteFavicon" href="">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="css/style.css?v=20260706e">
+  <link rel="stylesheet" href="css/style.css?v=20260706f">
 </head>
 <body>
 
@@ -1737,16 +1737,25 @@
     </div>
     <div id="odoModalIntEsp" style="font-size:.75rem;color:var(--s5);margin-bottom:14px"></div>
 
-    <!-- Status da intervenção -->
+    <!-- Cor no dente -->
     <div style="margin-bottom:14px">
-      <div style="font-size:.72rem;font-weight:800;color:var(--s6);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Status</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="odoStatusPill" id="odoStatBtn_a_realizar" data-status="a_realizar"
-                onclick="OdontogramaMod.setStatusViz('a_realizar')">🔴 A Realizar</button>
-        <button class="odoStatusPill" id="odoStatBtn_executado" data-status="executado"
-                onclick="OdontogramaMod.setStatusViz('executado')">🟢 Executado</button>
-        <button class="odoStatusPill" id="odoStatBtn_existente" data-status="existente"
-                onclick="OdontogramaMod.setStatusViz('existente')">🔵 Existente</button>
+      <div style="font-size:.72rem;font-weight:800;color:var(--s6);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Cor no odontograma</div>
+      <div style="display:flex;gap:8px">
+        <button class="odoCorBtn" id="odoStatBtn_a_realizar" data-status="a_realizar"
+                onclick="OdontogramaMod.setStatusViz('a_realizar')">
+          <span class="odoCorBolinha" style="background:#ef4444"></span>
+          <span class="odoCorLabel">Vermelho<br><span class="odoCorSub">A realizar</span></span>
+        </button>
+        <button class="odoCorBtn" id="odoStatBtn_executado" data-status="executado"
+                onclick="OdontogramaMod.setStatusViz('executado')">
+          <span class="odoCorBolinha" style="background:#22c55e"></span>
+          <span class="odoCorLabel">Verde<br><span class="odoCorSub">Executado</span></span>
+        </button>
+        <button class="odoCorBtn" id="odoStatBtn_existente" data-status="existente"
+                onclick="OdontogramaMod.setStatusViz('existente')">
+          <span class="odoCorBolinha" style="background:#3b82f6"></span>
+          <span class="odoCorLabel">Azul<br><span class="odoCorSub">Existente</span></span>
+        </button>
       </div>
     </div>
 

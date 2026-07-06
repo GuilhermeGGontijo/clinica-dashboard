@@ -2381,7 +2381,7 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
   overflow: visible;
 }
 
-/* ── Pills de status da intervenção ── */
+/* ── Pills de status da intervenção (legado) ── */
 .odoStatusPill {
   padding: 6px 14px;
   border: 1.5px solid var(--s3); border-radius: 20px;
@@ -2399,6 +2399,40 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .odoStatusPill.odoStatusPillAtivo[data-status="existente"] {
   background: #eff6ff; border-color: #3b82f6; color: #1d4ed8;
 }
+
+/* ── Botões de cor visual no odontograma ── */
+.odoCorBtn {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; padding: 9px 12px;
+  border: 2px solid var(--s3); border-radius: 10px;
+  background: var(--s0); cursor: pointer;
+  transition: all .13s; user-select: none;
+  text-align: left;
+}
+.odoCorBtn:hover { background: var(--s1); border-color: var(--s4); }
+.odoCorBolinha {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,.18);
+}
+.odoCorLabel {
+  font-size: .78rem; font-weight: 700; color: var(--s7); line-height: 1.3;
+}
+.odoCorSub { font-size: .68rem; font-weight: 400; color: var(--s5); }
+
+.odoCorBtn.odoStatusPillAtivo[data-status="a_realizar"] {
+  background: #fef2f2; border-color: #ef4444;
+}
+.odoCorBtn.odoStatusPillAtivo[data-status="a_realizar"] .odoCorLabel { color: #b91c1c; }
+
+.odoCorBtn.odoStatusPillAtivo[data-status="executado"] {
+  background: #f0fdf4; border-color: #22c55e;
+}
+.odoCorBtn.odoStatusPillAtivo[data-status="executado"] .odoCorLabel { color: #15803d; }
+
+.odoCorBtn.odoStatusPillAtivo[data-status="existente"] {
+  background: #eff6ff; border-color: #3b82f6;
+}
+.odoCorBtn.odoStatusPillAtivo[data-status="existente"] .odoCorLabel { color: #1d4ed8; }
 
 /* ── Checkboxes de face (pill toggle) ── */
 .odoFaceChk {
