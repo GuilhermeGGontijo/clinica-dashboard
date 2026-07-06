@@ -1729,18 +1729,24 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .odontoPacInfo  { flex: 1; text-align: right; }
 .odontoPacNome  { font-size: .9rem; font-weight: 700; color: var(--g7); }
 
-/* Layout de três colunas: histórico | arcadas | orçamento */
+/* ── Layout: arcadas em cima (largura total), painéis abaixo lado a lado ── */
 .odontoLayout {
   display: grid;
-  grid-template-columns: 230px 1fr 320px;
+  grid-template-columns: 300px 1fr;
+  grid-template-areas:
+    "arcada arcada"
+    "hist   orc";
   gap: 16px;
   align-items: start;
 }
-@media (max-width: 1100px) {
-  .odontoLayout { grid-template-columns: 200px 1fr 300px; }
-}
+.odontoPainelArcada    { grid-area: arcada; }
+.odoHistPanel          { grid-area: hist; }
+.odontoPainelOrcamento { grid-area: orc; }
 @media (max-width: 900px) {
-  .odontoLayout { grid-template-columns: 1fr; }
+  .odontoLayout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "arcada" "hist" "orc";
+  }
 }
 
 /* ── Painel Histórico ── */
@@ -2723,8 +2729,7 @@ body.sb-auditoria #secAuditoria { display: block !important; }
 @media(max-width:1024px){
   /* Unit bar — botão dropdown menor */
   .unitDropBtn{min-width:150px}
-  /* Odontograma — 3 colunas compactas */
-  .odontoLayout{grid-template-columns:180px 1fr 260px}
+  /* Odontograma — painéis inferiores em mobile */
   .odontoPainelOrcamento{position:relative;top:auto}
   /* KPI grid — minimums menores */
   .kpiGrid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
