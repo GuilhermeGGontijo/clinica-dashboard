@@ -2044,6 +2044,7 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
   background: var(--w); border: 1.5px solid var(--s2);
   border-radius: var(--Rs); padding: 16px 14px;
   overflow-x: auto;
+  min-width: 0;
 }
 
 /* ── Labels das arcadas ── */
