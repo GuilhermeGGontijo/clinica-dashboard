@@ -1729,24 +1729,18 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .odontoPacInfo  { flex: 1; text-align: right; }
 .odontoPacNome  { font-size: .9rem; font-weight: 700; color: var(--g7); }
 
-/* ── Layout: arcadas em cima (largura total), painéis abaixo lado a lado ── */
+/* ── Layout 3 colunas: histórico | arcadas | orçamento ── */
 .odontoLayout {
   display: grid;
-  grid-template-columns: 300px 1fr;
-  grid-template-areas:
-    "arcada arcada"
-    "hist   orc";
+  grid-template-columns: 155px 1fr 255px;
   gap: 16px;
   align-items: start;
 }
-.odontoPainelArcada    { grid-area: arcada; }
-.odoHistPanel          { grid-area: hist; }
-.odontoPainelOrcamento { grid-area: orc; }
+@media (max-width: 1100px) {
+  .odontoLayout { grid-template-columns: 140px 1fr 230px; }
+}
 @media (max-width: 900px) {
-  .odontoLayout {
-    grid-template-columns: 1fr;
-    grid-template-areas: "arcada" "hist" "orc";
-  }
+  .odontoLayout { grid-template-columns: 1fr; }
 }
 
 /* ── Painel Histórico ── */
@@ -2072,9 +2066,9 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 /* ── Linhas de dentes ── */
 .odontoLinhaDentes {
   display: flex; justify-content: center; flex-wrap: nowrap;
-  gap: 4px; margin-bottom: 2px; min-width: max-content;
+  gap: 3px; margin-bottom: 2px; min-width: max-content;
 }
-.odontoLinhaDentes.decidua { opacity: .9; gap: 3px; }
+.odontoLinhaDentes.decidua { opacity: .9; gap: 2px; }
 
 /* ── Divisor central (entre arcadas) ── */
 .odontoDivisor {
@@ -2093,17 +2087,17 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 
 /* ── Dente individual ── */
 .odontoDente {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  cursor: pointer; border-radius: 8px; padding: 3px; transition: background .12s;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; border-radius: 6px; padding: 2px; transition: background .12s;
 }
 .odontoDente:hover { background: var(--b1); }
-.odontoDente.deciduo .odontoDenteGraf { width: 46px; height: 46px; }
+.odontoDente.deciduo .odontoDenteGraf { width: 34px; height: 34px; }
 .odontoDenteNum {
-  font-size: .72rem; color: var(--s5); font-weight: 700;
+  font-size: .65rem; color: var(--s5); font-weight: 700;
   line-height: 1; user-select: none;
 }
 .odontoDenteGraf {
-  position: relative; width: 60px; height: 60px;
+  position: relative; width: 44px; height: 44px;
 }
 
 /* ── Faces ── */
@@ -2176,8 +2170,8 @@ body.role-profissional_saude #sbGrpAdmin{display:none!important}
 .odontoDente.selecionado { background: var(--b1); outline: 2px solid var(--b5); outline-offset: 1px; }
 
 /* ── Imagem anatômica do dente ── */
-.odontoDenteImg { width: 50px; height: 54px; object-fit: contain; display: block; pointer-events: none; }
-.odontoDente.deciduo .odontoDenteImg { width: 36px; height: 40px; }
+.odontoDenteImg { width: 37px; height: 40px; object-fit: contain; display: block; pointer-events: none; }
+.odontoDente.deciduo .odontoDenteImg { width: 26px; height: 29px; }
 
 /* ── Info do dente selecionado (topo do painel lateral) ── */
 .odoDenteInfoBox {
