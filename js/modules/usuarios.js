@@ -79,11 +79,7 @@ const UsuariosMod = (function () {
       'home','pacientes','agenda','admin-recepcao','caixa',
       'estoque',
       'relatorios',
-      'financeiro','fin-dashboard','recebimentos','auditoria','admin-dre',
-      'administrativo2','admin-repasse-recep',
-      'administrativo','admin-cadastro','admin-controle',
-      'admin-unidades','admin-salas','admin-atendimentos',
-      'admin-odonto-proc','admin-convenios'
+      'financeiro','fin-dashboard','recebimentos','auditoria'
     ]
   };
 

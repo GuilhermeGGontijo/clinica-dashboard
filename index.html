@@ -141,22 +141,6 @@
       <div class="sbSubItem" data-mod="auditoria" onclick="switchSidebar('auditoria')">
         Auditoria Financeira
       </div>
-      <div class="sbSubItem" data-mod="admin-dre" onclick="switchSidebar('admin-dre')">
-        Custos & Laboratório
-      </div>
-    </div>
-
-    <div class="sbDivider"></div>
-
-    <div class="sbItem" data-mod="administrativo2" onclick="toggleSbGroup(this,'sbGrpAdmin2')">
-      <span class="sbItemIco">🧾</span>
-      <span class="sbItemLbl">Repasses</span>
-      <span class="sbItemChev">▾</span>
-    </div>
-    <div class="sbSub open" id="sbGrpAdmin2">
-      <div class="sbSubItem" data-mod="admin-repasse-recep" onclick="switchSidebar('admin-repasse-recep')">
-        Recepcionistas
-      </div>
     </div>
 
     <div class="sbDivider"></div>
@@ -187,6 +171,12 @@
       </div>
       <div class="sbSubItem" data-mod="admin-convenios" onclick="switchSidebar('admin-convenios')">
         Cadastro de Convênios
+      </div>
+      <div class="sbSubItem" data-mod="admin-dre" onclick="switchSidebar('admin-dre')">
+        Custos & Laboratório
+      </div>
+      <div class="sbSubItem" data-mod="admin-repasse-recep" onclick="switchSidebar('admin-repasse-recep')">
+        Repasses Recepcionistas
       </div>
     </div>
 
@@ -2664,8 +2654,8 @@
 <script src="js/modules/admin-dre.js?v=20260706b"></script>
 <script src="js/modules/admin-repasse-recep.js?v=20260706a"></script>
 <script src="js/modules/unidades.js?v=20260702b"></script>
-<script src="js/modules/usuarios.js?v=20260706l"></script>
-<script src="js/core/main.js?v=20260706c"></script>
+<script src="js/modules/usuarios.js?v=20260706m"></script>
+<script src="js/core/main.js?v=20260706d"></script>
 <script>
 window.addEventListener('load', function() {
   var lo = document.getElementById('agLoading');
