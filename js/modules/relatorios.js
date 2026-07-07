@@ -537,6 +537,8 @@ var RelatoriosMod = (function () {
   ════════════════════════════════════════════════════════════ */
   async function _carregarDadosDRE(ini, fim) {
     _dadosDRE = { custos: [], repasses: [] };
+
+    /* ── 1. Custos operacionais ── */
     try {
       var rc = await _sb.from('custos_operacionais')
         .select('id,data_lancamento,categoria,descricao,valor')
@@ -544,21 +546,82 @@ var RelatoriosMod = (function () {
         .gte('data_lancamento', ini).lte('data_lancamento', fim);
       if (!rc.error) _dadosDRE.custos = rc.data || [];
     } catch (_e) {}
+
+    /* ── 2. Repasses calculados de agendamentos × procedimentos ── */
     try {
-      var rr = await _sb.from('repasses_profissionais')
-        .select('id,profissional_id,periodo_ini,periodo_fim,valor_faturado,percentual_repasse,valor_repasse,status')
-        .eq('unidade_id', CU)
-        .gte('periodo_ini', ini).lte('periodo_fim', fim);
-      if (!rr.error && rr.data && rr.data.length) {
-        _dadosDRE.repasses = rr.data;
-        var pfIds = Object.keys(rr.data.reduce(function (m, r) {
-          if (r.profissional_id) m[r.profissional_id] = 1; return m;
+      var rAg = await _sb.from('agendamentos')
+        .select('profissional_id,procedimento_id,valor_cobrado')
+        .eq('unidade_id', CU).eq('status', 'Realizado')
+        .gte('data_agendamento', ini).lte('data_agendamento', fim)
+        .limit(2000);
+      var ags = rAg.error ? [] : (rAg.data || []);
+
+      if (ags.length) {
+        var procIds = Object.keys(ags.reduce(function (m, a) {
+          if (a.procedimento_id) m[a.procedimento_id] = 1; return m;
         }, {}));
-        if (pfIds.length) {
-          var rp = await _sb.from('perfis_usuarios').select('id,nome').in('id', pfIds);
-          var pm = {}; (rp.data || []).forEach(function (p) { pm[p.id] = p.nome; });
-          _dadosDRE.repasses.forEach(function (r) { r._profNome = pm[r.profissional_id] || '—'; });
+        var procMap = {};
+        if (procIds.length) {
+          var rPr = await _sb.from('procedimentos')
+            .select('id,valor_repasse,tipo_repasse').in('id', procIds);
+          (rPr.data || []).forEach(function (p) { procMap[p.id] = p; });
         }
+
+        var profIds = Object.keys(ags.reduce(function (m, a) {
+          if (a.profissional_id) m[a.profissional_id] = 1; return m;
+        }, {}));
+        var profMap = {};
+        if (profIds.length) {
+          var rPf = await _sb.from('perfis_usuarios').select('id,nome').in('id', profIds);
+          (rPf.data || []).forEach(function (p) { profMap[p.id] = p.nome; });
+        }
+
+        var repMap = {};
+        ags.forEach(function (ag) {
+          if (!ag.profissional_id) return;
+          var proc  = procMap[ag.procedimento_id] || {};
+          var valor = parseFloat(ag.valor_cobrado) || 0;
+          var repVal = proc.tipo_repasse === 'percentual'
+            ? valor * (parseFloat(proc.valor_repasse) || 0) / 100
+            : (parseFloat(proc.valor_repasse) || 0);
+
+          if (!repMap[ag.profissional_id]) {
+            repMap[ag.profissional_id] = {
+              _profNome: profMap[ag.profissional_id] || '—',
+              valor_faturado: 0, valor_repasse: 0, qtd: 0
+            };
+          }
+          repMap[ag.profissional_id].valor_faturado += valor;
+          repMap[ag.profissional_id].valor_repasse  += repVal;
+          repMap[ag.profissional_id].qtd++;
+        });
+        _dadosDRE.repasses = Object.values(repMap);
+      }
+    } catch (_e) {}
+
+    /* ── 3. Repasses de recepcionistas (tabela opcional) ── */
+    try {
+      var rRec = await _sb.from('repasses_recepcionistas')
+        .select('recepcionista_id,valor')
+        .eq('unidade_id', CU)
+        .gte('competencia', ini).lte('competencia', fim);
+      if (!rRec.error && rRec.data && rRec.data.length) {
+        var recIds = Object.keys(rRec.data.reduce(function (m, r) {
+          if (r.recepcionista_id) m[r.recepcionista_id] = 1; return m;
+        }, {}));
+        var recMap = {};
+        if (recIds.length) {
+          var rRn = await _sb.from('perfis_usuarios').select('id,nome').in('id', recIds);
+          (rRn.data || []).forEach(function (p) { recMap[p.id] = p.nome; });
+        }
+        rRec.data.forEach(function (r) {
+          _dadosDRE.repasses.push({
+            _profNome: (recMap[r.recepcionista_id] || '—') + ' (Recep.)',
+            valor_faturado: 0,
+            valor_repasse: parseFloat(r.valor) || 0,
+            qtd: 0
+          });
+        });
       }
     } catch (_e) {}
   }
@@ -599,16 +662,13 @@ var RelatoriosMod = (function () {
     }
 
     var repLinhas = _dadosDRE.repasses.map(function (r) {
-      var st = r.status === 'pago'
-        ? '<span style="color:var(--g6);font-weight:700">Pago</span>'
-        : '<span style="color:var(--a5);font-weight:700">Pendente</span>';
       return '<tr>' +
         '<td>' + esc(r._profNome || '—') + '</td>' +
-        '<td style="text-align:right">'    + _brl(r.valor_faturado)     + '</td>' +
-        '<td style="text-align:center">'   + (r.percentual_repasse || 0) + '%</td>' +
-        '<td style="text-align:right;font-weight:700">' + _brl(r.valor_repasse) + '</td>' +
-        '<td style="text-align:center">'   + st + '</td></tr>';
-    }).join('') || '<tr><td colspan="5" class="relVazio">Nenhum repasse cadastrado no período.</td></tr>';
+        '<td style="text-align:center">'   + (r.qtd || '—') + '</td>' +
+        '<td style="text-align:right">'    + (r.valor_faturado > 0 ? _brl(r.valor_faturado) : '—') + '</td>' +
+        '<td style="text-align:right;font-weight:700;color:var(--r6)">' + _brl(r.valor_repasse) + '</td>' +
+        '</tr>';
+    }).join('') || '<tr><td colspan="4" class="relVazio">Nenhum procedimento realizado no período.</td></tr>';
 
     panel.innerHTML = aviso +
       '<div class="relDRE">' +
@@ -647,12 +707,14 @@ var RelatoriosMod = (function () {
         : '') +
       '<div class="relTableWrap" style="margin-top:16px">' +
         '<div class="relResumoTit" style="margin-bottom:8px">Repasses por Profissional</div>' +
+        '<div style="font-size:.75rem;color:var(--s5);margin-bottom:8px">Calculado automaticamente com base nos procedimentos realizados no período.</div>' +
         '<table class="relTable">' +
-        '<thead><tr><th>Profissional</th>' +
+        '<thead><tr>' +
+        '<th>Profissional</th>' +
+        '<th style="text-align:center">Atend.</th>' +
         '<th style="text-align:right">Faturado</th>' +
-        '<th style="text-align:center">%</th>' +
         '<th style="text-align:right">Repasse</th>' +
-        '<th style="text-align:center">Status</th></tr></thead>' +
+        '</tr></thead>' +
         '<tbody>' + repLinhas + '</tbody></table>' +
       '</div>';
   }
