@@ -229,10 +229,11 @@ function applyRoleVisibility(){
   document.body.classList.remove('role-administrador','role-faturamento','role-profissional_saude','role-recepcionista');
   if(USER_ROLE) document.body.classList.add('role-'+USER_ROLE);
 
-  // Ocultar itens de gestão de usuários para não-administradores
+  // Ocultar itens de gestão de usuários para perfis sem acesso
+  var podeGerenciarUsuarios = !USER_ROLE || USER_ROLE==='administrador' || USER_ROLE==='faturamento';
   ['admin-cadastro','admin-controle'].forEach(function(mod){
     var el=document.querySelector('.sbSubItem[data-mod="'+mod+'"]');
-    if(el) el.style.display=(USER_ROLE==='administrador'||!USER_ROLE)?'':'none';
+    if(el) el.style.display=podeGerenciarUsuarios?'':'none';
   });
 
   renderModuleTabs();

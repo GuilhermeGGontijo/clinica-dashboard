@@ -68,11 +68,23 @@ const UsuariosMod = (function () {
   /* Módulos permitidos por perfil (null = irrestrito) */
   var ROLE_MODULES = {
     administrador:      null,
-    profissional_saude: ['home','pacientes','agenda','admin-recepcao','prontuario',
-                         'relatorios','fin-dashboard','recebimentos'],
-    recepcionista:      ['home','pacientes','agenda','admin-recepcao','caixa'],
-    faturamento:        ['home','agenda','relatorios','fin-dashboard','recebimentos','auditoria',
-                         'administrativo','admin-salas','admin-atendimentos','admin-convenios']
+    recepcionista:      [
+      'home','pacientes','agenda','admin-recepcao','caixa'
+    ],
+    profissional_saude: [
+      'home','pacientes','agenda','admin-recepcao',
+      'prontuario','odontograma','caixa'
+    ],
+    faturamento:        [
+      'home','pacientes','agenda','admin-recepcao','caixa',
+      'estoque',
+      'relatorios',
+      'financeiro','fin-dashboard','recebimentos','auditoria','admin-dre',
+      'administrativo2','admin-repasse-recep',
+      'administrativo','admin-cadastro','admin-controle',
+      'admin-unidades','admin-salas','admin-atendimentos',
+      'admin-odonto-proc','admin-convenios'
+    ]
   };
 
   /* ── canAccess ── */
