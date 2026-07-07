@@ -18,7 +18,8 @@ var RelatoriosMod = (function () {
 
   var FORMAS = {
     DINHEIRO: 'Dinheiro', PIX: 'PIX',
-    CREDITO:  'Cartão Crédito', DEBITO: 'Cartão Débito', CONVENIO: 'Convênio'
+    CREDITO:  'Cartão Crédito', DEBITO: 'Cartão Débito', CONVENIO: 'Convênio',
+    NAO_INF:  'Não Informado'
   };
   var STATUS_CORES = {
     'Realizado': 'var(--g6)', 'Faltou': 'var(--r6)',

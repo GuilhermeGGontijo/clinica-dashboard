@@ -3438,4 +3438,52 @@ body.sb-auditoria #secAuditoria { display: block !important; }
   .relPrintTable tbody td { padding: 3pt 5pt; border-bottom: 1pt solid #eee; }
   .relPrintTable tbody tr:nth-child(even) td { background: #f5f7fa; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   ADMIN DRE — Custos, Repasses & Laboratório
+══════════════════════════════════════════════════════════════ */
+.dreSection {
+  background: var(--w);
+  border: 1.5px solid var(--s2);
+  border-radius: var(--R);
+  padding: 20px;
+  margin-top: 12px;
+  box-shadow: var(--sh);
+}
+.dreLoading {
+  padding: 32px; text-align: center; color: var(--s5); font-size: .88rem;
+}
+.dreToolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+  font-size: .84rem; color: var(--s6);
+}
+.dreForm {
+  margin-top: 20px;
+  background: var(--s0);
+  border: 1.5px solid var(--s2);
+  border-radius: var(--R);
+  padding: 18px 20px;
+}
+.dreFormTit {
+  font-size: .9rem; font-weight: 800; color: var(--s8); margin-bottom: 14px;
+}
+.dreFormGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.dreFormBtns {
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+.dreBadge {
+  display: inline-block;
+  background: var(--s1); color: var(--s7);
+  border-radius: 20px; padding: 2px 9px;
+  font-size: .72rem; font-weight: 700; text-transform: capitalize;
+}
+.dreLabKpis {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;
+}
 </style>
