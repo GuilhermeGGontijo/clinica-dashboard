@@ -473,6 +473,7 @@ body.sidebar-open #moduleNav{display:none!important}
 #secAdminCadastro,#secAdminControle,#secAdminUnidades,
 #secAdminSalas,#secAdminAtendimentos,#secAdminRecepcao,
 #secAdminConvenios,#secAdminOdontoproc,#secRecebimentos,#secOdontograma,
+#secAdminDRE,#secAdminRepasseRecep,
 #modulePacientes{display:none}
 /* Elementos soltos do fin-dashboard também ocultos por padrão */
 #printHeader,.finDashLayout,.topGrid,.agFormWrap,#slCadastro,
@@ -498,6 +499,8 @@ body.sb-admin-odonto-proc #secAdminOdontoproc{display:block!important}
 body.sb-recebimentos #secRecebimentos{display:block!important}
 body.sb-odontograma #secOdontograma{display:block!important}
 body.sb-estoque #secEstoque{display:block!important}
+body.sb-admin-dre #secAdminDRE{display:block!important}
+body.sb-admin-repasse-recep #secAdminRepasseRecep{display:block!important}
 body.sb-fin-dashboard #printHeader{display:block!important}
 body.sb-fin-dashboard .finDashLayout{display:flex!important;gap:20px;align-items:flex-start}
 body.sb-fin-dashboard #slCadastro,body.sb-fin-dashboard .topGrid,
