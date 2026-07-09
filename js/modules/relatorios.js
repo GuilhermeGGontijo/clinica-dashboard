@@ -420,7 +420,7 @@ var RelatoriosMod = (function () {
 
     var formaMap = {};
     _dadosFilt.forEach(function (d) {
-      if (d.status !== 'Realizado') return;
+      if (d.status !== 'Realizado' && !d.recebido) return;
       var f = d.forma_pagamento || 'NAO_INF';
       if (!formaMap[f]) formaMap[f] = { nome: FORMAS[f] || f, total: 0, qtd: 0 };
       formaMap[f].total += d.valor;
@@ -438,7 +438,7 @@ var RelatoriosMod = (function () {
     resLinhas += '<tr style="background:var(--s1);font-weight:800"><td>Total</td><td></td>' +
       '<td style="text-align:right">' + _brl(fatTot) + '</td></tr>';
 
-    var realizados = _dadosFilt.filter(function (d) { return d.status === 'Realizado'; });
+    var realizados = _dadosFilt.filter(function (d) { return d.status === 'Realizado' || d.recebido; });
     var detLinhas = realizados.map(function (d) {
       return '<tr>' +
         '<td>' + _fmtData(d.data) + '</td>' +

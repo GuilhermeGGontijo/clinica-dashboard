@@ -412,6 +412,11 @@ const CaixaMod = (function () {
       }
       if (r.error) throw r.error;
 
+      /* Marca agendamento como Realizado após pagamento confirmado */
+      if (!_editRecebId) {
+        await _sb.from('agendamentos').update({ status: 'Realizado' }).eq('id', _editAgId);
+      }
+
       _comissao += COMISSAO_POR_ATEND;
       if (_turnoId) {
         await _sb.from('caixa_turnos')
