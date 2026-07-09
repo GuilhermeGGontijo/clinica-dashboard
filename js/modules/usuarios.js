@@ -69,17 +69,17 @@ const UsuariosMod = (function () {
   var ROLE_MODULES = {
     administrador:      null,
     recepcionista:      [
-      'home','pacientes','agenda','admin-recepcao','caixa'
+      'home','agenda','admin-recepcao','caixa'
     ],
     profissional_saude: [
       'home','pacientes','agenda','admin-recepcao',
       'prontuario','odontograma','caixa'
     ],
     faturamento:        [
-      'home','pacientes','agenda','admin-recepcao','caixa',
+      'home','agenda','caixa',
       'estoque',
       'relatorios',
-      'financeiro','fin-dashboard','recebimentos','auditoria'
+      'financeiro','auditoria'
     ]
   };
 
